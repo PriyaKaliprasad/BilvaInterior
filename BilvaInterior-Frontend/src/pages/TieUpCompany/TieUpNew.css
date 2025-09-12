@@ -1,0 +1,37 @@
+.custom-fieldset legend.k-form-legend {
+    font-weight: bold;
+    border-bottom: none !important;
+    text-decoration: none !important;
+    font-size: 14px;
+}
+
+.excel-preview {
+    max-width: 75vw;
+    /* min-width: 300px; */
+    max-height: 80vh;
+    overflow: auto;
+    margin: 0 auto;
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+.excel-preview table td, .excel-preview table th {
+    border: 1px solid #d4d4d4;
+    padding: 6px 10px;
+    font-size: 1rem;
+}
+.excel-preview table {
+    border-collapse: collapse;
+    background: #fff;
+}
+
+@media (max-width: 600px) {
+  .excel-preview table td,
+  .excel-preview table th {
+    font-size: 0.75rem;
+    padding: 4px 6px;
+  }
+  .excel-preview table {
+    min-width: 240px;
+  }
+}

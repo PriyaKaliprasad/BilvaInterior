@@ -1,0 +1,187 @@
+/* sidebar component */
+.sidebar {
+  position: fixed;
+  /* make sidebar fixed */
+  left: 0;
+  top: 0;
+  width: 250px;
+  height: 100vh;
+  /* full height */
+  min-height: 100vh;
+  /* full height */
+  background-color: #405189;
+  /* pale deep blue */
+  overflow-y: auto;
+  z-index: 1000;
+  padding-right: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #5e6da8 #405189;
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #2e3860;
+  border-radius: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: #405189;
+}
+
+/* Title styling */
+.sidebar .sidebar-title {
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+/* Remove panelbar background */
+.sidebar .k-panelbar {
+  background: transparent;
+  border: none;
+  padding-left: 10px;
+}
+
+/* removed lines between items*/
+.sidebar .k-panelbar-item.k-panelbar-header {
+  border: none;
+}
+
+.segment-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 85%;
+}
+
+
+.btn-segment {
+  padding: 1.5rem;
+}
+
+.btn-segment button,
+.btn-segment button:focus {
+  background: none;
+  border: none;
+  box-shadow: none;
+  /* color: #8897c9; */
+  color: #fff;
+}
+
+.btn-segment button:hover {
+  background: #6673ad;
+  color: #fff;
+}
+
+/* PANEL ITEMS */
+
+/* Unselected items */
+.sidebar .k-panelbar .k-panelbar-item.k-panelbar-header.k-level-0 .k-link,
+.sidebar .k-panelbar .k-panelbar-item.k-panelbar-header.k-level-1 .k-link,
+.sidebar .k-panelbar .k-panelbar-item.k-panelbar-header.k-level-2 .k-link {
+  background: none;
+  /* color: #abb9e8; */
+  color: #fff;
+  font-size: 16px;
+  font-weight: 400;
+  /* for rounded corners */
+  border-radius: 10px;
+  /* adjustment for padding of k-panelbar */
+  padding-left: 18px;
+}
+
+/* Selected items */
+.sidebar .k-panelbar .k-panelbar-item.k-panelbar-header.k-level-0 .k-link.k-selected,
+.sidebar .k-panelbar .k-panelbar-item.k-panelbar-header.k-level-1 .k-link.k-selected,
+.sidebar .k-panelbar .k-panelbar-item.k-panelbar-header.k-level-2 .k-link.k-selected {
+  /* background: #2f3c73; */
+  background: #7c89c9;
+  /* background: #2f3a70; */
+  font-weight: 500;
+}
+
+/* Hover */
+.sidebar .k-panelbar .k-panelbar-item.k-panelbar-header.k-level-0 .k-link:hover,
+.sidebar .k-panelbar .k-panelbar-item.k-panelbar-header.k-level-1 .k-link:hover,
+.sidebar .k-panelbar .k-panelbar-item.k-panelbar-header.k-level-2 .k-link:hover {
+  background: #6673ad;
+  /* background: #4d5fa1; */
+  /* color: #b0bce6; */
+  cursor: pointer;
+}
+
+/* removes box shadow on click focus */
+.sidebar .k-panelbar .k-panelbar-item.k-panelbar-header.k-level-0 .k-link.k-focus,
+.sidebar .k-panelbar .k-panelbar-item.k-panelbar-header.k-level-1 .k-link.k-focus,
+.sidebar .k-panelbar .k-panelbar-item.k-panelbar-header.k-level-2 .k-link.k-focus {
+  box-shadow: none;
+}
+
+/* color for chevron icon in unselected state */
+.sidebar .k-panelbar>.k-panelbar-header>.k-link .k-icon {
+  /* color: #8897c9; */
+  color: #fff;
+}
+
+/* indentation for nested items */
+.sidebar .k-panelbar .k-panelbar-group>.k-panelbar-item {
+  padding-left: 1rem;
+}
+
+/* Responsive sidebar */
+.sidebar .sidebar-close {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    min-height: 100vh;
+    transform: translateX(-100%);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .sidebar .sidebar-close {
+    display: block;
+  }
+
+  .sidebar .k-panelbar{
+    padding-right: 1rem;
+  }
+}
+
+/* Main content shift for sidebar (optional) */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  transition: margin-left 0.3s;
+}
+.main-content-with-navbar {
+  margin-left: 250px;
+}
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+  .main-content-with-navbar {
+    margin-left: 0;
+  }
+}
