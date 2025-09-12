@@ -14,7 +14,8 @@ const SubNavbar = () => {
 
   return (
     <div className="sub-navbar">
-      <div className="sub-navbar-title">{parent}</div>
+      {/* <div className="sub-navbar-title">{parent}</div> */}
+      <div className="sub-navbar-title">{breadcrumb[breadcrumb.length - 1]}</div>
       {breadcrumb.length > 1 && (
         <div className="sub-navbar-breadcrumb">
           <Breadcrumb
