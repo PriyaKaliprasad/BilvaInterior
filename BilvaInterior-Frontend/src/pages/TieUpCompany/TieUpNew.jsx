@@ -125,6 +125,20 @@ const TieUpNew = () => {
                             validator={emailValidator}
                             colSpan={1}
                         />
+                        <Field
+                            name="storeCode"
+                            component={FormInput}
+                            label="Store Code"
+                            validator={nameValidator}
+                            colSpan={1}
+                        />
+                        <Field
+                            name="sapCode"
+                            component={FormInput}
+                            label="SAP Code"
+                            validator={nameValidator}
+                            colSpan={1}
+                        />
                     </CustomFormFieldSet>
 
                     {/* Fieldset 2: Address */}
