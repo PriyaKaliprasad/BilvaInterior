@@ -10,3 +10,25 @@
     justify-content: center;
     height: 100%;
 }
+
+.form-container {
+    max-width: 700px;
+    padding: 1.5rem 1rem;
+}
+
+
+/* for wide laptops and desktops */
+@media (min-width: 1025px) {
+    .form-container {
+        max-width: 85%;
+    }
+
+    .column-container{
+        display: flex;
+        gap: 2.5rem;
+    }
+
+    .left-column {
+        flex: 1;
+    }    
+}
