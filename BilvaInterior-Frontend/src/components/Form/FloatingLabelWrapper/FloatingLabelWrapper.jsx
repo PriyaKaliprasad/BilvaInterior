@@ -1,11 +1,11 @@
 import React, { useState, cloneElement } from "react";
 import "./FloatingLabelWrapper.css";
 
-const FloatingLabelWrapper = ({ id, label, value, children }) => {
+const FloatingLabelWrapper = ({ id, label, value, valid, children }) => {
   const [focused, setFocused] = useState(false);
 
   // Use child's value if wrapper value not provided
-  const childValue = value ?? children.props.value;
+  const childValue = value ?? children?.props?.value;
 
   const child = cloneElement(children, {
     id,
@@ -20,13 +20,15 @@ const FloatingLabelWrapper = ({ id, label, value, children }) => {
   });
 
   // check validity
-  const isInvalid = children.props.valid === false;
+  const isInvalid = valid === false || (children?.props?.valid === false);
 
-  // 👇 check if input has "real" value (not null/empty/undefined)
+  // Determine if there is a value  
   const hasValue =
-    childValue !== null &&
-    childValue !== undefined &&
-    String(childValue).trim() !== "";
+    childValue instanceof Date
+      ? !isNaN(childValue.getTime()) // valid date
+      : childValue !== null &&
+      childValue !== undefined &&
+      String(childValue).trim() !== "";
 
   return (
     <div
