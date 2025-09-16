@@ -1,0 +1,17 @@
+@media (min-width: 768px) {
+  .k-window.k-dialog {
+    margin: 0 10rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .k-window.k-dialog {
+    margin: 0 15rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .k-window.k-dialog {
+    margin: 0 20rem;
+  }
+}

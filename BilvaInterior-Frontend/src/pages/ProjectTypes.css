@@ -1,0 +1,37 @@
+.page-container {
+  padding: 1rem;
+}
+
+.card {
+  margin-bottom: 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* Make form fields stack on small screens */
+.responsive-form .k-form-fieldset {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .responsive-form .k-form-fieldset {
+    grid-template-columns: 1fr;
+  }
+
+  .form-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-cancel {
+    width: 100%;
+  }
+
+  .form-buttons button {
+    width: 100%;
+  }
+}
