@@ -1,0 +1,21 @@
+/* --- Custom Status Badge Colors --- */
+
+/* Base styles for all custom badges */
+.badge.status-active, .badge.status-inactive {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+  border-radius: 50rem; /* Creates the pill shape */
+}
+
+/* Style for the "Active" status */
+.status-active {
+  background-color: #dcfce7; /* Light Green */
+  color: #166534;             /* Dark Green */
+}
+
+/* Style for the "Inactive" status */
+.status-inactive {
+  background-color: #f3f4f6; /* Light Gray */
+  color: #374151;             /* Dark Gray */
+}
