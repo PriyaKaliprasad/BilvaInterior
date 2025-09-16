@@ -8,15 +8,16 @@
     font-size: 1.1rem;
 }
 
-.fieldset-grid {
+/* IMP: turned off due to bootstrap */
+
+/* .fieldset-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1rem 1.5rem;
-    /* padding-right: 12px;  */
-}
+} */
 
 /* For right hugging fix on ultra small screens */
-@media (max-width: 374px) {
+/* @media (max-width: 374px) {
     .custom-fieldset .k-input,  .custom-fieldset .k-upload {
         max-width: 100%;
         width: 90%;
@@ -28,4 +29,4 @@
     .custom-fieldset button{
         width: 90%;
     }
-}
+} */

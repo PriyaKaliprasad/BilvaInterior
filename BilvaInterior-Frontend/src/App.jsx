@@ -12,7 +12,7 @@ import ProjectsAll from "./pages/ProjectsAll";
 import ProjectsEnquiries from "./pages/ProjectsEnquiries";
 import ProjectsTypes from "./pages/ProjectsTypes";
 import SiteVisitAll from "./pages/SiteVisitAll";
-import SiteVisitNew from "./pages/SiteVisitNew";
+import SiteVisitNew from "./pages/SiteVisit/SiteVisitNew";
 import TieUpAll from "./pages/TieUpCompany/TieUpAll";
 import TieUpNew from "./pages/TieUpCompany/TieUpNew";
 import Quotations from "./pages/Quotations";

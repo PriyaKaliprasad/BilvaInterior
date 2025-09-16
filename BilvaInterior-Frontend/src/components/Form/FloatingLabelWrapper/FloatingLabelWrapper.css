@@ -25,6 +25,11 @@
   transition: none;
 }
 
+/* for kendo dialog with white bg */
+.k-dialog .floating-input label{
+  background: #fff;
+}
+
 /* Animated floating label (previously used) */
 
 /* .floating-input label {
