@@ -22,6 +22,7 @@
     "@progress/kendo-react-labels": "^10.1.0",
     "@progress/kendo-react-layout": "^10.1.0",
     "@progress/kendo-react-listview": "^10.1.0",
+    "@progress/kendo-react-notification": "^10.1.0",
     "@progress/kendo-react-upload": "^10.1.0",
     "@progress/kendo-theme-bootstrap": "^12.0.0",
     "@progress/kendo-theme-default": "^12.0.1",

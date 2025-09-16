@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import ProjectsAll from "./pages/ProjectsAll";
 import ProjectsEnquiries from "./pages/ProjectsEnquiries";
 import ProjectsTypes from "./pages/ProjectsTypes";
+import AddProjectType from "./pages/AddProjectType";
 import SiteVisitAll from "./pages/SiteVisitAll";
 import SiteVisitNew from "./pages/SiteVisit/SiteVisitNew";
 import TieUpAll from "./pages/TieUpCompany/TieUpAll";
@@ -21,6 +22,7 @@ import Billing from "./pages/Billing";
 import EmployeesAll from "./pages/EmployeesAll";
 import EmployeesNew from "./pages/ManageEmployees/EmployeesNew";
 import EmployeesRoles from "./pages/EmployeesRoles";
+import AddNewRole from "./pages/AddNewRole";
 import AuditTrail from "./pages/AuditTrail";
 import MyAccount from "./pages/MyAccount";
 
@@ -53,6 +55,7 @@ const App = () => {
                 <Route path="/projects/all" element={<ProjectsAll />} />
                 <Route path="/projects/enquiries" element={<ProjectsEnquiries />} />
                 <Route path="/projects/types" element={<ProjectsTypes />} />
+                <Route path="/projects/types/new" element={<AddProjectType />} />
                 <Route path="/site-visit/all" element={<SiteVisitAll />} />
                 <Route path="/site-visit/new" element={<SiteVisitNew />} />
                 <Route path="/tie-up-company/all" element={<TieUpAll />} />
@@ -63,6 +66,7 @@ const App = () => {
                 <Route path="/manage-employees/all" element={<EmployeesAll />} />
                 <Route path="/manage-employees/new" element={<EmployeesNew />} />
                 <Route path="/manage-employees/roles" element={<EmployeesRoles />} />
+                <Route path="/manage-employees/new-role" element={<AddNewRole />} />
                 <Route path="/audit-trail" element={<AuditTrail />} />
                 <Route path="/my-account" element={<MyAccount />} />
               </Routes>
