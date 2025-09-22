@@ -6,7 +6,6 @@ import { orderBy } from '@progress/kendo-data-query';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './EmployeeAll.css';
 
-
 // --- Employee Sample Data ---
 const employees = [
   { id: 1, firstName: "John", lastName: "Doe", email: "john.doe@example.com", mobile: "9876543210", role: "Manager", status: "Active" },
@@ -27,6 +26,7 @@ const StatusCell = (props) => {
     </td>
   );
 };
+
 const ActionCell = () => {
   return (
     <td className="text-center">
@@ -34,7 +34,6 @@ const ActionCell = () => {
     </td>
   );
 };
-
 
 const EmployeeAll = () => {
   // --- State for Pagination ---
@@ -56,31 +55,28 @@ const EmployeeAll = () => {
   return (
     <div className="container mt-4">
       <div className="card shadow-sm p-4">
-        {/* <div className="d-flex justify-content-between align-items-center mb-3">
-            
-            <Button themeColor="primary">Add new Employee</Button>
-        </div> */}
-        
-        <Grid
-          data={orderBy(employees, sort).slice(skip, skip + take)}
-          pageable={true}
-          sortable={true}
-          skip={skip}
-          take={take}
-          total={employees.length}
-          onPageChange={handlePageChange}
-          sort={sort}
-          onSortChange={handleSortChange}
-          style={{ height: 'auto', border: 'none' }}
-        >
-          <GridColumn field="firstName" title="First Name" />
-          <GridColumn field="lastName" title="Last Name" />
-          <GridColumn field="email" title="Email" width="250px" />
-          <GridColumn field="mobile" title="Mobile" />
-          <GridColumn field="role" title="Role" />
-          <GridColumn field="status" title="Status" cell={StatusCell} className="text-center" />
-          <GridColumn title="Actions" cell={ActionCell} sortable={false} className="text-center" />
-        </Grid>
+        <div className="grid-responsive-wrapper">
+          <Grid
+            data={orderBy(employees, sort).slice(skip, skip + take)}
+            pageable={true}
+            sortable={true}
+            skip={skip}
+            take={take}
+            total={employees.length}
+            onPageChange={handlePageChange}
+            sort={sort}
+            onSortChange={handleSortChange}
+            style={{ height: 'auto', border: 'none' }}
+          >
+            <GridColumn field="firstName" title="First Name" />
+            <GridColumn field="lastName" title="Last Name" />
+            <GridColumn field="email" title="Email" width="250px" />
+            <GridColumn field="mobile" title="Mobile" />
+            <GridColumn field="role" title="Role" />
+            <GridColumn field="status" title="Status" cell={StatusCell} className="text-center" />
+            <GridColumn title="Actions" cell={ActionCell} sortable={false} className="text-center" />
+          </Grid>
+        </div>
       </div>
     </div>
   );
