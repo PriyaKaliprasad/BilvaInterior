@@ -1,5 +1,14 @@
 import React, { useState } from 'react'
 import { useAuth } from '../../context/AuthContext';
+import { 
+  LoginNavbar, 
+  LoginHero, 
+  LoginFeatures, 
+  LoginWorkflow, 
+  LoginFAQ, 
+  LoginFooter 
+} from './components';
+import './login.css';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -25,54 +34,26 @@ const LoginPage = () => {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '100px auto', padding: '20px' }}>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-        
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-        
-        <button 
-          type="submit" 
-          disabled={isSubmitting}
-          style={{ 
-            width: '100%', 
-            padding: '10px', 
-            backgroundColor: '#007bff', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '4px' 
-          }}
-        >
-          {isSubmitting ? 'Logging in...' : 'Login'}
-        </button>
-        
-        {error && (
-          <div style={{ color: 'red', marginTop: '10px' }}>
-            {error}
-          </div>
-        )}
-      </form>
+    <div className="login-page-wrapper">
+      <LoginNavbar />
+      
+      <LoginHero 
+        handleSubmit={handleSubmit}
+        setEmail={setEmail}
+        email={email}
+        setPassword={setPassword}
+        password={password}
+        isSubmitting={isSubmitting}
+        error={error}
+      />
+      
+      <LoginFeatures />
+      
+      <LoginWorkflow />
+      
+      <LoginFAQ />
+      
+      <LoginFooter />
     </div>
   )
 }

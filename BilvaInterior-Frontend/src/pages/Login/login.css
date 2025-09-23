@@ -1,0 +1,125 @@
+:root{
+  --brand:#6c5ce7;        /* primary */
+  --brand-2:#a29bfe;      /* accent */
+  --ink:#2b2d42;          /* dark text */
+  --muted:#6c757d;        /* muted text */
+  --bg:#f8f9fb;           /* page bg */
+}
+
+body{ 
+  background:var(--bg); 
+  color:var(--ink); 
+}
+
+/* Navbar */
+.navbar-brand span{ 
+  font-weight:800; 
+  letter-spacing:.3px; 
+}
+
+.badge-beta{ 
+  background:linear-gradient(90deg,var(--brand),var(--brand-2)); 
+}
+
+/* Hero */
+.hero{
+  background: radial-gradient(1200px 600px at 80% -200px, rgba(108,92,231,.12), transparent),
+              radial-gradient(800px 400px at 10% -100px, rgba(162,155,254,.18), transparent);
+  padding-top: clamp(2rem, 3vw, 3.5rem);
+  padding-bottom: clamp(2rem, 3vw, 3.5rem);
+}
+
+.hero .login-card{
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(108,92,231,.15);
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+}
+
+/* Feature icons */
+.fi{
+  width:3rem; 
+  height:3rem; 
+  display:grid; 
+  place-items:center;
+  border-radius:.75rem; 
+  background: #fff; 
+  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  color:var(--brand);
+}
+
+/* Decorative check list */
+.check i{ 
+  color: #2ecc71; 
+}
+
+/* Footer */
+footer a{ 
+  color:inherit; 
+  text-decoration:none;
+}
+
+footer a:hover{ 
+  color:var(--brand);
+}
+
+/* Form styling */
+.form-floating>.form-control:focus~label{ 
+  color:var(--brand);
+}
+
+.btn-brand{ 
+  background:linear-gradient(90deg,var(--brand),var(--brand-2)); 
+  color:#fff; 
+  border:none;
+}
+
+.btn-brand:hover{ 
+  filter:brightness(.95); 
+  color:#fff;
+}
+
+/* Responsive helpers */
+@media (min-width: 992px){
+  .hero-split{ 
+    min-height: 60vh; /* Reduced from 78vh */
+  }
+  
+  /* Center hero content but with reduced height */
+  .hero {
+    display: flex;
+    align-items: center;
+    min-height: 60vh; /* Much smaller than full viewport */
+    padding-top: 3rem;
+    padding-bottom: 2rem;
+  }
+  
+  .hero .container {
+    width: 100%;
+  }
+}
+
+/* Login specific styles */
+.login-page-wrapper {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.login-container {
+  background: var(--bg);
+}
+
+/* Password toggle button */
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  z-index: 10;
+}
+
+.password-toggle:hover {
+  color: var(--brand);
+}
