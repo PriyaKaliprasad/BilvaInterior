@@ -25,56 +25,61 @@ import EmployeesRoles from "./pages/EmployeesRoles";
 import AddNewRole from "./pages/AddNewRole";
 import AuditTrail from "./pages/AuditTrail";
 import MyAccount from "./pages/MyAccount";
+import LoginPage from "./pages/Login/LoginPage";
+import { AuthProvider } from "./context/AuthContext";
 
 const App = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <NavigationProvider>
-      <Router>
-        <div style={{ display: "flex", minHeight: "100vh"}}>
-          {/* Sidebar overlay and sidebar */}
-          <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-          {sidebarOpen && (
-            <div
-              className="sidebar-backdrop"
-              onClick={() => setSidebarOpen(false)}
-              aria-label="Close sidebar"
-            />
-          )}
+    <AuthProvider>
+      <NavigationProvider>
+        <Router>
+          <div style={{ display: "flex", minHeight: "100vh" }}>
+            {/* Sidebar overlay and sidebar */}
+            <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+            {sidebarOpen && (
+              <div
+                className="sidebar-backdrop"
+                onClick={() => setSidebarOpen(false)}
+                aria-label="Close sidebar"
+              />
+            )}
 
-          {/* Main Content Area */}
-          <div className="main-content-with-navbar">
-            {/* White Navbar always visible */}
-            <MainNavbar onSidebarOpen={setSidebarOpen} />
-            <SubNavbar />
-            <div className="main-content">
-              <Routes>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/projects/all" element={<ProjectsAll />} />
-                <Route path="/projects/enquiries" element={<ProjectsEnquiries />} />
-                <Route path="/projects/types" element={<ProjectsTypes />} />
-                <Route path="/projects/types/new" element={<AddProjectType />} />
-                <Route path="/site-visit/all" element={<SiteVisitAll />} />
-                <Route path="/site-visit/new" element={<SiteVisitNew />} />
-                <Route path="/tie-up-company/all" element={<TieUpAll />} />
-                <Route path="/tie-up-company/new" element={<TieUpNew />} />
-                <Route path="/quotations" element={<Quotations />} />
-                <Route path="/expense-tracker" element={<ExpenseTracker />} />
-                <Route path="/billing" element={<Billing />} />
-                <Route path="/manage-employees/all" element={<EmployeesAll />} />
-                <Route path="/manage-employees/new" element={<EmployeesNew />} />
-                <Route path="/manage-employees/roles" element={<EmployeesRoles />} />
-                <Route path="/manage-employees/new-role" element={<AddNewRole />} />
-                <Route path="/audit-trail" element={<AuditTrail />} />
-                <Route path="/my-account" element={<MyAccount />} />
-              </Routes>
+            {/* Main Content Area */}
+            <div className="main-content-with-navbar">
+              {/* White Navbar always visible */}
+              <MainNavbar onSidebarOpen={setSidebarOpen} />
+              <SubNavbar />
+              <div className="main-content">
+                <Routes>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/projects/all" element={<ProjectsAll />} />
+                  <Route path="/projects/enquiries" element={<ProjectsEnquiries />} />
+                  <Route path="/projects/types" element={<ProjectsTypes />} />
+                  <Route path="/projects/types/new" element={<AddProjectType />} />
+                  <Route path="/site-visit/all" element={<SiteVisitAll />} />
+                  <Route path="/site-visit/new" element={<SiteVisitNew />} />
+                  <Route path="/tie-up-company/all" element={<TieUpAll />} />
+                  <Route path="/tie-up-company/new" element={<TieUpNew />} />
+                  <Route path="/quotations" element={<Quotations />} />
+                  <Route path="/expense-tracker" element={<ExpenseTracker />} />
+                  <Route path="/billing" element={<Billing />} />
+                  <Route path="/manage-employees/all" element={<EmployeesAll />} />
+                  <Route path="/manage-employees/new" element={<EmployeesNew />} />
+                  <Route path="/manage-employees/roles" element={<EmployeesRoles />} />
+                  <Route path="/manage-employees/new-role" element={<AddNewRole />} />
+                  <Route path="/audit-trail" element={<AuditTrail />} />
+                  <Route path="/my-account" element={<MyAccount />} />
+                </Routes>
+              </div>
             </div>
           </div>
-        </div>
-      </Router>
-    </NavigationProvider>
+        </Router>
+      </NavigationProvider>
+    </AuthProvider>
   );
 };
 
