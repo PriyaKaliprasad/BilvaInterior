@@ -1,24 +1,27 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
-import { usePost } from '../../hooks/usePost';
+import { useAuth } from '../../context/AuthContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { mutate: loginUser, loading, error } = usePost('/api/auth/login');
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
     
-    try {
-      const data = await loginUser({ email, password });
-      console.log('Login successful:', data);
-      navigate('/dashboard');
-    } catch (error) {
-      console.log('Login failed:', error);
+    const result = await login({ email, password });
+    
+    if (!result.success) {
+      setError(result.error);
     }
+    // No manual navigation needed - PublicRoute will handle redirect automatically
+    
+    setIsSubmitting(false);
   };
 
   return (
@@ -51,7 +54,7 @@ const LoginPage = () => {
         
         <button 
           type="submit" 
-          disabled={loading}
+          disabled={isSubmitting}
           style={{ 
             width: '100%', 
             padding: '10px', 
@@ -61,7 +64,7 @@ const LoginPage = () => {
             borderRadius: '4px' 
           }}
         >
-          {loading ? 'Logging in...' : 'Login'}
+          {isSubmitting ? 'Logging in...' : 'Login'}
         </button>
         
         {error && (

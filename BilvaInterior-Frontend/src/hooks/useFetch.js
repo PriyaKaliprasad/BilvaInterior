@@ -6,22 +6,29 @@ export const useFetch = (url) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const fetchData = async () => {
     if (!url) return;
+    
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get(url); // cookies auto-sent
+      setData(res.data);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const fetchData = async () => {
-      try {
-        const res = await api.get(url); // cookies auto-sent
-        setData(res.data);
-      } catch (err) {
-        setError(err.response?.data?.message || err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  useEffect(() => {
     fetchData();
   }, [url]);
 
-  return { data, loading, error };
+  const refetch = () => {
+    fetchData();
+  };
+
+  return { data, loading, error, refetch };
 };
