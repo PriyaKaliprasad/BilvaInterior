@@ -21,6 +21,7 @@ const PublicRoute = () => {
 
   // If already authenticated, redirect to dashboard
   if (user) {
+    console.log(user);
     return <Navigate to="/dashboard" replace />;
   }
 

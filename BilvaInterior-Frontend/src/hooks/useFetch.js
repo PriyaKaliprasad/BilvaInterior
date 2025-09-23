@@ -15,6 +15,7 @@ export const useFetch = (url) => {
       const res = await api.get(url); // cookies auto-sent
       setData(res.data);
     } catch (err) {
+      console.log(err);
       setError(err.response?.data?.message || err.message);
       setData(null);
     } finally {

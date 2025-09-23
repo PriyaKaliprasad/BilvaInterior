@@ -16,6 +16,16 @@ export function AuthProvider({ children }) {
     }
   }, [data, error]);
 
+  // flush browser cached page so that auth is re-verified on back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      refetch(); // verify auth again when user navigates with browser buttons
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   const login = async (credentials) => {
     try {
       const response = await api.post("/api/auth/login", credentials);
@@ -23,9 +33,9 @@ export function AuthProvider({ children }) {
       await refetch();
       return { success: true, data: response.data };
     } catch (err) {
-      return { 
-        success: false, 
-        error: err.response?.data?.message || err.message 
+      return {
+        success: false,
+        error: err.response?.data?.message || err.message
       };
     }
   };
@@ -41,13 +51,13 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      setUser, 
-      loading, 
-      login, 
+    <AuthContext.Provider value={{
+      user,
+      setUser,
+      loading,
+      login,
       logout,
-      isAuthenticated: !!user 
+      isAuthenticated: !!user
     }}>
       {children}
     </AuthContext.Provider>

@@ -17,6 +17,7 @@ const useMutation = (url, method) => {
         data: body, // not used for DELETE normally
       });
       setData(res.data);
+      console.log(res);
       return res.data;
     } catch (err) {
       setError(err.response?.data?.message || err.message);
