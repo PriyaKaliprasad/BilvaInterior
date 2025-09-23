@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
     } catch (err) {
       return {
         success: false,
-        error: err.response?.data?.message || err.message
+        error: err.response?.data?.error || err.message
       };
     }
   };

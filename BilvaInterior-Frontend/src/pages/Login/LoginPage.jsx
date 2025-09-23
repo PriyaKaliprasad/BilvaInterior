@@ -69,7 +69,7 @@ const LoginPage = () => {
         
         {error && (
           <div style={{ color: 'red', marginTop: '10px' }}>
-            Error: {error}
+            {error}
           </div>
         )}
       </form>
