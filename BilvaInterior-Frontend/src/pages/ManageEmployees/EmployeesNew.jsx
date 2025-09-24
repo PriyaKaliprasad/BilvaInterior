@@ -1,203 +1,328 @@
-import React from 'react';
-import { Form, Field, FormElement } from '@progress/kendo-react-form';
-import { Button } from '@progress/kendo-react-buttons';
-import { Switch } from '@progress/kendo-react-inputs';
-import { DropDownList } from '@progress/kendo-react-dropdowns';
-import Avatar from '../../components/Avatar/CustomAvatar';
-import FormInput from '../../components/Form/FormInput';
-import FormUpload from '../../components/Form/FormUpload';
-import CustomFormFieldSet from '../../components/Form/CustomFormFieldSet';
-import { nameValidator, emailValidator, phoneValidator, imageValidator } from '../../utils/validators';
-import { responsiveBreakpoints } from '../../components/Form/formConstants';
-import './EmployeeNew.css';
+import React, { useState, useEffect, useRef } from "react";
+import { Form, Field, FormElement } from "@progress/kendo-react-form";
+import { Button } from "@progress/kendo-react-buttons";
+import { Switch } from "@progress/kendo-react-inputs";
+import { DropDownList } from "@progress/kendo-react-dropdowns";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
+import Avatar from "../../components/Avatar/CustomAvatar";
+import FormInput from "../../components/Form/FormInput";
+import FormUpload from "../../components/Form/FormUpload";
+import CustomFormFieldSet from "../../components/Form/CustomFormFieldSet";
+import {
+    nameValidator,
+    emailValidator,
+    phoneValidator,
+    imageValidator,
+} from "../../utils/validators";
+import { responsiveBreakpoints } from "../../components/Form/formConstants";
+import "./EmployeeNew.css";
 
-// screen breakpoint for responsiveness
 const wideScreenValue = 1100;
 
-
-const roles = [
-  { text: 'Admin', value: 'admin' },
-  { text: 'Manager', value: 'manager' },
-  { text: 'Employee', value: 'employee' }
-];
+// const roles = [
+//     { text: "Admin", value: "Admin" },
+//     { text: "Manager", value: "Manager" },
+//     { text: "Employee", value: "Employee" },
+// ];
 const genders = [
-  { text: 'Male', value: 'male' },
-  { text: 'Female', value: 'female' },
-  { text: 'Other', value: 'other' }
+    { text: "Male", value: "Male" },
+    { text: "Female", value: "Female" },
+    { text: "Other", value: "Other" },
 ];
 
 const EmployeesNew = () => {
-  const [avatarSrc, setAvatarSrc] = React.useState(null);
+    const [avatarSrc, setAvatarSrc] = useState(null);
+    const [isWide, setIsWide] = useState(() => window.innerWidth >= wideScreenValue);
+    const [showDialog, setShowDialog] = useState(false);
+    const [dialogMessage, setDialogMessage] = useState("");
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [roles, setRoles] = useState([]);
+    
+    const resetFnRef = useRef(null); 
 
-  const handleImageUpload = (src) => {
-    setAvatarSrc(src);
-  };
+    const API_BASE = "https://localhost:7142/api/Role";
+    const fetchRoles = async () => {
+  try {
+    const res = await fetch(API_BASE, { cache: "no-cache" });
 
-  const handleSubmit = (dataItem) => {
-    alert('Form submitted!\n' + JSON.stringify(dataItem, null, 2));
-  };
+    if (!res.ok) throw new Error(`Failed to fetch roles (${res.status})`);
+    const data = await res.json();
+    console.log("Fetched roles:", data);
 
-  // Responsive order logic
-  const [isWide, setIsWide] = React.useState(() => window.innerWidth >= wideScreenValue);
-  React.useEffect(() => {
-    const onResize = () => setIsWide(window.innerWidth >= 1025);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
+    // ✅ Transform roles into desired format
+    const formattedRoles = (data || []).map((role) => ({
+      text: role.name || role.roleName || role, // adapt key based on your API response
+      value: role.name || role.roleName || role,
+    }));
 
-  const leftColumn = (
-    <div className="left-column">
-      {/* First row: Firstname, Lastname */}
-      <CustomFormFieldSet cols={responsiveBreakpoints}>
-        <Field
-          name="firstName"
-          component={FormInput}
-          label="First Name"
-          validator={nameValidator}
-        />
-        <Field
-          name="lastName"
-          component={FormInput}
-          label="Last Name"
-          validator={nameValidator}
-        />
-      </CustomFormFieldSet>
+    console.log("Formatted roles:", formattedRoles);
 
-      {/* Second row: Email, Mobile */}
-      <CustomFormFieldSet cols={responsiveBreakpoints}>
-        <Field
-          name="email"
-          component={FormInput}
-          label="Email"
-          validator={emailValidator}
-        />
-        <Field
-          name="mobile"
-          component={FormInput}
-          label="Mobile"
-          validator={phoneValidator}
-        />
-      </CustomFormFieldSet>
+    setRoles(formattedRoles); // finally set roles in state
+  } catch (err) {
+    console.error("Error fetching roles:", err);
+    setRoles([]);
+    setMainPopupMessage("❌ Error loading roles from the server.");
+  }
+};
 
-      {/* Third row: Address (full width) */}
-      <CustomFormFieldSet cols={responsiveBreakpoints}>
-        <Field
-          name="address"
-          component={FormInput}
-          label="Address"
-          validator={nameValidator}
-          colSpan={responsiveBreakpoints}
-        />
-      </CustomFormFieldSet>
 
-      {/* Fourth row: Role, Gender */}
-      <CustomFormFieldSet cols={responsiveBreakpoints}>
-        <Field
-          name="role"
-          label="Role"
-          validator={nameValidator}
-          component={(fieldProps) => (
-            <DropDownList
-              data={roles}
-              textField="text"
-              dataItemKey="value"
-              value={roles.find(r => r.value === fieldProps.value) || null}
-              onChange={e => fieldProps.onChange({ value: e.value.value })}
-              {...fieldProps}
-            />
-          )}
-          colSpan={1}
-        />
-        <Field
-          name="gender"
-          label="Gender"
-          validator={nameValidator}
-          component={(fieldProps) => (
-            <DropDownList
-              data={genders}
-              textField="text"
-              dataItemKey="value"
-              value={genders.find(g => g.value === fieldProps.value) || null}
-              onChange={e => fieldProps.onChange({ value: e.value.value })}
-              {...fieldProps}
-            />
-          )}
-          colSpan={1}
-        />
-      </CustomFormFieldSet>
+  useEffect(() => {
+      fetchRoles();
+    }, []);
 
-      {/* Fifth row: Status Switch */}
-      <CustomFormFieldSet layout={{
-        cols: [{ minWidth: 0, value: 1 }],
-        gap: 24
-      }}>
-        <Field
-          name="status"
-          label="Status"
-          component={(fieldProps) => (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <Switch
-                checked={!!fieldProps.value}
-                onChange={e => fieldProps.onChange({ value: e.value })}
-              />
-              <span>{fieldProps.value ? 'Active' : 'Inactive'}</span>
-            </div>
-          )}
-        />
-      </CustomFormFieldSet>
-    </div>
-  );
+    useEffect(() => {
+        const onResize = () => setIsWide(window.innerWidth >= wideScreenValue);
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, []);
 
-  const rightColumn = (
-    <div className="right-column">
-      {/* Zeroth row: Avatar and file upload */}
-      <CustomFormFieldSet cols={responsiveBreakpoints}>
-        <div className='img-container'>
-          <Avatar src={avatarSrc} height={200} />
+    const handleImageUpload = (src) => {
+        setAvatarSrc(src);
+    };
+
+    const handleSubmit = async (dataItem, formRenderProps) => {
+        setIsSaving(true);
+
+        const payload = {
+            FirstName: dataItem.firstName,
+            LastName: dataItem.lastName,
+            Email: dataItem.email,
+            Password: "DefaultPassword@123",
+            Mobile: dataItem.mobile,
+            Address: dataItem.address,
+            Gender: dataItem.gender?.value || dataItem.gender,
+            Role: dataItem.role?.value,
+            Status: !!dataItem.status,
+            ProfilePicPath: avatarSrc,
+        };
+        console.log("Submitting payload to backend:", payload);
+        try {
+            // --- THIS IS THE FIX ---
+            // The URL has been changed from "/api/auth/new" to the correct "/api/auth/register"
+            const response = await fetch("https://localhost:7142/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+            console.log("Backend response:", response.ok);
+            if (response.ok) {
+                console.log("if:", response.ok);
+
+                setIsSuccess(true);
+                setDialogMessage("Employee created successfully!");
+                if (resetFnRef.current) {
+                    resetFnRef.current();
+                }
+                setAvatarSrc(null);
+            } else {
+                console.log("Else:", response.ok);
+                const errorData = await response.json();
+                setIsSuccess(false);
+                let errorMessage = "Failed to create employee.";
+
+                if (errorData.errors) {
+                    errorMessage = Object.values(errorData.errors).flat().join(" ");
+                } else if (errorData.error) {
+                    errorMessage = errorData.error;
+                } else if (errorData.title) {
+                    errorMessage = errorData.title;
+                }
+
+                setDialogMessage(errorMessage);
+            }
+        } catch (error) {
+            console.error("Error during submission:", error);
+            setIsSuccess(false);
+            setDialogMessage("An error occurred. Please check the server connection.");
+        } finally {
+            setShowDialog(true);
+            setIsSaving(false);
+        }
+    };
+
+    const toggleDialog = () => {
+        setShowDialog(!showDialog);
+    };
+
+    const leftColumn = (
+        <div className="left-column">
+            <CustomFormFieldSet cols={responsiveBreakpoints}>
+                <Field
+                    name="firstName"
+                    component={FormInput}
+                    label="First Name"
+                    validator={nameValidator}
+                />
+                <Field
+                    name="lastName"
+                    component={FormInput}
+                    label="Last Name"
+                    validator={nameValidator}
+                />
+            </CustomFormFieldSet>
+
+            <CustomFormFieldSet cols={responsiveBreakpoints}>
+                <Field
+                    name="email"
+                    component={FormInput}
+                    label="Email"
+                    validator={emailValidator}
+                />
+                <Field
+                    name="mobile"
+                    component={FormInput}
+                    label="Mobile"
+                    validator={phoneValidator}
+                />
+            </CustomFormFieldSet>
+
+            <CustomFormFieldSet cols={responsiveBreakpoints}>
+                <Field
+                    name="address"
+                    component={FormInput}
+                    label="Address"
+                    validator={nameValidator}
+                    colSpan={responsiveBreakpoints}
+                />
+            </CustomFormFieldSet>
+
+            <CustomFormFieldSet cols={responsiveBreakpoints}>
+                <Field
+                    name="role"
+                    label="Role"
+                    validator={(value) => (value ? "" : "Role is required.")}
+                    component={(fieldProps) => (
+                        <DropDownList
+                            data={roles}
+                            textField="text"
+                            dataItemKey="value"
+                            value={roles.find((r) => r.value === fieldProps.value) || null}
+                            onChange={(e) =>
+                                fieldProps.onChange({ value: e.value ? e.value.value : null })
+                            }
+                            {...fieldProps}
+                        />
+                    )}
+                />
+                <Field
+                    name="gender"
+                    label="Gender"
+                    validator={(value) => (value ? "" : "Gender is required.")}
+                    component={(fieldProps) => (
+                        <DropDownList
+                            data={genders}
+                            textField="text"
+                            dataItemKey="value"
+                            value={genders.find((g) => g.value === fieldProps.value) || null}
+                            onChange={(e) => fieldProps.onChange(e.value?.value || "")} // ✅ only string
+                            {...fieldProps}
+                        />
+
+                    )}
+                />
+            </CustomFormFieldSet>
+
+            <CustomFormFieldSet
+                layout={{
+                    cols: [{ minWidth: 0, value: 1 }],
+                    gap: 24,
+                }}
+            >
+                <Field
+                    name="status"
+                    label="Status"
+                    component={(fieldProps) => (
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <label>Status:</label>
+                            <Switch
+                                checked={!!fieldProps.value}
+                                onChange={(e) => fieldProps.onChange({ value: e.value })}
+                            />
+                            <span>{fieldProps.value ? "Active" : "Inactive"}</span>
+                        </div>
+                    )}
+                />
+            </CustomFormFieldSet>
         </div>
-        <Field
-          name="profilePic"
-          component={FormUpload}
-          label="Profile Picture"
-          accept=".jpg,.jpeg,.png"
-          allowedFormatsArray={[".jpg", ".jpeg", ".png"]}
-          validator={imageValidator}
-          onImageUpload={handleImageUpload}
-        />
-      </CustomFormFieldSet>
-    </div>
-  );
+    );
 
-  return (
-    <Form
-      onSubmit={handleSubmit}
-      render={(formRenderProps) => (
-        <FormElement className='form-container'>
-          <div className="column-container">
-            {isWide ? (
-              <>
-                {leftColumn}
-                {rightColumn}
-              </>
-            ) : (
-              <>
-                {rightColumn}
-                {leftColumn}
-              </>
+    const rightColumn = (
+        <div className="right-column">
+            <CustomFormFieldSet cols={responsiveBreakpoints}>
+                <div className="img-container">
+                    <Avatar src={avatarSrc} height={200} />
+                </div>
+                <Field
+                    name="profilePic"
+                    component={FormUpload}
+                    label="Profile Picture"
+                    accept=".jpg,.jpeg,.png"
+                    allowedFormatsArray={[".jpg", ".jpeg", ".png"]}
+                    validator={imageValidator}
+                    onImageUpload={handleImageUpload}
+                />
+            </CustomFormFieldSet>
+        </div>
+    );
+
+    return (
+        <>
+            <Form
+                onSubmit={handleSubmit}
+                render={(formRenderProps) => {
+                     resetFnRef.current = formRenderProps.onFormReset;
+
+                    return (
+                    <FormElement className="form-container">
+                        <div className="column-container">
+                            {isWide ? (
+                                <>
+                                    {leftColumn} {rightColumn}
+                                </>
+                            ) : (
+                                <>
+                                    {rightColumn} {leftColumn}
+                                </>
+                            )}
+                        </div>
+                        <div className="k-form-buttons" style={{ marginTop: 24 }}>
+                            <Button
+                                themeColor="primary"
+                                type="submit"
+                                disabled={!formRenderProps.allowSubmit || isSaving}
+                            >
+                                {isSaving ? "Saving..." : "Submit"}
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    formRenderProps.onFormReset();
+                                    setAvatarSrc(null);
+                                }}
+                                style={{ marginLeft: 12 }}
+                                disabled={isSaving}
+                            >
+                                Reset
+                            </Button>
+                        </div>
+                    </FormElement>
+                )}}
+            />
+
+            {showDialog && (
+                <Dialog title={isSuccess ? "Success" : "Error"} onClose={toggleDialog}>
+                    <p style={{ margin: "25px", textAlign: "center" }}>
+                        {dialogMessage}
+                    </p>
+                    <DialogActionsBar>
+                        <Button themeColor="primary" onClick={toggleDialog}>OK</Button>
+                    </DialogActionsBar>
+                </Dialog>
             )}
-          </div>
-          <div className="k-form-buttons" style={{ marginTop: 24 }}>
-            <Button themeColor="primary" type="submit" disabled={!formRenderProps.allowSubmit}>
-              Submit
-            </Button>
-            <Button onClick={formRenderProps.onFormReset} style={{ marginLeft: 12 }}>
-              Reset
-            </Button>
-          </div>
-        </FormElement>
-      )}
-    />
-  );
+        </>
+    );
 };
 
 export default EmployeesNew;
