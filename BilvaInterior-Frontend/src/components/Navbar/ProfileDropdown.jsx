@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Avatar } from "@progress/kendo-react-layout";
 import "./ProfileDropdown.css";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const user = {
     name: "Vishnu P.",
@@ -11,6 +12,7 @@ const user = {
 
 const ProfileDropdown = () => {
     const navigate = useNavigate();
+    const { logout } = useAuth();
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
     const buttonRef = useRef(null);
@@ -18,6 +20,12 @@ const ProfileDropdown = () => {
     const handleAccountSettings = () => {
         setOpen(false);
         navigate("/my-account");
+    };
+
+    const handleSignOut = async () => {
+        setOpen(false);
+        await logout();
+        // No need to navigate - PrivateRoute will handle redirect to login
     };
 
 // Close dropdown on outside click
@@ -80,7 +88,7 @@ return (
                     <button onClick={handleAccountSettings} className="profile-dropdown-item">Account Settings</button>
                 </div>
                 <div className="profile-dropdown-footer">
-                    <button className="profile-dropdown-item">Sign Out</button>
+                    <button onClick={handleSignOut} className="profile-dropdown-item">Sign Out</button>
                 </div>
             </div>
         )}

@@ -1,11 +1,15 @@
 // App.jsx
 import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import Sidebar from "./components/Sidebar/Sidebar";
 import MainNavbar from "./components/Navbar/MainNavbar";
 import SubNavbar from "./components/Navbar/SubNavbar";
 import "./App.css";
 import { NavigationProvider } from "./context/NavigationContext";
+import { AuthProvider } from "./context/AuthContext";
+
+import PrivateRoute from "./routes/PrivateRoute";
+import PublicRoute from "./routes/PublicRoute";
 
 import Dashboard from "./pages/Dashboard";
 import ProjectsAll from "./pages/ProjectsAll";
@@ -25,31 +29,45 @@ import EmployeesRoles from "./pages/EmployeesRoles";
 import AddNewRole from "./pages/AddNewRole";
 import AuditTrail from "./pages/AuditTrail";
 import MyAccount from "./pages/MyAccount";
+import LoginPage from "./pages/Login/LoginPage";
+
+// Layout component for protected routes
+const AppLayout = ({ sidebarOpen, setSidebarOpen }) => (
+  <div style={{ display: "flex", minHeight: "100vh" }}>
+    <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    {sidebarOpen && (
+      <div
+        className="sidebar-backdrop"
+        onClick={() => setSidebarOpen(false)}
+        aria-label="Close sidebar"
+      />
+    )}
+    <div className="main-content-with-navbar">
+      <MainNavbar onSidebarOpen={setSidebarOpen} />
+      <SubNavbar />
+      <div className="main-content">
+        <Outlet />
+      </div>
+    </div>
+  </div>
+);
 
 const App = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <NavigationProvider>
-      <Router>
-        <div style={{ display: "flex", minHeight: "100vh"}}>
-          {/* Sidebar overlay and sidebar */}
-          <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-          {sidebarOpen && (
-            <div
-              className="sidebar-backdrop"
-              onClick={() => setSidebarOpen(false)}
-              aria-label="Close sidebar"
-            />
-          )}
+    <AuthProvider>
+      <NavigationProvider>
+        <Router>
+          <Routes>
+            {/* Public routes - redirect to dashboard if authenticated */}
+            <Route element={<PublicRoute />}>
+              <Route path="/login" element={<LoginPage />} />
+            </Route>
 
-          {/* Main Content Area */}
-          <div className="main-content-with-navbar">
-            {/* White Navbar always visible */}
-            <MainNavbar onSidebarOpen={setSidebarOpen} />
-            <SubNavbar />
-            <div className="main-content">
-              <Routes>
+            {/* Protected routes - redirect to login if not authenticated */}
+            <Route element={<PrivateRoute />}>
+              <Route element={<AppLayout sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />}>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/projects/all" element={<ProjectsAll />} />
@@ -69,12 +87,12 @@ const App = () => {
                 <Route path="/manage-employees/new-role" element={<AddNewRole />} />
                 <Route path="/audit-trail" element={<AuditTrail />} />
                 <Route path="/my-account" element={<MyAccount />} />
-              </Routes>
-            </div>
-          </div>
-        </div>
-      </Router>
-    </NavigationProvider>
+              </Route>
+            </Route>
+          </Routes>
+        </Router>
+      </NavigationProvider>
+    </AuthProvider>
   );
 };
 
