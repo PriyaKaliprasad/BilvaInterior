@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import "./ManageRoles.css";
 import { Form, Field, FormElement } from "@progress/kendo-react-form";
 import { Button } from "@progress/kendo-react-buttons";
@@ -25,7 +25,20 @@ const AddRole = () => {
     { featureId: 10, featureName: "Approve Budgets & Expenses" },
     { featureId: 11, featureName: "Oversee Employee & Project Status" },
   ];
-  const [availableFeatures, setAvailableFeatures] = useState(staticFeatures);
+
+  const [availableFeatures, setAvailableFeatures] = useState([]);
+
+   useEffect(() => {
+      fetch(`${API_BASE}/features`)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => setAvailableFeatures(data))
+        .catch((err) => console.error("Error fetching features:", err));
+    }, []);
 
   const handleSubmit = async (dataItem) => {
     // Disable the button while submitting to prevent double-clicks
