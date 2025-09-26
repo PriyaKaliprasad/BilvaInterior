@@ -8,7 +8,7 @@ import axios from "axios";
 
 const getAvatarUrl = (dataItem) => {
   return dataItem.profilePicPath
-    ? `https://localhost:7142/Uploads/profile/${dataItem.profilePicPath}`
+    ? `${import.meta.env.VITE_API_BASE_URL}/Uploads/profile/${dataItem.profilePicPath}`
     : `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(dataItem.id)}`;
 };
 
@@ -67,7 +67,7 @@ const TieUpAll = () => {
 
   useEffect(() => {
     axios
-      .get("https://localhost:7142/api/TieUpCompany")
+      .get(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany`)
       .then((res) => {
         setCompanies(res.data);
         setLoading(false);

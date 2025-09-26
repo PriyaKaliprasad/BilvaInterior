@@ -41,7 +41,7 @@ const AddProjectType = () => {
         setIsLoading(true);
         setFormMessage({ text: '', type: '' });
 
-        const apiUrl = 'https://localhost:7142/api/ProjectTypes';
+    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/ProjectTypes`;
         const dataToSend = { name: newTypeName };
 
         try {

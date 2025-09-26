@@ -133,7 +133,7 @@ const TieUpNew = () => {
     setIsSubmitting(true); // <-- start submitting
 
     try {
-      const checkResponse = await fetch('https://localhost:7142/api/TieUpCompany/checkUnique', {
+      const checkResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/checkUnique`, {
         method: 'POST',
         body: JSON.stringify({
           companyName: dataItem.companyName,
@@ -184,7 +184,7 @@ const TieUpNew = () => {
         formData.append('profilePic', file);
       }
 
-      const response = await fetch('https://localhost:7142/api/TieUpCompany', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany`, {
         method: 'POST',
         body: formData
       });
