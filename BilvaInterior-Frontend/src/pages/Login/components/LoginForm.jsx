@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ErrorMessage from './ErrorMessage';
 
 const LoginForm = ({
@@ -11,6 +11,7 @@ const LoginForm = ({
     error
 }) => {
     const [showPassword, setShowPassword] = useState(false);
+    const [capsLockOn, setCapsLockOn] = useState(false);
 
     const onSubmit = (e) => {
         e.preventDefault();
@@ -22,6 +23,29 @@ const LoginForm = ({
     const togglePassword = () => {
         setShowPassword(!showPassword);
     };
+
+    // Check caps lock status
+    const checkCapsLock = (event) => {
+        const capsLock = event.getModifierState && event.getModifierState('CapsLock');
+        setCapsLockOn(capsLock);
+    };
+
+    // Global caps lock detection
+    useEffect(() => {
+        const handleGlobalKeyEvent = (event) => {
+            checkCapsLock(event);
+        };
+
+        // Add global event listeners
+        document.addEventListener('keydown', handleGlobalKeyEvent);
+        document.addEventListener('keyup', handleGlobalKeyEvent);
+
+        // Cleanup event listeners on unmount
+        return () => {
+            document.removeEventListener('keydown', handleGlobalKeyEvent);
+            document.removeEventListener('keyup', handleGlobalKeyEvent);
+        };
+    }, []);
 
     return (
         <div className="col-12 col-md-6">
@@ -76,6 +100,15 @@ const LoginForm = ({
                                     <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
                                 </button>
                                 <div className="invalid-feedback">Password must be at least 6 characters.</div>
+                            </div>
+                            {/* Caps Lock Warning - Always reserve space */}
+                            <div className="mt-1 small d-flex align-items-center" style={{ minHeight: '1.25rem' }}>
+                                {capsLockOn && (
+                                    <>
+                                        <i className="bi bi-exclamation-triangle-fill me-1" style={{ color: '#ff6b35' }}></i>
+                                        <span style={{ color: '#ff6b35' }}>Caps Lock is on</span>
+                                    </>
+                                )}
                             </div>
                         </div>
                         
