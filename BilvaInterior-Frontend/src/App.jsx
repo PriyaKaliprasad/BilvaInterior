@@ -31,6 +31,7 @@ import AddNewRole from "./pages/AddNewRole";
 import AuditTrail from "./pages/AuditTrail";
 import MyAccount from "./pages/MyAccount";
 import LoginPage from "./pages/Login/LoginPage";
+import ResetPasswordPage from "./pages/PasswordReset/ResetPasswordPage";
 
 // Layout component for protected routes
 const AppLayout = ({ sidebarOpen, setSidebarOpen }) => (
@@ -61,6 +62,7 @@ const App = () => {
       <NavigationProvider>
         <Router>
           <Routes>
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             {/* Public routes - redirect to dashboard if authenticated */}
             <Route element={<PublicRoute />}>
               <Route path="/login" element={<LoginPage />} />

@@ -41,6 +41,12 @@
   margin: 1rem 0;
 }
 
+.sidebar .sidebar-title h4{
+  margin-top: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
 /* Remove panelbar background */
 .sidebar .k-panelbar {
   background: transparent;
