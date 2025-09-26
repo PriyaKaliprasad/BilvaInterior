@@ -276,51 +276,55 @@ const EmployeesNew = () => {
                      resetFnRef.current = formRenderProps.onFormReset;
 
                     return (
-                    <FormElement className="form-container">
-                        <div className="column-container">
-                            {isWide ? (
-                                <>
-                                    {leftColumn} {rightColumn}
-                                </>
-                            ) : (
-                                <>
-                                    {rightColumn} {leftColumn}
-                                </>
+                        <FormElement className="form-container">
+                            <div className="column-container">
+                                {isWide ? (
+                                    <>
+                                        {leftColumn} {rightColumn}
+                                    </>
+                                ) : (
+                                    <>
+                                        {rightColumn} {leftColumn}
+                                    </>
+                                )}
+                            </div>
+                            {/* Toast-like success/error message (moved to bottom above buttons) */}
+                            {dialogMessage && (
+                                <div style={{
+                                    marginBottom: "1rem",
+                                    padding: "8px",
+                                    borderRadius: "6px",
+                                    textAlign: "center",
+                                    fontWeight: "bold",
+                                    color: isSuccess ? "#065f46" : "#b91c1c",
+                                    backgroundColor: isSuccess ? "#d1fae5" : "#fee2e2"
+                                }}>
+                                    {dialogMessage}
+                                </div>
                             )}
-                        </div>
-                        <div className="k-form-buttons" style={{ marginTop: 24 }}>
-                            <Button
-                                themeColor="primary"
-                                type="submit"
-                                disabled={!formRenderProps.allowSubmit || isSaving}
-                            >
-                                {isSaving ? "Saving..." : "Submit"}
-                            </Button>
-                            <Button
-                                onClick={() => {
-                                    formRenderProps.onFormReset();
-                                    setAvatarSrc(null);
-                                }}
-                                style={{ marginLeft: 12 }}
-                                disabled={isSaving}
-                            >
-                                Reset
-                            </Button>
-                        </div>
-                    </FormElement>
-                )}}
+                            <div className="k-form-buttons" style={{ marginTop: 24 }}>
+                                <Button
+                                    themeColor="primary"
+                                    type="submit"
+                                    disabled={!formRenderProps.allowSubmit || isSaving}
+                                >
+                                    {isSaving ? "Saving..." : "Submit"}
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        formRenderProps.onFormReset();
+                                        setAvatarSrc(null);
+                                    }}
+                                    style={{ marginLeft: 12 }}
+                                    disabled={isSaving}
+                                >
+                                    Reset
+                                </Button>
+                            </div>
+                        </FormElement>
+                    )
+                }}
             />
-
-            {showDialog && (
-                <Dialog title={isSuccess ? "Success" : "Error"} onClose={toggleDialog}>
-                    <p style={{ margin: "25px", textAlign: "center" }}>
-                        {dialogMessage}
-                    </p>
-                    <DialogActionsBar>
-                        <Button themeColor="primary" onClick={toggleDialog}>OK</Button>
-                    </DialogActionsBar>
-                </Dialog>
-            )}
         </>
     );
 };
