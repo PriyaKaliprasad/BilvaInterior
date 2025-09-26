@@ -73,140 +73,172 @@ const TieUpNew = () => {
     };
 
     return (
-        <Form
-            onSubmit={handleSubmit}
-            render={(formRenderProps) => (
-                <FormElement style={{ maxWidth: 700, padding: '0 1rem' }}>
+        <div className="container-fluid d-flex justify-content-center py-4">
+            <Form
+                onSubmit={handleSubmit}
+                render={(formRenderProps) => (
+                    <FormElement className="w-100" style={{ maxWidth: 800 }}>
 
-                    {/* Zeroth row: Avatar and file upload */}
-                    <CustomFormFieldSet cols={responsiveBreakpoints}>
-                        <div className='img-container'>
-                            <Avatar src={avatarSrc} height={100} />
+                        {/* Zeroth row: Avatar and file upload */}
+                    <CustomFormFieldSet>
+                        <div className="row g-3">
+                            <div className="col-md-6">
+                                <div className='img-container'>
+                                    <Avatar src={avatarSrc} height={100} />
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <Field
+                                    name="profilePic"
+                                    component={FormUpload}
+                                    label="Company Logo"
+                                    accept=".jpg,.jpeg,.png"
+                                    allowedFormatsArray={[".jpg", ".jpeg", ".png"]}
+                                    validator={imageValidator}
+                                    onImageUpload={handleImageUpload}
+                                />
+                            </div>
                         </div>
-                        <Field
-                            name="profilePic"
-                            component={FormUpload}
-                            label="Company Logo"
-                            accept=".jpg,.jpeg,.png"
-                            allowedFormatsArray={[".jpg", ".jpeg", ".png"]}
-                            validator={imageValidator}
-                            onImageUpload={handleImageUpload}
-                        />
                     </CustomFormFieldSet>
 
                     {/* Fieldset 1: Contact Info */}
-                    <CustomFormFieldSet legend="Contact Info" cols={responsiveBreakpoints} className="custom-fieldset">
-                        <Field
-                            name="companyName"
-                            component={FormInput}
-                            label="Company Name"
-                            validator={nameValidator}
-                            colSpan={1}
-                        />
-                        <Field
-                            name="contactPerson"
-                            component={FormInput}
-                            label="Contact Person"
-                            validator={nameValidator}
-                            colSpan={1}
-                        />
-                        <Field
-                            name="phone"
-                            component={FormMaskedInput}
-                            label="Phone"
-                            mask="00000 00000"
-                            validator={phoneValidator}
-                            colSpan={1}
-                        />
-                        <Field
-                            name="email"
-                            component={FormInput}
-                            label="Email"
-                            validator={emailValidator}
-                            colSpan={1}
-                        />
-                        <Field
-                            name="storeCode"
-                            component={FormInput}
-                            label="Store Code"
-                            validator={nameValidator}
-                            colSpan={1}
-                        />
-                        <Field
-                            name="sapCode"
-                            component={FormInput}
-                            label="SAP Code"
-                            validator={nameValidator}
-                            colSpan={1}
-                        />
+                    <CustomFormFieldSet legend="Contact Info" className="custom-fieldset">
+                        <div className="row g-3">
+                            <div className="col-md-6">
+                                <Field
+                                    name="companyName"
+                                    component={FormInput}
+                                    label="Company Name"
+                                    validator={nameValidator}
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <Field
+                                    name="contactPerson"
+                                    component={FormInput}
+                                    label="Contact Person"
+                                    validator={nameValidator}
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <Field
+                                    name="phone"
+                                    component={FormMaskedInput}
+                                    label="Phone"
+                                    mask="00000 00000"
+                                    validator={phoneValidator}
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <Field
+                                    name="email"
+                                    component={FormInput}
+                                    label="Email"
+                                    validator={emailValidator}
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <Field
+                                    name="storeCode"
+                                    component={FormInput}
+                                    label="Store Code"
+                                    validator={nameValidator}
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <Field
+                                    name="sapCode"
+                                    component={FormInput}
+                                    label="SAP Code"
+                                    validator={nameValidator}
+                                />
+                            </div>
+                        </div>
                     </CustomFormFieldSet>
 
                     {/* Fieldset 2: Address */}
-                    <CustomFormFieldSet legend="Address" cols={responsiveBreakpoints} className="custom-fieldset">
-                        <Field
-                            name="addressLine1"
-                            component={FormInput}
-                            label="Address Line 1"
-                            colSpan={responsiveBreakpoints}
-                        />
-                        <Field
-                            name="addressLine2"
-                            component={FormInput}
-                            label="Address Line 2"
-                            colSpan={responsiveBreakpoints}
-                        />
-                        <Field
-                            name="city"
-                            component={FormInput}
-                            label="City"
-                            colSpan={1}
-                        />
-                        <Field
-                            name="state"
-                            component={FormInput}
-                            label="State"
-                            colSpan={1}
-                        />
-                        <Field
-                            name="pincode"
-                            component={FormMaskedInput}
-                            mask="0 0 0 0 0 0"
-                            label="Pincode"
-                            validator={pincodeValidator}
-                            colSpan={1}
-                            style={{ maxWidth: 200 }}
-                        />
+                    <CustomFormFieldSet legend="Address" className="custom-fieldset">
+                        <div className="row g-3">
+                            <div className="col-12">
+                                <Field
+                                    name="addressLine1"
+                                    component={FormInput}
+                                    label="Address Line 1"
+                                />
+                            </div>
+                            <div className="col-12">
+                                <Field
+                                    name="addressLine2"
+                                    component={FormInput}
+                                    label="Address Line 2"
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <Field
+                                    name="city"
+                                    component={FormInput}
+                                    label="City"
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <Field
+                                    name="state"
+                                    component={FormInput}
+                                    label="State"
+                                />
+                            </div>
+                            <div className="col-md-6">
+                                <Field
+                                    name="pincode"
+                                    component={FormMaskedInput}
+                                    mask="0 0 0 0 0 0"
+                                    label="Pincode"
+                                    validator={pincodeValidator}
+                                    style={{ maxWidth: 200 }}
+                                />
+                            </div>
+                        </div>
                     </CustomFormFieldSet>
 
                     {/* Fieldset 3: Business Details */}
-                    <CustomFormFieldSet legend="Business Details" cols={responsiveBreakpoints} className="custom-fieldset">
-                        <Field
-                            name="gstin"
-                            component={FormInput}
-                            label="GSTIN"
-                            validator={gstinValidator}
-                            colSpan={1}
-                            style={{ maxWidth: 350 }}
-                        />
+                    <CustomFormFieldSet legend="Business Details" className="custom-fieldset">
+                        <div className="row g-3">
+                            <div className="col-md-6">
+                                <Field
+                                    name="gstin"
+                                    component={FormInput}
+                                    label="GSTIN"
+                                    validator={gstinValidator}
+                                    style={{ maxWidth: 350 }}
+                                />
+                            </div>
+                        </div>
                     </CustomFormFieldSet>
 
                     {/* Fieldset 4: Billing Template (Excel) */}
-                    <CustomFormFieldSet legend="Billing Template (Excel)" cols={responsiveBreakpoints} className="custom-fieldset">
-                        <Field
-                            name="billingTemplate"
-                            component={FormUpload}
-                            label="Upload Excel File"
-                            accept=".xlsx,.xls"
-                            allowedFormatsArray={[".xlsx", ".xls"]}
-                            colSpan={responsiveBreakpoints}
-                            onChange={(e) => handleExcelUpload(e.value)}
-                        />
+                    <CustomFormFieldSet legend="Billing Template (Excel)" className="custom-fieldset">
+                        <div className="row g-3">
+                            <div className="col-12">
+                                <Field
+                                    name="billingTemplate"
+                                    component={FormUpload}
+                                    label="Upload Excel File"
+                                    accept=".xlsx,.xls"
+                                    allowedFormatsArray={[".xlsx", ".xls"]}
+                                    onChange={(e) => handleExcelUpload(e.value)}
+                                />
+                            </div>
+                        </div>
                     </CustomFormFieldSet>
                     {excelFile && (
-                        <CustomFormFieldSet cols={responsiveBreakpoints} className="custom-fieldset">
-                            <Button style={{ marginTop: 12 }} onClick={handlePreview}>
-                                Preview
-                            </Button>
+                        <CustomFormFieldSet className="custom-fieldset">
+                            <div className="row">
+                                <div className="col-12">
+                                    <Button style={{ marginTop: 12 }} onClick={handlePreview}>
+                                        Preview
+                                    </Button>
+                                </div>
+                            </div>
                         </CustomFormFieldSet>
                     )}
 
@@ -248,9 +280,10 @@ const TieUpNew = () => {
                             </div>
                         </Dialog>
                     )}
-                </FormElement>
-            )}
-        />
+                    </FormElement>
+                )}
+            />
+        </div>
     );
 };
 
