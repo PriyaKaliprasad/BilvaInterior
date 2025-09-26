@@ -9,14 +9,14 @@ const Avatar = ({src, height}) => {
           alt="avatar"
           height={height}
           width={height}
-          style={{ borderRadius: '50%', objectFit: 'cover', display: 'block' }}
+          style={{ borderRadius: '10%', objectFit: 'cover', display: 'block' }}
         />
       ) : (
         <div
           style={{
             width: height,
             height: height,
-            borderRadius: '50%',
+            borderRadius: '10%',
             background: '#ccc',
             display: 'flex',
             alignItems: 'center',
