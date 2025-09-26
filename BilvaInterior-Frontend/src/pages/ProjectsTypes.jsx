@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './projectTypes.css';
 
 // KendoReact imports
@@ -13,59 +13,109 @@ import FormInput from '../components/Form/FormInput';
 import CustomFormFieldSet from '../components/Form/CustomFormFieldSet';
 import { nameValidator } from '../utils/validators';
 
-// --- Dummy Data ---
-const initialProjectTypes = [
-  { id: 1, type: 'Residential', status: 'Active' },
-  { id: 2, type: 'Commercial', status: 'Active' },
-  { id: 3, type: 'Office Space', status: 'Active' },
-  { id: 4, type: 'Landscape', status: 'Active' },
-  { id: 5, type: 'Healthcare Facility', status: 'Active' },
-  { id: 6, type: 'Renovation', status: 'Inactive' },
-  { id: 7, type: 'Landscape', status: 'Inactive' },
-];
-
 export default function ProjectTypes() {
-  const [projectTypes, setProjectTypes] = useState(initialProjectTypes);
-
-  // Pagination state
+  const [projectTypes, setProjectTypes] = useState([]);
   const [skip, setSkip] = useState(0);
   const [take, setTake] = useState(6);
-
-  // Dialog state
   const [editItem, setEditItem] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Page change
+  // ✅ Backend API URL
+  const apiUrl = 'https://localhost:7142/api/ProjectTypes';
+
+  // ✅ Load backend data
+  const fetchData = async () => {
+    try {
+      const res = await fetch(apiUrl);
+      if (res.ok) {
+        const data = await res.json();
+        setProjectTypes(data);
+      } else {
+        console.error('Failed to fetch project types:', await res.text());
+      }
+    } catch (err) {
+      console.error('Network error while fetching:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // ✅ Save updated project type (PUT to backend)
+  const handleEditSubmit = async (dataItem) => {
+    const newName = dataItem.typeName.trim();
+
+    // 1. If user didn’t change the name → just save
+    if (newName.toLowerCase() === editItem.name.trim().toLowerCase()) {
+      setErrorMessage('');
+    } else {
+      // 2. Check if another record already has this name
+      const duplicate = projectTypes.some(
+        (p) => p.name.trim().toLowerCase() === newName.toLowerCase()
+      );
+
+      if (duplicate) {
+        setErrorMessage('⚠️ Project type with this name already exists!');
+        return;
+      } else {
+        setErrorMessage('');
+      }
+    }
+
+    const updatedItem = {
+      ...editItem,
+      name: newName,
+      status: dataItem.status,
+    };
+
+    try {
+      const res = await fetch(`${apiUrl}/${editItem.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedItem),
+      });
+
+      if (res.ok) {
+        setProjectTypes((prev) =>
+          prev.map((p) => (p.id === editItem.id ? updatedItem : p))
+        );
+
+        // ✅ Show success
+        setSuccessMessage('✅ Project type saved successfully!');
+        setErrorMessage('');
+
+        setTimeout(() => {
+          setSuccessMessage('');
+          setEditItem(null); // close dialog
+        }, 3000);
+      } else {
+        const errMsg = await res.text();
+        setErrorMessage(`❌ Failed to update: ${errMsg}`);
+        console.error('Failed to update project type:', errMsg);
+      }
+    } catch (err) {
+      console.error('Network error while updating:', err);
+      setErrorMessage('❌ Network error while updating project type');
+    }
+  };
+
+  // Pagination
   const handlePageChange = (event) => {
     setSkip(event.page.skip);
     setTake(event.page.take);
   };
 
-  // Save updated project type
-  const handleEditSubmit = (dataItem) => {
-    const updated = projectTypes.map((p) =>
-      p.id === editItem.id
-        ? {
-            ...p,
-            type: dataItem.typeName,
-            status: dataItem.status ? 'Active' : 'Inactive',
-          }
-        : p
-    );
-    setProjectTypes(updated);
-    setEditItem(null);
-  };
-
-  // Status cell
+  // ✅ Status cell
   const StatusCell = (props) => {
     const { status } = props.dataItem;
     return (
       <td>
         <span
-          className={`badge ${
-            status === 'Active' ? 'status-active' : 'status-inactive'
-          }`}
+          className={`badge ${status ? 'status-active' : 'status-inactive'}`}
         >
-          {status}
+          {status ? 'Active' : 'Inactive'}
         </span>
       </td>
     );
@@ -84,25 +134,34 @@ export default function ProjectTypes() {
     </td>
   );
 
-  // Custom Switch Field
+  // Switch field
   const SwitchField = (fieldRenderProps) => (
     <div className="k-form-field" style={{ marginTop: '12px' }}>
-      <label>Status</label>
-      <Switch
-        checked={fieldRenderProps.value}
-        onChange={(e) =>
-          fieldRenderProps.onChange({
-            value: e.value,
-          })
-        }
-        onLabel="ACTIVE"
-        offLabel="INACTIVE"
-      />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <label>Status</label>
+        <Switch
+          checked={fieldRenderProps.value}
+          onChange={(e) =>
+            fieldRenderProps.onChange({
+              value: e.value,
+            })
+          }
+          onLabel="ACTIVE"
+          offLabel="INACTIVE"
+        />
+      </div>
     </div>
   );
 
   return (
     <main className="page-container">
+      {/* ✅ Refresh Button */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+        <Button themeColor="primary" size="small" onClick={fetchData}>
+          Refresh
+        </Button>
+      </div>
+
       {/* Grid Section */}
       <div className="card">
         <Grid
@@ -113,9 +172,9 @@ export default function ProjectTypes() {
           total={projectTypes.length}
           onPageChange={handlePageChange}
           style={{ height: 'auto', border: 'none' }}
-          dataItemKey="id" // ✅ Fix warning about keys
+          dataItemKey="id"
         >
-          <GridColumn field="type" title="Project Type" />
+          <GridColumn field="name" title="Project Type" />
           <GridColumn field="status" title="Status" cell={StatusCell} />
           <GridColumn title="Action" cell={ActionCell} />
         </Grid>
@@ -126,13 +185,13 @@ export default function ProjectTypes() {
         <Dialog
           title="Edit Project Type"
           onClose={() => setEditItem(null)}
-          width={window.innerWidth < 600 ? '95%' : 500} // ✅ responsive width
+          width={window.innerWidth < 600 ? '95%' : 500}
         >
           <Form
             onSubmit={handleEditSubmit}
             initialValues={{
-              typeName: editItem.type,
-              status: editItem.status === 'Active',
+              typeName: editItem.name,
+              status: editItem.status,
             }}
             render={(formRenderProps) => (
               <FormElement className="responsive-form">
@@ -146,7 +205,11 @@ export default function ProjectTypes() {
                   <Field name="status" component={SwitchField} />
                 </CustomFormFieldSet>
 
-                <div className="form-buttons">
+                {/* Buttons */}
+                <div
+                  className="form-buttons"
+                  style={{ display: 'flex', gap: '8px', marginTop: '12px' }}
+                >
                   <Button
                     type="button"
                     onClick={() => setEditItem(null)}
@@ -162,6 +225,40 @@ export default function ProjectTypes() {
                     Save
                   </Button>
                 </div>
+
+                {/* ✅ Inline Error Message */}
+                {errorMessage && (
+                  <div
+                    style={{
+                      marginTop: '15px',
+                      padding: '10px',
+                      borderRadius: '4px',
+                      textAlign: 'center',
+                      backgroundColor: '#f8d7da',
+                      color: '#721c24',
+                      border: '1px solid #f5c6cb',
+                    }}
+                  >
+                    {errorMessage}
+                  </div>
+                )}
+
+                {/* ✅ Inline Success Message */}
+                {successMessage && (
+                  <div
+                    style={{
+                      marginTop: '15px',
+                      padding: '10px',
+                      borderRadius: '4px',
+                      textAlign: 'center',
+                      backgroundColor: '#d4edda',
+                      color: '#155724',
+                      border: '1px solid #c3e6cb',
+                    }}
+                  >
+                    {successMessage}
+                  </div>
+                )}
               </FormElement>
             )}
           />
