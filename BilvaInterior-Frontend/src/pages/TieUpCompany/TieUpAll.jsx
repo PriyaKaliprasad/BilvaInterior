@@ -6,11 +6,14 @@ import "./TieUpAll.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// ------------------ UPDATED ------------------
+// Use the path directly from backend; backend already prefixes with /uploads/profile/
 const getAvatarUrl = (dataItem) => {
   return dataItem.profilePicPath
-    ? `${import.meta.env.VITE_API_BASE_URL}/Uploads/profile/${dataItem.profilePicPath}`
+    ? `${import.meta.env.VITE_API_BASE_URL}${dataItem.profilePicPath}` // backend already includes /uploads/profile/
     : `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(dataItem.id)}`;
 };
+// --------------------------------------------
 
 const ListViewItem = (props) => {
   const { dataItem } = props;
