@@ -12,7 +12,7 @@ const TieUpEdit = () => {
 
   useEffect(() => {
     axios
-      .get(`https://localhost:7142/api/TieUpCompany/${id}`)
+      .get(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/${id}`)
       .then((res) => {
         const loaded = res.data || {};
         setCompany({
@@ -62,7 +62,7 @@ const TieUpEdit = () => {
     }
 
     try {
-      await axios.put(`https://localhost:7142/api/TieUpCompany/${id}`, formData, {
+  await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("Company updated successfully!");
@@ -79,7 +79,7 @@ const TieUpEdit = () => {
     company.companyLogo instanceof File
       ? URL.createObjectURL(company.companyLogo)
       : company.companyLogo
-      ? `https://localhost:7142/Uploads/profile/${company.companyLogo}`
+      ? `${import.meta.env.VITE_API_BASE_URL}/Uploads/profile/${company.companyLogo}`
       : "/default-avatar.png";
 
   return (

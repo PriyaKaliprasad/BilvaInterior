@@ -41,7 +41,7 @@ const EmployeesNew = () => {
     
     const resetFnRef = useRef(null); 
 
-    const API_BASE = "https://localhost:7142/api/Role";
+    const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
     const fetchRoles = async () => {
   try {
     const res = await fetch(API_BASE, { cache: "no-cache" });
@@ -100,7 +100,7 @@ const EmployeesNew = () => {
         try {
             // --- THIS IS THE FIX ---
             // The URL has been changed from "/api/auth/new" to the correct "/api/auth/register"
-            const response = await fetch("https://localhost:7142/api/auth/register", {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

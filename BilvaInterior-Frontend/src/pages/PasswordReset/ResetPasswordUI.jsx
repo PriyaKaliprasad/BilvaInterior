@@ -61,9 +61,6 @@ const ResetPasswordUI = ({
                         Your password has been reset successfully. You can now log in with your new password.
                       </div>
                     </div>
-                    <a href="/login" className="btn btn-brand w-100 py-3 fw-semibold">
-                      Go to Login Page
-                    </a>
                   </div>
                 )}
 

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ErrorMessage from './ErrorMessage';
+import SuccessMessage from './SuccessMessage';
+import { Link } from 'react-router-dom';
 
 const LoginForm = ({
     handleSubmit,
@@ -8,7 +10,8 @@ const LoginForm = ({
     setPassword,
     password,
     isSubmitting,
-    error
+    error,
+    success
 }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [capsLockOn, setCapsLockOn] = useState(false);
@@ -54,9 +57,9 @@ const LoginForm = ({
                     <h3 className="fw-bold mb-1">Welcome back</h3>
                     <small className="text-muted">Sign in to manage your sites & clients</small>
                 </div>
-
+                {/* Success message above error */}
+                <SuccessMessage message={success} />
                 <ErrorMessage error={error} />
-
                 <form className="needs-validation" onSubmit={onSubmit} noValidate>
                     <div className="row g-3">
                         <div className="col-12">
@@ -75,7 +78,6 @@ const LoginForm = ({
                                 <div className="invalid-feedback">Please enter a valid email.</div>
                             </div>
                         </div>
-
                         <div className="col-12">
                             <div className="form-floating position-relative">
                                 <input
@@ -111,7 +113,6 @@ const LoginForm = ({
                                 )}
                             </div>
                         </div>
-                        
                         <div className="col-12 d-grid">
                             <button
                                 className="btn btn-brand py-2"
@@ -132,12 +133,9 @@ const LoginForm = ({
                                 )}
                             </button>
                         </div>
-
                         <div className="col-12 d-flex justify-content-between align-items-center">
-                            <a href="#" className="small">Forgot password?</a>
+                            <Link to="/forgot-password" className="small">Forgot password?</Link>
                         </div>
-
-
                     </div>
                 </form>
             </div>

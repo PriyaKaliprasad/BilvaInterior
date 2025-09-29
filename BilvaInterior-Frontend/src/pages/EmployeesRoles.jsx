@@ -16,7 +16,7 @@ export default function ManageRoles() {
   const [dialogPopupMessage, setDialogPopupMessage] = useState("");
   const [mainPopupMessage, setMainPopupMessage] = useState("");
 
-  const API_BASE = "https://localhost:7142/api/Role";
+  const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
 
   // This useEffect hook runs once when the component is first loaded.
   useEffect(() => {
