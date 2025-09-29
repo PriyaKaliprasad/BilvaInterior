@@ -9,7 +9,8 @@ const LoginHero = ({
   setPassword, 
   password, 
   isSubmitting, 
-  error 
+  error,
+  success 
 }) => {
   return (
     <section className="hero">
@@ -37,6 +38,7 @@ const LoginHero = ({
                   password={password}
                   isSubmitting={isSubmitting}
                   error={error}
+                  success={success}
                 />
               </div>
             </div>
