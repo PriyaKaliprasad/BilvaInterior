@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ErrorMessage from './ErrorMessage';
 import SuccessMessage from './SuccessMessage';
+import { Link } from 'react-router-dom';
 
 const LoginForm = ({
     handleSubmit,
@@ -133,7 +134,7 @@ const LoginForm = ({
                             </button>
                         </div>
                         <div className="col-12 d-flex justify-content-between align-items-center">
-                            <a href="#" className="small">Forgot password?</a>
+                            <Link to="/forgot-password" className="small">Forgot password?</Link>
                         </div>
                     </div>
                 </form>
