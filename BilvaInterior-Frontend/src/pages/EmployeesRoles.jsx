@@ -4,7 +4,7 @@ import { Grid, GridColumn } from "@progress/kendo-react-grid";
 import { filterBy } from "@progress/kendo-data-query";
 import "./ManageRoles.css";
 
-const API_BASE = "https://localhost:7142/api/Role";
+  const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
 
 /* ---------- Roles List Page ---------- */
 function RolesList({ roles, features, loading, error }) {
@@ -108,7 +108,6 @@ function EditRole({ features }) {
   const [popupMessage, setPopupMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
 
   // This useEffect hook runs once when the component is first loaded.
   useEffect(() => {
