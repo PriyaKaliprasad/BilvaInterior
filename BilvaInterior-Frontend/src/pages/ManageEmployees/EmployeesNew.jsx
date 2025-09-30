@@ -371,7 +371,7 @@ const EmployeesNew = () => {
 
     const resetFnRef = useRef(null);
 
-    const API_BASE = "https://localhost:7142/api/Role";
+    const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
     const fetchRoles = async () => {
         try {
             const res = await fetch(API_BASE, { cache: "no-cache" });
@@ -425,7 +425,9 @@ const EmployeesNew = () => {
         };
         console.log("Submitting payload to backend:", payload);
         try {
-            const response = await fetch("https://localhost:7142/api/auth/register", {
+            // --- THIS IS THE FIX ---
+            // The URL has been changed from "/api/auth/new" to the correct "/api/auth/register"
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -621,6 +623,20 @@ const EmployeesNew = () => {
                                     </>
                                 )}
                             </div>
+                            {/* Toast-like success/error message (moved to bottom above buttons) */}
+                            {dialogMessage && (
+                                <div style={{
+                                    marginBottom: "1rem",
+                                    padding: "8px",
+                                    borderRadius: "6px",
+                                    textAlign: "center",
+                                    fontWeight: "bold",
+                                    color: isSuccess ? "#065f46" : "#b91c1c",
+                                    backgroundColor: isSuccess ? "#d1fae5" : "#fee2e2"
+                                }}>
+                                    {dialogMessage}
+                                </div>
+                            )}
                             <div className="k-form-buttons" style={{ marginTop: 24 }}>
                                 <Button
                                     themeColor="primary"
@@ -640,40 +656,10 @@ const EmployeesNew = () => {
                                     Reset
                                 </Button>
                             </div>
-
-                            {/* ✅ Notification under buttons */}
-                            {showNotification && (
-                                <Fade>
-                                    <Notification
-                                        type={{
-                                            style: isSuccess ? "success" : "error",
-                                            icon: true,
-                                        }}
-                                        closable={true}
-                                        onClose={() => setShowNotification(false)}
-                                        style={{ marginTop: "20px" }}
-                                    >
-                                        {dialogMessage}
-                                    </Notification>
-                                </Fade>
-                            )}
                         </FormElement>
-                    );
+                    )
                 }}
             />
-
-            {showDialog && (
-                <Dialog title={isSuccess ? "Success" : "Error"} onClose={toggleDialog}>
-                    <p style={{ margin: "25px", textAlign: "center" }}>
-                        {dialogMessage}
-                    </p>
-                    <DialogActionsBar>
-                        <Button themeColor="primary" onClick={toggleDialog}>
-                            OK
-                        </Button>
-                    </DialogActionsBar>
-                </Dialog>
-            )}
         </>
     );
 };

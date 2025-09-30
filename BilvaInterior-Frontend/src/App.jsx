@@ -20,6 +20,7 @@ import SiteVisitAll from "./pages/SiteVisitAll";
 import SiteVisitNew from "./pages/SiteVisit/SiteVisitNew";
 import TieUpAll from "./pages/TieUpCompany/TieUpAll";
 import TieUpNew from "./pages/TieUpCompany/TieUpNew";
+import TieUpEdit from "./pages/TieUpCompany/TieUpEdit"; // CHANGED: Imported TieUpEdit for edit company page
 import Quotations from "./pages/Quotations";
 import ExpenseTracker from "./pages/ExpenseTracker";
 import Billing from "./pages/Billing";
@@ -30,6 +31,8 @@ import AddNewRole from "./pages/AddNewRole";
 import AuditTrail from "./pages/AuditTrail";
 import MyAccount from "./pages/MyAccount";
 import LoginPage from "./pages/Login/LoginPage";
+import ResetPasswordPage from "./pages/PasswordReset/ResetPasswordPage";
+import ForgotPasswordPage from "./pages/ForgotPassword/ForgotPasswordPage";
 
 // Layout component for protected routes
 const AppLayout = ({ sidebarOpen, setSidebarOpen }) => (
@@ -60,6 +63,8 @@ const App = () => {
       <NavigationProvider>
         <Router>
           <Routes>
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             {/* Public routes - redirect to dashboard if authenticated */}
             <Route element={<PublicRoute />}>
               <Route path="/login" element={<LoginPage />} />
@@ -78,6 +83,7 @@ const App = () => {
                 <Route path="/site-visit/new" element={<SiteVisitNew />} />
                 <Route path="/tie-up-company/all" element={<TieUpAll />} />
                 <Route path="/tie-up-company/new" element={<TieUpNew />} />
+                <Route path="/tie-up-company/edit/:id" element={<TieUpEdit />} /> {/* CHANGED: Added route for editing company */}
                 <Route path="/quotations" element={<Quotations />} />
                 <Route path="/expense-tracker" element={<ExpenseTracker />} />
                 <Route path="/billing" element={<Billing />} />

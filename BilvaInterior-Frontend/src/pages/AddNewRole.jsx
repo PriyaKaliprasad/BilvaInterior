@@ -6,7 +6,7 @@ import { Switch, Checkbox } from "@progress/kendo-react-inputs";
 import FormInput from "../components/Form/FormInput";
 
 const AddRole = () => {
-  const API_BASE = "https://localhost:7142/api/Role";
+  const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
   
   const [popupMessage, setPopupMessage] = useState("");
   const [formKey, setFormKey] = useState(0); // This key is used to reset the form

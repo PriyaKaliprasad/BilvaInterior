@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ErrorMessage from './ErrorMessage';
+import SuccessMessage from './SuccessMessage';
+import { Link } from 'react-router-dom';
 
 const LoginForm = ({
     handleSubmit,
@@ -8,9 +10,11 @@ const LoginForm = ({
     setPassword,
     password,
     isSubmitting,
-    error
+    error,
+    success
 }) => {
     const [showPassword, setShowPassword] = useState(false);
+    const [capsLockOn, setCapsLockOn] = useState(false);
 
     const onSubmit = (e) => {
         e.preventDefault();
@@ -23,6 +27,29 @@ const LoginForm = ({
         setShowPassword(!showPassword);
     };
 
+    // Check caps lock status
+    const checkCapsLock = (event) => {
+        const capsLock = event.getModifierState && event.getModifierState('CapsLock');
+        setCapsLockOn(capsLock);
+    };
+
+    // Global caps lock detection
+    useEffect(() => {
+        const handleGlobalKeyEvent = (event) => {
+            checkCapsLock(event);
+        };
+
+        // Add global event listeners
+        document.addEventListener('keydown', handleGlobalKeyEvent);
+        document.addEventListener('keyup', handleGlobalKeyEvent);
+
+        // Cleanup event listeners on unmount
+        return () => {
+            document.removeEventListener('keydown', handleGlobalKeyEvent);
+            document.removeEventListener('keyup', handleGlobalKeyEvent);
+        };
+    }, []);
+
     return (
         <div className="col-12 col-md-6">
             <div className="h-100 d-flex flex-column">
@@ -30,9 +57,9 @@ const LoginForm = ({
                     <h3 className="fw-bold mb-1">Welcome back</h3>
                     <small className="text-muted">Sign in to manage your sites & clients</small>
                 </div>
-
+                {/* Success message above error */}
+                <SuccessMessage message={success} />
                 <ErrorMessage error={error} />
-
                 <form className="needs-validation" onSubmit={onSubmit} noValidate>
                     <div className="row g-3">
                         <div className="col-12">
@@ -51,7 +78,6 @@ const LoginForm = ({
                                 <div className="invalid-feedback">Please enter a valid email.</div>
                             </div>
                         </div>
-
                         <div className="col-12">
                             <div className="form-floating position-relative">
                                 <input
@@ -77,8 +103,16 @@ const LoginForm = ({
                                 </button>
                                 <div className="invalid-feedback">Password must be at least 6 characters.</div>
                             </div>
+                            {/* Caps Lock Warning - Always reserve space */}
+                            <div className="mt-1 small d-flex align-items-center" style={{ minHeight: '1.25rem' }}>
+                                {capsLockOn && (
+                                    <>
+                                        <i className="bi bi-exclamation-triangle-fill me-1" style={{ color: '#ff6b35' }}></i>
+                                        <span style={{ color: '#ff6b35' }}>Caps Lock is on</span>
+                                    </>
+                                )}
+                            </div>
                         </div>
-                        
                         <div className="col-12 d-grid">
                             <button
                                 className="btn btn-brand py-2"
@@ -99,12 +133,9 @@ const LoginForm = ({
                                 )}
                             </button>
                         </div>
-
                         <div className="col-12 d-flex justify-content-between align-items-center">
-                            <a href="#" className="small">Forgot password?</a>
+                            <Link to="/forgot-password" className="small">Forgot password?</Link>
                         </div>
-
-
                     </div>
                 </form>
             </div>

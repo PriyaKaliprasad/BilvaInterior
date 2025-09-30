@@ -81,7 +81,7 @@ const Sidebar = ({ open, onClose }) => {
     <div className={`sidebar${open ? " open" : ""}`} style={{ zIndex: 1200 }}>
       {/* sidebar title */}
       <div className="sidebar-title">
-        <h2>Bilva Interiors</h2>
+        <h4>Bilva Interiors</h4>
       </div>
 
       {/* panelbar 1 */}

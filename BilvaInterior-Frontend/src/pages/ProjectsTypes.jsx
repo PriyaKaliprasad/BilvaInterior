@@ -293,7 +293,8 @@ export default function ProjectTypes() {
     typeof window !== 'undefined' ? window.innerWidth <= 600 : false
   );
 
-  const apiUrl = 'https://localhost:7142/api/ProjectTypes';
+  // ✅ Backend API URL
+  const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/ProjectTypes`;
 
   // Fetch data
   const fetchData = async () => {
