@@ -12,19 +12,19 @@ const AddRole = () => {
   const [formKey, setFormKey] = useState(0); // This key is used to reset the form
 
   // A static list of features is fine for the creation page.
-  const staticFeatures = [
-    { featureId: 1, featureName: "CRUD on Employees" },
-    { featureId: 2, featureName: "CRUD on Roles" },
-    { featureId: 3, featureName: "Manage Projects" },
-    { featureId: 4, featureName: "Access Audit Trail" },
-    { featureId: 5, featureName: "Manage Billing & Expenses" },
-    { featureId: 6, featureName: "Log Site Visits" },
-    { featureId: 7, featureName: "View Assigned Projects" },
-    { featureId: 8, featureName: "Upload Site Documents" },
-    { featureId: 9, featureName: "View Reports & Dashboards" },
-    { featureId: 10, featureName: "Approve Budgets & Expenses" },
-    { featureId: 11, featureName: "Oversee Employee & Project Status" },
-  ];
+  // const staticFeatures = [
+  //   { featureId: 1, featureName: "CRUD on Employees" },
+  //   { featureId: 2, featureName: "CRUD on Roles" },
+  //   { featureId: 3, featureName: "Manage Projects" },
+  //   { featureId: 4, featureName: "Access Audit Trail" },
+  //   { featureId: 5, featureName: "Manage Billing & Expenses" },
+  //   { featureId: 6, featureName: "Log Site Visits" },
+  //   { featureId: 7, featureName: "View Assigned Projects" },
+  //   { featureId: 8, featureName: "Upload Site Documents" },
+  //   { featureId: 9, featureName: "View Reports & Dashboards" },
+  //   { featureId: 10, featureName: "Approve Budgets & Expenses" },
+  //   { featureId: 11, featureName: "Oversee Employee & Project Status" },
+  // ];
 
   const [availableFeatures, setAvailableFeatures] = useState([]);
 

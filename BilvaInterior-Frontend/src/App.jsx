@@ -83,7 +83,7 @@ const App = () => {
                 <Route path="/billing" element={<Billing />} />
                 <Route path="/manage-employees/all" element={<EmployeesAll />} />
                 <Route path="/manage-employees/new" element={<EmployeesNew />} />
-                <Route path="/manage-employees/roles" element={<EmployeesRoles />} />
+                <Route path="/manage-employees/roles/*" element={<EmployeesRoles />} />
                 <Route path="/manage-employees/new-role" element={<AddNewRole />} />
                 <Route path="/audit-trail" element={<AuditTrail />} />
                 <Route path="/my-account" element={<MyAccount />} />
