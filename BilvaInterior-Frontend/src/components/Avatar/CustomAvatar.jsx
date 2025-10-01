@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Avatar = ({src, height}) => {
+const Avatar = ({src, height, onClick}) => {
   return (
     <div>
       {src ? (
@@ -9,7 +9,8 @@ const Avatar = ({src, height}) => {
           alt="avatar"
           height={height}
           width={height}
-          style={{ borderRadius: '10%', objectFit: 'cover', display: 'block' }}
+          style={{ borderRadius: '10%', objectFit: 'cover', display: 'block', cursor: onClick ? 'pointer' : undefined }}
+          onClick={onClick}
         />
       ) : (
         <div
@@ -21,12 +22,13 @@ const Avatar = ({src, height}) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            // fontSize: typeof height === 'number' ? Math.max(12, height / 5) : 16,
             fontSize: 16,
             color: '#666',
             textAlign: 'center',
-            userSelect: 'none'
+            userSelect: 'none',
+            cursor: onClick ? 'pointer' : undefined
           }}
+          onClick={onClick}
         >
           no image
         </div>

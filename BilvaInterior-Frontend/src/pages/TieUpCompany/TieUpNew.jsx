@@ -243,21 +243,29 @@ const TieUpNew = () => {
       }}
       render={(formRenderProps) => (
         <FormElement style={{ maxWidth: 900, padding: '0 1rem' }}>
-          {/* Avatar Upload */}
           <CustomFormFieldSet cols={responsiveBreakpoints}>
-            <div className="img-container">
+            <div
+              className="img-container"
+              style={{ cursor: 'pointer' }}
+              onClick={() => document.getElementById('profilePicInput').click()}
+            >
               <Avatar src={avatarSrc} height={100} style={{ borderRadius: 0 }} />
             </div>
-            <Field
-              name="profilePic"
-              component={FormUpload}
-              label="Company Logo"
+            <input
+              type="file"
+              id="profilePicInput"
+              style={{ display: 'none' }}
               accept=".jpg,.jpeg,.png"
-              allowedFormatsArray={['.jpg', '.jpeg', '.png']}
-              validator={imageValidator}
-              onImageUpload={handleImageUpload}
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  handleImageUpload(URL.createObjectURL(file));
+                  formRef.current.change('profilePic', [file]);
+                }
+              }}
             />
           </CustomFormFieldSet>
+
 
           {/* Contact Info */}
           <CustomFormFieldSet legend="Contact Info" className="custom-fieldset">
@@ -446,7 +454,7 @@ const TieUpNew = () => {
               Reset
             </Button>
           </div>
-          
+
           {/* Global error near submit button */}
           {(showGlobalError || uniqueError) && (
             <div ref={errorRef} style={{ color: 'red', marginTop: 8 }}>
