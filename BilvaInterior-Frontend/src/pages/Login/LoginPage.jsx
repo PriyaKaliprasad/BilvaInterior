@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext';
 import { 
   LoginNavbar, 
@@ -8,6 +8,7 @@ import {
   LoginFAQ, 
   LoginFooter 
 } from './components';
+import SuccessMessage from './components/SuccessMessage';
 import './login.css';
 
 const LoginPage = () => {
@@ -16,7 +17,15 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { login } = useAuth();
+  const { login, signOutMessage, setSignOutMessage } = useAuth();
+  // Show message and clear it after first render
+  useEffect(() => {
+    if (signOutMessage) {
+      setTimeout(() => {
+        setSignOutMessage('');
+      }, 5000); // auto-clear after 5s
+    }
+  }, [signOutMessage, setSignOutMessage]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,7 +45,6 @@ const LoginPage = () => {
   return (
     <div className="login-page-wrapper">
       <LoginNavbar />
-      
       <LoginHero 
         handleSubmit={handleSubmit}
         setEmail={setEmail}
@@ -45,14 +53,11 @@ const LoginPage = () => {
         password={password}
         isSubmitting={isSubmitting}
         error={error}
+        success={signOutMessage}
       />
-      
       <LoginFeatures />
-      
       <LoginWorkflow />
-      
       <LoginFAQ />
-      
       <LoginFooter />
     </div>
   )

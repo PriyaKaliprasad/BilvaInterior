@@ -50,7 +50,7 @@ const EmployeeAll = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [saveMessage, setSaveMessage] = useState("");
 
-  const API_BASE = "https://localhost:7142/api/Employee";
+  const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Employee`;
 
   // Load employees from backend
   useEffect(() => {

@@ -22,7 +22,7 @@ export default function ProjectTypes() {
   const [errorMessage, setErrorMessage] = useState('');
 
   // ✅ Backend API URL
-  const apiUrl = 'https://localhost:7142/api/ProjectTypes';
+  const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/ProjectTypes`;
 
   // ✅ Load backend data
   const fetchData = async () => {

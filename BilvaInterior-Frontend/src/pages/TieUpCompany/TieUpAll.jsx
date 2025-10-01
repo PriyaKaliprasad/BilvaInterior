@@ -10,7 +10,7 @@ import axios from "axios";
 // Use the path directly from backend; backend already prefixes with /uploads/profile/
 const getAvatarUrl = (dataItem) => {
   return dataItem.profilePicPath
-    ? `https://localhost:7142${dataItem.profilePicPath}` // backend already includes /uploads/profile/
+    ? `${import.meta.env.VITE_API_BASE_URL}${dataItem.profilePicPath}` // backend already includes /uploads/profile/
     : `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(dataItem.id)}`;
 };
 // --------------------------------------------
@@ -70,7 +70,7 @@ const TieUpAll = () => {
 
   useEffect(() => {
     axios
-      .get("https://localhost:7142/api/TieUpCompany")
+      .get(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany`)
       .then((res) => {
         setCompanies(res.data);
         setLoading(false);

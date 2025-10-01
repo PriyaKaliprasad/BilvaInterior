@@ -9,11 +9,12 @@ const LoginHero = ({
   setPassword, 
   password, 
   isSubmitting, 
-  error 
+  error,
+  success 
 }) => {
   return (
     <section className="hero">
-      <div className="container hero-split d-flex align-items-center">
+      <div className="container hero-split d-flex align-items-center justify-content-center">
         <div className="row g-4 align-items-center w-100">
           {/* Mobile/Tablet: Heading first, Desktop: Combined with content */}
           <div className="col-12 d-lg-none">
@@ -37,6 +38,7 @@ const LoginHero = ({
                   password={password}
                   isSubmitting={isSubmitting}
                   error={error}
+                  success={success}
                 />
               </div>
             </div>

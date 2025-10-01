@@ -6,6 +6,7 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [signOutMessage, setSignOutMessage] = useState('');
   const { data, loading, error, refetch } = useFetch("/api/auth/me");
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export function AuthProvider({ children }) {
       console.error("Logout error:", err);
     } finally {
       setUser(null);
+      setSignOutMessage('Signed out successfully.'); // set the message here
     }
   };
 
@@ -57,7 +59,9 @@ export function AuthProvider({ children }) {
       loading,
       login,
       logout,
-      isAuthenticated: !!user
+      isAuthenticated: !!user,
+      signOutMessage,
+      setSignOutMessage
     }}>
       {children}
     </AuthContext.Provider>

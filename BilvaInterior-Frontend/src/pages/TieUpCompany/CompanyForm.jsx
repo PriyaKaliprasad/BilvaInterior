@@ -207,7 +207,7 @@ const CompanyForm = ({ formData, onChange, onSubmit, onCancel, isEdit, logoUrl }
         {formData.billingTemplatePath && (
           <div style={{ marginTop: 8 }}>
             <a
-              href={`https://localhost:7142/Uploads/${formData.billingTemplatePath}`}
+              href={`${import.meta.env.VITE_API_BASE_URL}/Uploads/${formData.billingTemplatePath}`}
               target="_blank"
               rel="noreferrer"
             >
