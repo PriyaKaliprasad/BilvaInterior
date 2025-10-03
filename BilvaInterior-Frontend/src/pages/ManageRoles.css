@@ -73,13 +73,44 @@ body {
   padding-left: 1.25rem;
 }
 
-/* Form */
+/* ----------- KENDO GRID FIXES ----------- */
+
+/* Ensure consistent table layout */
+.k-grid table {
+  table-layout: fixed !important;
+  width: 100% !important;
+}
+
+/* Ensure header, filter and data cells align */
+.k-grid th,
+.k-grid td {
+  white-space: normal !important;
+  word-break: break-word !important;
+  vertical-align: middle !important;
+  padding: 8px 12px !important;
+}
+
+/* Slight spacing for roles grid card */
+.roles-card {
+  margin-top: 10px;
+  padding: 10px;
+}
+
+/* Smaller filter row inputs */
+.k-grid .k-filtercell .k-textbox,
+.k-grid .k-filtercell input,
+.k-grid .k-filtercell select {
+  padding: 6px;
+}
+
+/* ----------- FORM STYLES ----------- */
+
+/* keep your earlier naming: .form-row provides two-column grid */
 .add-role-form {
   display: grid;
   gap: 1.5rem;
 }
 
-/* THIS IS THE CORRECTED DESKTOP RULE */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -88,7 +119,6 @@ body {
 
 .permissions-grid {
   display: grid;
-  /* This creates a 4-column grid */
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
 }
@@ -109,14 +139,17 @@ body {
   justify-content: flex-end;
 }
 
-/* Floating label style */
+/* Floating label style (keeps placeholders like company form) */
 .form-group {
   position: relative;
   width: 100%;
   margin-bottom: 1.5rem;
 }
 
-.form-group input {
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="number"],
+.form-group input[type="file"] {
   width: 100%;
   padding: 14px 12px 6px 12px;
   border: 1px solid #d1d5db;
@@ -127,15 +160,22 @@ body {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+.form-group select {
+  width: 100%;
+  padding: 9px 10px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 14px;
+}
+
 .form-group input:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 }
 
 .form-group label {
-  position: absolute;
-  left: 12px;
-  top: 14px;
   color: #6b7280;
   font-size: 14px;
   transition: 0.2s ease all;
@@ -204,25 +244,25 @@ input:checked + .slider:before {
   transform: translateX(20px);
 }
 
-/* --- ALL RESPONSIVE STYLES (for screens 768px and smaller) --- */
+/* Popup message */
+.popup-message {
+  margin: 8px 0;
+  font-weight: bold;
+}
+
+/* ----------- RESPONSIVE STYLES ----------- */
 @media (max-width: 768px) {
-  /* General */
   .card {
     padding: 1.5rem 1rem;
   }
-  
-  .hide-on-mobile {
-    display: none;
-  }
 
-  /* Form Styles */
-  /* THIS IS THE CORRECTED MOBILE RULE */
   .form-row {
-    grid-template-columns: 1fr; /* Stack columns on mobile */
+    grid-template-columns: 1fr;
   }
 
   .form-actions {
-    justify-content: stretch;
+    flex-direction: column;
+    gap: 10px;
   }
 
   .form-actions .btn {
@@ -232,10 +272,10 @@ input:checked + .slider:before {
   }
 
   .permissions-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   }
 
-  /* Responsive Table Styles */
+  /* Responsive Table */
   .roles-table thead {
     display: none;
   }
@@ -252,13 +292,14 @@ input:checked + .slider:before {
     border: 1px solid var(--medium-gray);
     border-radius: var(--border-radius);
     overflow: hidden;
+    background: var(--white);
   }
-  
+
   .roles-table td {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
+    align-items: flex-start;
+    padding: 0.75rem;
     border-bottom: 1px solid var(--medium-gray);
   }
 
@@ -266,29 +307,27 @@ input:checked + .slider:before {
     content: attr(data-label);
     font-weight: 600;
     color: #111827;
-    text-align: left;
-  }
-  
-  /* Hide the specific columns you don't want on mobile */
-  .roles-table td[data-label="Description"],
-  .roles-table td[data-label="Features"],
-  .roles-table td[data-label="Actions"] {
-    display: none;
+    margin-right: 1rem;
+    flex-shrink: 0;
   }
 
-  /* Adjust the last visible item to remove its bottom border */
-  .roles-table tr td[data-label="Status"] {
+  .roles-table td:last-child {
     border-bottom: none;
+  }
+
+  .roles-table td[data-label="Features"] {
+    display: block;
+    padding-top: 0.5rem;
+  }
+
+  .roles-table td[data-label="Actions"] {
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid var(--medium-gray);
   }
 }
 
-/*
-================================================================
-  NEW CODE: MODAL DIALOG STYLES (Added, not changed)
-================================================================
-*/
-
-/* The semi-transparent background that covers the whole page */
+/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -303,7 +342,6 @@ input:checked + .slider:before {
   padding: 1rem;
 }
 
-/* The white pop-up box in the middle */
 .modal-content {
   background: #ffffff;
   padding: 24px;
@@ -323,23 +361,9 @@ input:checked + .slider:before {
   color: #333;
 }
 
-/* Specific styles for form elements INSIDE the modal to avoid conflicts */
 .modal-content .form-group {
-  position: static; /* Override floating label style for simplicity in modal */
-  margin-bottom: 1rem;
-}
-
-.modal-content .form-group label {
   position: static;
-  display: block;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #555;
-  padding: 0;
-  font-size: 14px;
-  /* Override floating label styles */
-  top: auto;
-  left: auto;
+  margin-bottom: 1rem;
 }
 
 .modal-content .form-group input[type="text"],
@@ -349,39 +373,36 @@ input:checked + .slider:before {
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
-  box-sizing: border-box;
 }
 
-/* Container for the checkboxes */
 .features-container {
   border: 1px solid #e0e0e0;
   border-radius: 6px;
   padding: 12px;
-  max-height: 200px;
+  max-height: 260px;
   overflow-y: auto;
   background-color: #f9f9f9;
 }
 
-.feature-item {
+.permission-item {
   display: flex;
   align-items: center;
   margin-bottom: 8px;
 }
 
-.feature-item input[type="checkbox"] {
+.permission-item input[type="checkbox"] {
   margin-right: 10px;
   width: 16px;
   height: 16px;
 }
 
-.feature-item label {
+.permission-item label {
   margin-bottom: 0;
   font-weight: normal;
   color: #333;
   cursor: pointer;
 }
 
-/* Container for the Save/Cancel buttons */
 .modal-actions {
   margin-top: 24px;
   display: flex;
@@ -389,13 +410,11 @@ input:checked + .slider:before {
   gap: 12px;
 }
 
-/* Use existing button classes but ensure they have min-width */
 .modal-actions .btn {
   padding: 10px 20px;
   font-size: 1rem;
 }
 
-/* Feedback message inside the modal */
 .modal-content .popup-message {
   text-align: center;
   font-weight: bold;
@@ -407,6 +426,23 @@ input:checked + .slider:before {
 }
 
 .modal-content .popup-message.error {
-    color: #b91c1c;
-    background-color: #fee2e2;
+  color: #b91c1c;
+  background-color: #fee2e2;
+}
+
+.fullscreen-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.fullscreen-card {
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }

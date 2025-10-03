@@ -4,10 +4,14 @@ import { Button } from "@progress/kendo-react-buttons";
 import { Switch } from "@progress/kendo-react-inputs";
 import { DropDownList } from "@progress/kendo-react-dropdowns";
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
+import { Notification } from "@progress/kendo-react-notification"; // ✅ added
+import { Fade } from "@progress/kendo-react-animation"; // ✅ added
+
 import Avatar from "../../components/Avatar/CustomAvatar";
 import FormInput from "../../components/Form/FormInput";
 import FormUpload from "../../components/Form/FormUpload";
 import CustomFormFieldSet from "../../components/Form/CustomFormFieldSet";
+
 import {
     nameValidator,
     emailValidator,
@@ -19,11 +23,6 @@ import "./EmployeeNew.css";
 
 const wideScreenValue = 1100;
 
-// const roles = [
-//     { text: "Admin", value: "Admin" },
-//     { text: "Manager", value: "Manager" },
-//     { text: "Employee", value: "Employee" },
-// ];
 const genders = [
     { text: "Male", value: "Male" },
     { text: "Female", value: "Female" },
@@ -38,37 +37,35 @@ const EmployeesNew = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [roles, setRoles] = useState([]);
-    
-    const resetFnRef = useRef(null); 
+    const [showNotification, setShowNotification] = useState(false); // ✅ new state
+
+    const resetFnRef = useRef(null);
 
     const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
     const fetchRoles = async () => {
-  try {
-    const res = await fetch(API_BASE, { cache: "no-cache" });
+        try {
+            const res = await fetch(API_BASE, { cache: "no-cache" });
 
-    if (!res.ok) throw new Error(`Failed to fetch roles (${res.status})`);
-    const data = await res.json();
-    console.log("Fetched roles:", data);
+            if (!res.ok) throw new Error(`Failed to fetch roles (${res.status})`);
+            const data = await res.json();
+            console.log("Fetched roles:", data);
 
-    // ✅ Transform roles into desired format
-    const formattedRoles = (data || []).map((role) => ({
-      text: role.name || role.roleName || role, // adapt key based on your API response
-      value: role.name || role.roleName || role,
-    }));
+            const formattedRoles = (data || []).map((role) => ({
+                text: role.name || role.roleName || role,
+                value: role.name || role.roleName || role,
+            }));
 
-    console.log("Formatted roles:", formattedRoles);
+            console.log("Formatted roles:", formattedRoles);
 
-    setRoles(formattedRoles); // finally set roles in state
-  } catch (err) {
-    console.error("Error fetching roles:", err);
-    setRoles([]);
-    setMainPopupMessage("❌ Error loading roles from the server.");
-  }
-};
+            setRoles(formattedRoles);
+        } catch (err) {
+            console.error("Error fetching roles:", err);
+            setRoles([]);
+        }
+    };
 
-
-  useEffect(() => {
-      fetchRoles();
+    useEffect(() => {
+        fetchRoles();
     }, []);
 
     useEffect(() => {
@@ -109,16 +106,17 @@ const EmployeesNew = () => {
             });
             console.log("Backend response:", response.ok);
             if (response.ok) {
-                console.log("if:", response.ok);
-
                 setIsSuccess(true);
                 setDialogMessage("Employee created successfully!");
                 if (resetFnRef.current) {
                     resetFnRef.current();
                 }
                 setAvatarSrc(null);
+
+                // ✅ show success notification
+                setShowNotification(true);
+                setTimeout(() => setShowNotification(false), 3000);
             } else {
-                console.log("Else:", response.ok);
                 const errorData = await response.json();
                 setIsSuccess(false);
                 let errorMessage = "Failed to create employee.";
@@ -132,11 +130,19 @@ const EmployeesNew = () => {
                 }
 
                 setDialogMessage(errorMessage);
+
+                // ✅ show error notification
+                setShowNotification(true);
+                setTimeout(() => setShowNotification(false), 3000);
             }
         } catch (error) {
             console.error("Error during submission:", error);
             setIsSuccess(false);
             setDialogMessage("An error occurred. Please check the server connection.");
+
+            // ✅ show error notification
+            setShowNotification(true);
+            setTimeout(() => setShowNotification(false), 3000);
         } finally {
             setShowDialog(true);
             setIsSaving(false);
@@ -217,10 +223,9 @@ const EmployeesNew = () => {
                             textField="text"
                             dataItemKey="value"
                             value={genders.find((g) => g.value === fieldProps.value) || null}
-                            onChange={(e) => fieldProps.onChange(e.value?.value || "")} // ✅ only string
+                            onChange={(e) => fieldProps.onChange(e.value?.value || "")}
                             {...fieldProps}
                         />
-
                     )}
                 />
             </CustomFormFieldSet>
@@ -273,7 +278,7 @@ const EmployeesNew = () => {
             <Form
                 onSubmit={handleSubmit}
                 render={(formRenderProps) => {
-                     resetFnRef.current = formRenderProps.onFormReset;
+                    resetFnRef.current = formRenderProps.onFormReset;
 
                     return (
                         <FormElement className="form-container">

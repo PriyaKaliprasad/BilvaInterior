@@ -1,10 +1,14 @@
-/* --- Custom Status Badge Colors --- */
+--- Custom Status Badge Colors ---
 .badge.status-active,
 .badge.status-inactive {
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
   padding: 0.35em 0.65em;
-  border-radius: 50rem; /* pill shape */
+  border-radius: 999px; /* pill shape */
+  display: inline-block;
+  min-width: 72px;
+  text-align: center;
+  line-height: 1;
 }
 
 .status-active {
@@ -17,20 +21,182 @@
   color: #374151;            /* Dark Gray */
 }
 
-/* --- Mobile Responsiveness --- */
+/* --- Grid wrapper to allow horizontal scrolling (mobile-friendly) --- */
 .grid-responsive-wrapper {
   width: 100%;
-  overflow-x: auto;   /* Enables horizontal scroll on small screens */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 1; /* ensure it's above background elements so buttons are clickable */
 }
 
+/* --- Kendo Grid base styling (keeps table semantics intact) --- */
 .k-grid {
-  min-width: 600px;   /* Ensures table doesn’t collapse */
+  border: 1px solid #e6e9ee;
+  border-radius: 8px;
+  overflow: visible;
+  background: #ffffff;
+  font-size: 0.95rem;
 }
 
+/* Ensure the inner table can be wider than the container and scroll */
+.k-grid .k-grid-content table {
+  width: auto;          /* allow natural width */
+  min-width: 900px;     /* prevents collapse on narrow screens (desktop/tablet) */
+  border-collapse: collapse;
+}
+
+/* Header cells */
+.k-grid .k-grid-header th,
+.k-grid .k-grid-header .k-header {
+  background-color: #f9fafb;
+  font-weight: 700;
+  color: #374151;
+  padding: 12px 14px;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid #eef2f6;
+}
+
+/* Body cells */
+.k-grid .k-grid-content td {
+  padding: 10px 14px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f3f4f6;
+  white-space: nowrap;
+  color: #263238;
+}
+
+/* Small visual improvement for the last row divider */
+.k-grid .k-grid-content tr:last-child td {
+  border-bottom: none;
+}
+
+/* Style for the edit action button (Kendo's Button outputs .k-button class) */
+.k-grid .k-grid-content td .k-button,
+.k-grid .k-grid-content td button,
+.k-grid .k-grid-content td .btn-edit {
+  position: relative;
+  z-index: 5;             /* ensure clickable above any sibling backgrounds */
+  display: inline-block;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* If you used custom className add fallback styling */
+.k-grid .k-grid-content td .btn-edit {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+}
+.k-grid .k-grid-content td .btn-edit:hover {
+  background: #1e40af;
+}
+
+/* Make email column slightly narrower by default so table fits better */
+.k-grid .k-grid-content td:nth-child(3),
+.k-grid .k-grid-header th:nth-child(3) {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Improve scroll bar appearance (optional) */
+.grid-responsive-wrapper::-webkit-scrollbar {
+  height: 10px;
+}
+.grid-responsive-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+  border-radius: 999px;
+}
+
+/* --- Responsive rules --- */
+@media (max-width: 992px) {
+  /* allow the grid table to shrink, but still support horizontal scroll */
+  .k-grid .k-grid-content table {
+    min-width: 760px; /* narrower for tablets */
+  }
+
+  .k-grid .k-grid-content td,
+  .k-grid .k-grid-header th {
+    padding: 10px 12px;
+    font-size: 0.92rem;
+  }
+}
+
+/* --- Mobile: keep table layout, hide Email column and reduce widths --- */
 @media (max-width: 576px) {
+  /* reduce min width now that email can be hidden */
+  .k-grid .k-grid-content table {
+    min-width: 640px;
+  }
+
+  /* Hide the Email column (3rd column) on very small screens */
+  .k-grid .k-grid-header th:nth-child(3),
+  .k-grid .k-grid-content td:nth-child(3) {
+    display: none;
+  }
+
+  /* Slight padding reduction for mobile */
+  .k-grid .k-grid-content td,
+  .k-grid .k-grid-header th {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+
+  /* Keep status badge from wrapping and keep actions visible */
   .badge.status-active,
   .badge.status-inactive {
-    font-size: 0.7rem;
+    min-width: 60px;
+    font-size: 0.8rem;
     padding: 0.25em 0.5em;
   }
+
+  /* Make sure the edit button looks tappable and is not overlapped */
+  .k-grid .k-grid-content td .k-button,
+  .k-grid .k-grid-content td button,
+  .k-grid .k-grid-content td .btn-edit {
+    z-index: 6;
+    position: relative;
+    touch-action: manipulation;
+  }
+
+  /* If you want the Action column to show buttons stacked (optional) */
+  .k-grid .k-grid-content td:last-child {
+    white-space: nowrap;
+  }
+}
+
+/* Defensive safety: ensure nothing blocks clicks (if some overlay exists) */
+.grid-responsive-wrapper,
+.k-grid,
+.k-grid .k-grid-content {
+  pointer-events: auto;
+}
+.features-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f9fafb;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #333; /* Ensure text is visible */
+}
+
+.feature-item label {
+  margin: 0;
+  cursor: pointer;
+  color: #111 !important; /* Force visible text */
+  font-size: 14px;
 }
