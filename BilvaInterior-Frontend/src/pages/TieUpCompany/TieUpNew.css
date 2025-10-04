@@ -1,3 +1,25 @@
+/* Square "no image" avatar placeholder */
+.custom-avatar-square {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ccc; /* Placeholder background color */
+  color: #666;      /* Placeholder text color */
+  font-size: 15px;
+  margin: 0 auto;
+  border-radius: 0;  /* Square shape (no rounded corners) */
+  user-select: none;
+}
+
+/* Optional: adjust Avatar image to fit exactly in the square container */
+.custom-avatar-square img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 0;  /* Keep square shape */
+}
 .custom-fieldset legend.k-form-legend {
     font-weight: bold;
     border-bottom: none !important;

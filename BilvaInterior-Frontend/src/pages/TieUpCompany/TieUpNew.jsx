@@ -11,6 +11,7 @@ import CustomFormFieldSet from '../../components/Form/CustomFormFieldSet';
 import { indiaStatesCities } from '../../utils/indiaStatesCities';
 import Avatar from '../../components/Avatar/CustomAvatar';
 
+
 const responsiveBreakpoints = [
   { minWidth: 0, maxWidth: 499, value: 1 },
   { minWidth: 500, value: 2 }
@@ -72,7 +73,7 @@ const TieUpNew = () => {
   const [cities, setCities] = useState(
     indiaStatesCities.find((s) => s.state === 'Karnataka')?.cities || []
   );
-  const [selectedCity, setSelectedCity] = useState("Bengaluru"); // SET default city to Bengaluru
+  const [selectedCity, setSelectedCity] = useState("Bengaluru"); // default city
 
   const errorRef = useRef(null);
   const formRef = useRef(null);
@@ -92,7 +93,27 @@ const TieUpNew = () => {
     }
   }, [showGlobalError, uniqueError]);
 
-  const handleImageUpload = (src) => setAvatarSrc(src);
+  // ✅ cleanup for avatarSrc (object URL)
+  useEffect(() => {
+    return () => {
+      if (avatarSrc) {
+        URL.revokeObjectURL(avatarSrc);
+      }
+    };
+  }, [avatarSrc]);
+
+  const handleImageUpload = (file) => {
+    if (!file) return; // ✅ safeguard
+
+    // ✅ revoke old preview if it exists
+    if (avatarSrc) {
+      URL.revokeObjectURL(avatarSrc);
+    }
+
+    const newUrl = URL.createObjectURL(file);
+    console.log("1. Uploaded image src:", newUrl);
+    setAvatarSrc(newUrl);
+  };
 
   const handleExcelUpload = (files) => {
     if (files?.length > 0) {
@@ -130,10 +151,11 @@ const TieUpNew = () => {
     }
     setShowGlobalError(false);
     setUniqueError('');
-    setIsSubmitting(true); // <-- start submitting
+    setIsSubmitting(true);
 
     try {
-      const checkResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/checkUnique`, {
+      // HARD-CODED URL
+      const checkResponse = await fetch(`https://localhost:7142/api/TieUpCompany/checkUnique/0`, {
         method: 'POST',
         body: JSON.stringify({
           companyName: dataItem.companyName,
@@ -181,10 +203,12 @@ const TieUpNew = () => {
 
       if (dataItem.profilePic?.length > 0) {
         const file = dataItem.profilePic[0].getRawFile?.() || dataItem.profilePic[0];
+        console.log('2. Uploading profile pic:', file);
         formData.append('profilePic', file);
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany`, {
+      // HARD-CODED URL
+      const response = await fetch(`https://localhost:7142/api/TieUpCompany`, {
         method: 'POST',
         body: formData
       });
@@ -202,7 +226,7 @@ const TieUpNew = () => {
       setToast({ visible: true, message: 'Error submitting form: ' + err.message, type: 'error' });
       setTimeout(() => setToast({ visible: false, message: '', type: 'success' }), 2500);
     } finally {
-      setIsSubmitting(false); // <-- end submitting
+      setIsSubmitting(false);
     }
   };
 
@@ -245,27 +269,57 @@ const TieUpNew = () => {
         <FormElement style={{ maxWidth: 900, padding: '0 1rem' }}>
           <CustomFormFieldSet cols={responsiveBreakpoints}>
             <div
-              className="img-container"
-              style={{ cursor: 'pointer' }}
-              onClick={() => document.getElementById('profilePicInput').click()}
-            >
-              <Avatar src={avatarSrc} height={100} style={{ borderRadius: 0 }} />
-            </div>
-            <input
-              type="file"
-              id="profilePicInput"
-              style={{ display: 'none' }}
-              accept=".jpg,.jpeg,.png"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  handleImageUpload(URL.createObjectURL(file));
-                  formRef.current.change('profilePic', [file]);
-                }
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center", // centers children horizontally
+                marginBottom: 20,
+                width: "100%",
               }}
-            />
-          </CustomFormFieldSet>
+            >
+              {/* Avatar Preview */}
+              {avatarSrc ? (
+                <Avatar
+                  src={avatarSrc}
+                  shape="square"
+                  className="custom-avatar-square"
+                />
+              ) : (
+                <div className="custom-avatar-square">
+                  no image
+                </div>
+              )}
 
+              {/* Show label only when no image */}
+              {!avatarSrc && (
+                <p style={{ fontSize: 12, marginTop: 8, textAlign: "center" }}>
+                  Upload Company Logo
+                </p>
+              )}
+
+              {/* Kendo Upload Field */}
+              <Field
+                name="profilePic"
+                component={FormUpload}
+                label=""
+                accept=".jpg,.jpeg,.png"
+                allowedFormatsArray={[".jpg", ".jpeg", ".png"]}
+                validator={imageValidator}
+                onChange={(e, fieldRenderProps) => {
+                  if (e.value && e.value.length > 0) {
+                    const rawFile = e.value[0].getRawFile?.() || e.value[0];
+                    if (avatarSrc) {
+                      URL.revokeObjectURL(avatarSrc);
+                    }
+                    const previewUrl = URL.createObjectURL(rawFile);
+                    setAvatarSrc(previewUrl);
+                    fieldRenderProps.formApi.setValue("profilePic", [rawFile]);
+                    fieldRenderProps.formApi.setError("profilePic", undefined);
+                  }
+                }}
+              />
+            </div>
+          </CustomFormFieldSet>
 
           {/* Contact Info */}
           <CustomFormFieldSet legend="Contact Info" className="custom-fieldset">
@@ -409,7 +463,14 @@ const TieUpNew = () => {
               label="Upload Excel File"
               accept=".xlsx,.xls"
               allowedFormatsArray={['.xlsx', '.xls']}
-              onChange={(e) => handleExcelUpload(e.value)}
+              onChange={(e, fieldRenderProps) => {
+                if (e.value && e.value.length > 0) {
+                  const file = e.value[0].getRawFile?.() || e.value[0];
+                  fieldRenderProps.formApi.setValue('billingTemplate', [file]);
+                  fieldRenderProps.formApi.setError('billingTemplate', undefined); // clear previous error
+                  handleExcelUpload([file]); // your existing preview logic
+                }
+              }}
             />
           </CustomFormFieldSet>
 
@@ -420,6 +481,7 @@ const TieUpNew = () => {
               </Button>
             </CustomFormFieldSet>
           )}
+
           {/* Toast below submit button */}
           {toast.visible && (
             <div style={{
