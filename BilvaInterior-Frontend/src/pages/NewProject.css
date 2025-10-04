@@ -1,0 +1,65 @@
+/* Full-page layout */
+.page-root {
+  min-height: 100vh;
+  width: 100%;
+  background: #fff; /* full white page */
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+/* Title */
+.form-title {
+  margin-bottom: 24px;
+  font-weight: 600;
+  font-size: 24px;
+  color: #1f2937;
+}
+
+/* form full width */
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+/* inputs */
+.k-input-full,
+.k-textarea,
+.k-dropdownlist {
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* project members */
+.members-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.members-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.member-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* buttons row */
+.form-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 16px;
+  margin-top: 20px;
+}
