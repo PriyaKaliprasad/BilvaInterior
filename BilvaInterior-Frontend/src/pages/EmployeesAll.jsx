@@ -1,67 +1,99 @@
-import React, { useState, useEffect } from 'react';
-import { Grid, GridColumn } from '@progress/kendo-react-grid';
-import { Button } from '@progress/kendo-react-buttons';
-import { Dialog } from '@progress/kendo-react-dialogs';
-import { orderBy } from '@progress/kendo-data-query';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './EmployeeAll.css';
+import React, { useState, useEffect } from "react";
+import { Grid, GridColumn } from "@progress/kendo-react-grid";
+import { Button } from "@progress/kendo-react-buttons";
+import { orderBy } from "@progress/kendo-data-query";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./EmployeeAll.css";
 
-// --- Custom Cell Renderers for Status and Actions ---
+/* -------------------------
+   Cell Renderers - explicit
+   ------------------------- */
+const FirstNameCell = (props) => (
+  <td>
+    <div className="cell-text" title={props.dataItem.firstName}>
+      {props.dataItem.firstName}
+    </div>
+  </td>
+);
+
+const LastNameCell = (props) => (
+  <td>
+    <div className="cell-text" title={props.dataItem.lastName}>
+      {props.dataItem.lastName}
+    </div>
+  </td>
+);
+
+const EmailCell = (props) => (
+  <td>
+    <div className="cell-text" title={props.dataItem.email}>
+      {props.dataItem.email}
+    </div>
+  </td>
+);
+
+const MobileCell = (props) => (
+  <td className="text-center">
+    <div className="cell-text" title={props.dataItem.mobile}>
+      {props.dataItem.mobile}
+    </div>
+  </td>
+);
+
+const RoleCell = (props) => (
+  <td>
+    <div className="cell-text" title={props.dataItem.role}>
+      {props.dataItem.role}
+    </div>
+  </td>
+);
+
 const StatusCell = (props) => {
-  console.log(props);
-  const { status } = props.dataItem;
+  const status = props.dataItem.status;
   return (
     <td className="text-center">
-      <span className={`badge ${status === true ? "status-active" : "status-inactive"}`}>
-        {/* {status} */}
+      <span className={`status-badge ${status ? "active" : "inactive"}`}>
         {status ? "Active" : "Inactive"}
       </span>
     </td>
   );
 };
 
-const ActionCell = (props) => {
-  return (
-    <td className="text-center">
-      <Button
-        size="small"
-        themeColor="primary"
-        onClick={() => props.onEdit(props.dataItem)}
-      >
-        Edit
-      </Button>
-    </td>
-  );
-};
+const ActionCell = (props) => (
+  <td className="text-center">
+    <Button
+      size="small"
+      themeColor="primary"
+      onClick={() => props.onEdit(props.dataItem)}
+    >
+      Edit
+    </Button>
+  </td>
+);
 
+/* -------------------------
+   Main Component
+   ------------------------- */
 const EmployeeAll = () => {
-  // --- State for employees (fetched from backend) ---
   const [employees, setEmployees] = useState([]);
 
-  // --- State for Pagination ---
   const [skip, setSkip] = useState(0);
   const [take, setTake] = useState(5);
 
-  // --- State for Sorting ---
-  const [sort, setSort] = useState([{ field: 'firstName', dir: 'asc' }]);
+  const [sort, setSort] = useState([{ field: "firstName", dir: "asc" }]);
 
-  // --- State for Dialog ---
-  const [openDialog, setOpenDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [saveMessage, setSaveMessage] = useState("");
 
   const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Employee`;
 
-  // Load employees from backend
   useEffect(() => {
     fetch(API_BASE)
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! Status: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         return res.json();
       })
-      .then((data) => setEmployees(data))
+      .then((data) => setEmployees(Array.isArray(data) ? data : []))
       .catch((err) => console.error("Error fetching employees:", err));
   }, []);
 
@@ -75,9 +107,8 @@ const EmployeeAll = () => {
   };
 
   const handleEdit = (employee) => {
-    setSelectedEmployee({ ...employee }); // copy object
+    setSelectedEmployee({ ...employee });
     setSaveMessage("");
-    setOpenDialog(true);
   };
 
   const handleInputChange = (e) => {
@@ -89,27 +120,23 @@ const EmployeeAll = () => {
   };
 
   const handleSave = () => {
+    if (!selectedEmployee || !selectedEmployee.id) return;
     fetch(`${API_BASE}/${selectedEmployee.id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(selectedEmployee),
     })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Failed to save employee (Status: ${res.status})`);
-        }
+        if (!res.ok) throw new Error(`Failed (Status: ${res.status})`);
         return res.json();
       })
       .then((data) => {
-        // Update frontend state immediately
         setEmployees((prev) =>
           prev.map((emp) =>
             emp.id === selectedEmployee.id ? selectedEmployee : emp
           )
         );
-        setSaveMessage(data.message || "Employee details saved successfully ✅");
+        setSaveMessage(data?.message || "Employee details saved successfully ✅");
       })
       .catch((err) => {
         console.error("Error updating employee:", err);
@@ -117,114 +144,158 @@ const EmployeeAll = () => {
       });
   };
 
-  return (
-    <div className="container mt-4">
-      <div className="card shadow-sm p-4">
-        <div className="grid-responsive-wrapper">
-          <Grid
-            data={orderBy(employees, sort).slice(skip, skip + take)}
-            pageable={true}
-            sortable={true}
-            skip={skip}
-            take={take}
-            total={employees.length}
-            onPageChange={handlePageChange}
-            sort={sort}
-            onSortChange={handleSortChange}
-            style={{ height: 'auto', border: 'none' }}
-          >
-            <GridColumn field="firstName" title="First Name" />
-            <GridColumn field="lastName" title="Last Name" />
-            <GridColumn field="email" title="Email" width="250px" />
-            <GridColumn field="mobile" title="Mobile" />
-            <GridColumn field="role" title="Role" />
-            <GridColumn field="status" title="Status" cell={StatusCell} className="text-center" />
-            <GridColumn
-              title="Actions"
-              cell={(props) => <ActionCell {...props} onEdit={handleEdit} />}
-              sortable={false}
-              className="text-center"
-            />
-          </Grid>
-        </div>
-      </div>
+  const rowRender = (trElement, props) => {
+    const isEven = props.dataIndex % 2 === 1;
+    const style = { backgroundColor: isEven ? "#f6f6f6" : "#ffffff" };
+    return React.cloneElement(trElement, { style }, trElement.props.children);
+  };
 
-      {/* --- Dialog Box --- */}
-      {openDialog && selectedEmployee && (
-        <Dialog title="Edit Employee" onClose={() => setOpenDialog(false)} width={500}>
+  return (
+    <div className="container-fluid mt-4 employee-all-wrapper">
+      {/* Show Grid if no employee selected */}
+      {!selectedEmployee && (
+        <div className="card shadow-sm p-3">
+          <div className="table-responsive k-grid-wrap">
+            <Grid
+              data={orderBy(employees, sort).slice(skip, skip + take)}
+              pageable={true}
+              sortable={true}
+              skip={skip}
+              take={take}
+              total={employees.length}
+              onPageChange={handlePageChange}
+              sort={sort}
+              onSortChange={handleSortChange}
+              style={{ minWidth: "900px", border: "none" }}
+              rowRender={rowRender}
+            >
+              <GridColumn
+                field="firstName"
+                title="First Name"
+                cell={FirstNameCell}
+                width="150px"
+              />
+              <GridColumn
+                field="lastName"
+                title="Last Name"
+                cell={LastNameCell}
+                width="120px"
+              />
+              <GridColumn
+                field="email"
+                title="Email"
+                cell={EmailCell}
+                width="240px"
+              />
+              <GridColumn
+                field="mobile"
+                title="Mobile"
+                cell={MobileCell}
+                width="140px"
+              />
+              <GridColumn
+                field="role"
+                title="Role"
+                cell={RoleCell}
+                width="260px"
+              />
+              <GridColumn
+                field="status"
+                title="Status"
+                cell={StatusCell}
+                width="120px"
+              />
+              <GridColumn
+                title="Actions"
+                cell={(props) => <ActionCell {...props} onEdit={handleEdit} />}
+                sortable={false}
+                width="110px"
+              />
+            </Grid>
+          </div>
+        </div>
+      )}
+
+      {/* Show Form if editing */}
+      {selectedEmployee && (
+        <div className="card shadow-sm p-4">
+          <h5 className="mb-3">Edit Employee</h5>
+
           <div className="mb-2">
             <label>First Name:</label>
             <input
               type="text"
               name="firstName"
-              value={selectedEmployee.firstName}
+              value={selectedEmployee.firstName || ""}
               onChange={handleInputChange}
               className="form-control"
             />
           </div>
+
           <div className="mb-2">
             <label>Last Name:</label>
             <input
               type="text"
               name="lastName"
-              value={selectedEmployee.lastName}
+              value={selectedEmployee.lastName || ""}
               onChange={handleInputChange}
               className="form-control"
             />
           </div>
-          {/* <div className="mb-2">
-            <label>Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={selectedEmployee.email}
-              onChange={handleInputChange}
-              className="form-control"
-            />
-          </div> */}
+
           <div className="mb-2">
             <label>Mobile:</label>
             <input
-              type="text"
+              type="tel"
               name="mobile"
-              value={selectedEmployee.mobile}
+              value={selectedEmployee.mobile || ""}
               onChange={handleInputChange}
               className="form-control"
             />
           </div>
+
           <div className="mb-2">
             <label>Role:</label>
             <input
               type="text"
               name="role"
-              value={selectedEmployee.role}
+              value={selectedEmployee.role || ""}
               onChange={handleInputChange}
               className="form-control"
             />
           </div>
+
           <div className="mb-2">
             <label>Status:</label>
             <select
               name="status"
-              value={selectedEmployee.status}
+              value={selectedEmployee.status ? "true" : "false"}
               onChange={handleInputChange}
               className="form-select"
             >
-              <option value={true}>Active</option>
-              <option value={false}>Inactive</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
             </select>
           </div>
 
           <div className="d-flex justify-content-end gap-2 mt-3">
-            <Button themeColor="primary" onClick={handleSave}>Save</Button>
-            <Button themeColor="secondary" onClick={() => setOpenDialog(false)}>Cancel</Button>
+            <Button themeColor="primary" onClick={handleSave}>
+              Save
+            </Button>
+            <Button
+              themeColor="secondary"
+              onClick={() => setSelectedEmployee(null)}
+            >
+              Cancel
+            </Button>
           </div>
 
-          {/* Success Message */}
           {saveMessage && (
-            <div className="alert alert-success mt-3 text-center">{saveMessage}</div>
+            <div className="alert alert-success mt-3 text-center">
+              {saveMessage}
+            </div>
           )}
-        </Dialog>
+        </div>
       )}
     </div>
   );
