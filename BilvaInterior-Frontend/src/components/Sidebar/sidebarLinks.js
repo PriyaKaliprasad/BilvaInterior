@@ -1,52 +1,189 @@
-// sidebarData.js
+
+
 import { chartPieIcon, folderIcon, calendarIcon, globeIcon, stickyNoteIcon, 
          dollarIcon, moneyExchangeIcon, usersSolidIcon, clipboardTextIcon, 
          userIcon } from "@progress/kendo-svg-icons";
 
+// Import all page components
+import Dashboard from '../../pages/Dashboard.jsx';
+import ProjectsAll from '../../pages/ProjectsAll.jsx';
+import ProjectsEnquiries from '../../pages/ProjectsEnquiries.jsx';
+import ProjectsTypes from '../../pages/ProjectsTypes.jsx';
+import AddProjectType from '../../pages/AddProjectType.jsx';
+import SiteVisitAll from '../../pages/SiteVisitAll.jsx';
+import SiteVisitNew from '../../pages/SiteVisit/SiteVisitNew.jsx';
+import TieUpAll from '../../pages/TieUpCompany/TieUpAll.jsx';
+import TieUpNew from '../../pages/TieUpCompany/TieUpNew.jsx';
+import TieUpEdit from '../../pages/TieUpCompany/TieUpEdit.jsx';
+import Quotations from '../../pages/Quotations.jsx';
+import ExpenseTracker from '../../pages/ExpenseTracker.jsx';
+import Billing from '../../pages/Billing.jsx';
+import EmployeesAll from '../../pages/EmployeesAll.jsx';
+import EmployeesNew from '../../pages/ManageEmployees/EmployeesNew.jsx';
+import EmployeesRoles from '../../pages/EmployeesRoles.jsx';
+import AddNewRole from '../../pages/AddNewRole.jsx';
+import AuditTrail from '../../pages/AuditTrail.jsx';
+import MyAccount from '../../pages/MyAccount.jsx';
+
+
+// Sidebar groups with navMeta, icons, tab IDs, and page components
 export const sidebarLinks = [
   {
-    title: "Dashboard",
-    route: "/dashboard",
-    icon: chartPieIcon
+    id: "dashboard",
+    label: "Dashboard",
+    icon: chartPieIcon,
+    navMeta: { title: "Dashboard", breadcrumb: ["Dashboard"] },
+    content: Dashboard,
+    isGroup: false
   },
   {
-    title: "Projects",
+    id: "projects",
+    label: "Projects",
     icon: folderIcon,
+    isGroup: true,
     children: [
-      { title: "All Projects", route: "/projects/all" },
-      { title: "All Enquiries", route: "/projects/enquiries" },
-      { title: "Project Types", route: "/projects/types" },
-      { title: "Add New Project Type", route: "/projects/types/new" },
+      {
+        id: "projects-all",
+        label: "All Projects",
+        navMeta: { title: "All Projects", breadcrumb: ["Projects", "All Projects"] },
+        content: ProjectsAll,
+      },
+      {
+        id: "projects-enquiries",
+        label: "Enquiries",
+        navMeta: { title: "Enquiries", breadcrumb: ["Projects", "Enquiries"] },
+        content: ProjectsEnquiries,
+      },
+      {
+        id: "projects-types",
+        label: "Project Types",
+        navMeta: { title: "Project Types", breadcrumb: ["Projects", "Project Types"] },
+        content: ProjectsTypes,
+      },
+      {
+        id: "add-project-type",
+        label: "Add Project Type",
+        navMeta: { title: "Add Project Type", breadcrumb: ["Projects", "Add Project Type"] },
+        content: AddProjectType,
+      }
     ]
   },
   {
-    title: "Site Visit",
+    id: "site-visit",
+    label: "Site Visit",
     icon: calendarIcon,
+    isGroup: true,
     children: [
-      { title: "All Site Visits", route: "/site-visit/all" },
-      { title: "New Site Visit", route: "/site-visit/new" }
+      {
+        id: "site-visit-all",
+        label: "All Site Visits",
+        navMeta: { title: "All Site Visits", breadcrumb: ["Site Visit", "All Site Visits"] },
+        content: SiteVisitAll,
+      },
+      {
+        id: "site-visit-new",
+        label: "New Site Visit",
+        navMeta: { title: "New Site Visit", breadcrumb: ["Site Visit", "New Site Visit"] },
+        content: SiteVisitNew,
+      }
     ]
   },
   {
-    title: "Tie-up company",
+    id: "tie-up",
+    label: "Tie Up Company",
     icon: globeIcon,
+    isGroup: true,
     children: [
-      { title: "All Companies", route: "/tie-up-company/all" },
-      { title: "New Company", route: "/tie-up-company/new" }
+      {
+        id: "tie-up-all",
+        label: "All Companies",
+        navMeta: { title: "All Companies", breadcrumb: ["Tie Up Company", "All Companies"] },
+        content: TieUpAll,
+      },
+      {
+        id: "tie-up-new",
+        label: "New Company",
+        navMeta: { title: "New Company", breadcrumb: ["Tie Up Company", "New Company"] },
+        content: TieUpNew,
+      },
+      {
+        id: "tie-up-edit",
+        label: "Edit Company",
+        navMeta: { title: "Edit Company", breadcrumb: ["Tie Up Company", "Edit Company"] },
+        content: TieUpEdit,
+      }
     ]
   },
-  { title: "Quotations", route: "/quotations", icon: stickyNoteIcon },
-  { title: "Expense Tracker", route: "/expense-tracker", icon: dollarIcon },
-  { title: "Billing", route: "/billing", icon: moneyExchangeIcon },
   {
-    title: "Manage Employees",
+    id: "quotations",
+    label: "Quotations",
+    icon: stickyNoteIcon,
+    navMeta: { title: "Quotations", breadcrumb: ["Quotations"] },
+    content: Quotations,
+    isGroup: false
+  },
+  {
+    id: "expense-tracker",
+    label: "Expense Tracker",
+    icon: dollarIcon,
+    navMeta: { title: "Expense Tracker", breadcrumb: ["Expense Tracker"] },
+    content: ExpenseTracker,
+    isGroup: false
+  },
+  {
+    id: "billing",
+    label: "Billing",
+    icon: moneyExchangeIcon,
+    navMeta: { title: "Billing", breadcrumb: ["Billing"] },
+    content: Billing,
+    isGroup: false
+  },
+  {
+    id: "employees",
+    label: "Manage Employees",
     icon: usersSolidIcon,
+    isGroup: true,
     children: [
-      { title: "All Employees", route: "/manage-employees/all" },
-      { title: "New Employee", route: "/manage-employees/new" },
-      { title: "Manage Roles", route: "/manage-employees/roles" },
-      { title: "Add New Roles", route: "/manage-employees/new-role" }
+      {
+        id: "employees-all",
+        label: "All Employees",
+        navMeta: { title: "All Employees", breadcrumb: ["Manage Employees", "All Employees"] },
+        content: EmployeesAll,
+      },
+      {
+        id: "employees-new",
+        label: "New Employee",
+        navMeta: { title: "New Employee", breadcrumb: ["Manage Employees", "New Employee"] },
+        content: EmployeesNew,
+      },
+      {
+        id: "employees-roles",
+        label: "Employee Roles",
+        navMeta: { title: "Employee Roles", breadcrumb: ["Manage Employees", "Employee Roles"] },
+        content: EmployeesRoles,
+      },
+      {
+        id: "add-new-role",
+        label: "Add New Role",
+        navMeta: { title: "Add New Role", breadcrumb: ["Manage Employees", "Add New Role"] },
+        content: AddNewRole,
+      }
     ]
   },
-  { title: "Audit Trail", route: "/audit-trail", icon: clipboardTextIcon },
+  {
+    id: "audit-trail",
+    label: "Audit Trail",
+    icon: clipboardTextIcon,
+    navMeta: { title: "Audit Trail", breadcrumb: ["Audit Trail"] },
+    content: AuditTrail,
+    isGroup: false
+  },
+  // {
+  //   id: "my-account",
+  //   label: "My Account",
+  //   icon: userIcon,
+  //   navMeta: { title: "My Account", breadcrumb: ["My Account"] },
+  //   content: MyAccount,
+  //   isGroup: false
+  // }
 ];

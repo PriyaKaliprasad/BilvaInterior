@@ -22,7 +22,7 @@ const PublicRoute = () => {
   // If already authenticated, redirect to dashboard
   if (user) {
     console.log(user);
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // If not authenticated, render the public component (login page)
