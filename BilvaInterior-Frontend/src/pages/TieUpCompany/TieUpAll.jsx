@@ -6,15 +6,20 @@ import "./TieUpAll.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-// ------------------ UPDATED ------------------
-// Use the path directly from backend; backend already prefixes with /uploads/profile/
-const getAvatarUrl = (dataItem) => {
-  return dataItem.profilePicPath
-    ? `${import.meta.env.VITE_API_BASE_URL}${dataItem.profilePicPath}` // backend already includes /uploads/profile/
-    : `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(dataItem.id)}`;
-};
-// --------------------------------------------
+// ------------------ Set API Base URL ------------------
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ;
 
+// ------------------ Avatar URL ------------------
+const getAvatarUrl = (dataItem) => {
+  if (dataItem.profilePicPath) {
+    // backend already returns like: /uploads/profile/logo_xxx.png
+    return `${API_BASE_URL}${dataItem.profilePicPath}`;
+  }
+  // fallback avatar
+  return `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(dataItem.id)}`;
+};
+
+// ------------------ List Item ------------------
 const ListViewItem = (props) => {
   const { dataItem } = props;
   const navigate = useNavigate();
@@ -31,7 +36,17 @@ const ListViewItem = (props) => {
       <div className="tieup-list-state tieup-list-cell">{dataItem.state}</div>
       <div className="tieup-list-gstin tieup-list-cell">{dataItem.gstin}</div>
       <div className="tieup-list-template tieup-list-cell">
-        {dataItem.billingTemplatePath ? "Uploaded" : "N/A"}
+        {dataItem.billingTemplatePath ? (
+          <a
+            href={`${API_BASE_URL}/uploads/${dataItem.billingTemplatePath}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View
+          </a>
+        ) : (
+          "N/A"
+        )}
       </div>
       <div className="tieup-list-status tieup-list-cell">
         {dataItem.isActive ? "Active" : "Inactive"}
@@ -49,6 +64,7 @@ const ListViewItem = (props) => {
   );
 };
 
+// ------------------ Header ------------------
 const ListViewHeader = () => (
   <div className="tieup-list-header">
     <div className="tieup-list-header-logo tieup-list-header-cell"></div>
@@ -64,15 +80,31 @@ const ListViewHeader = () => (
   </div>
 );
 
+// ------------------ Error Boundary ------------------
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    return this.state.hasError ? <div>Something went wrong.</div> : this.props.children;
+  }
+}
+
+// ------------------ Main Component ------------------
 const TieUpAll = () => {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany`)
+      .get(`${API_BASE_URL}/api/TieUpCompany`)
       .then((res) => {
-        setCompanies(res.data);
+        const data = Array.isArray(res.data) ? res.data : [];
+        setCompanies(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -89,7 +121,12 @@ const TieUpAll = () => {
     <div className="tieup-list-container">
       <div className="tieup-list-inner">
         <ListViewHeader />
-        <ListView data={companies} item={ListViewItem} />
+        <ErrorBoundary>
+          <ListView
+            data={companies}
+            item={(props) => <ListViewItem key={props.dataItem.id} {...props} />}
+          />
+        </ErrorBoundary>
       </div>
     </div>
   );

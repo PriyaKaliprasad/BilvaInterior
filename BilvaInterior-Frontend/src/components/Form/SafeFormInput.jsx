@@ -6,7 +6,7 @@ import { Button } from "@progress/kendo-react-buttons";
 import { eyeIcon, eyeSlashIcon } from "@progress/kendo-svg-icons";
 import FloatingLabelWrapper from "./FloatingLabelWrapper/FloatingLabelWrapper";
 
-const FormInput = (fieldRenderProps) => {
+const SafeFormInput = (fieldRenderProps) => {
     const {
         validationMessage,
         touched,
@@ -23,7 +23,6 @@ const FormInput = (fieldRenderProps) => {
         onChange,
         ...others
     } = fieldRenderProps;
-
     const showValidationMessage = touched && validationMessage;
     const showHint = !showValidationMessage && hint;
     const hintId = showHint ? `${id}_hint` : '';
@@ -33,17 +32,16 @@ const FormInput = (fieldRenderProps) => {
     const togglePasswordVisibility = () => {
         setTogglePassword(!togglePassword);
     };
+    // Guarded onChange handler to prevent destructuring errors
+    const safeOnChange = (event) => {
+        if (!event || typeof event !== 'object' || !('value' in event)) {
+            onChange && onChange({ value: '' });
+        } else {
+            onChange(event);
+        }
+    };
     return (
         <FieldWrapper colSpan={colSpan}>
-            {/* <Label
-                editorId={id}
-                editorValid={valid}
-                editorDisabled={disabled}
-                optional={optional}
-                className="k-form-label"
-            >
-                {label}
-            </Label> */}
             <div className={'k-form-field-wrap'}>
                 <FloatingLabelWrapper id={id} label={label} value={value}>
                     <TextBox
@@ -51,30 +49,29 @@ const FormInput = (fieldRenderProps) => {
                         type={togglePassword ? 'password' : 'text'}
                         id={id}
                         disabled={disabled}
-                    value={value ?? ""}       // <-- force controlled
-                    onChange={onChange}       // <-- must pass onChange
-                    aria-describedby={`${hintId} ${errorId}`}
-                    autoComplete={autoComplete}
-                    size='large'
-                    suffix={
-                        type === 'password' &&
-                        (() => {
-                            return (
-                                <InputSuffix>
-                                    <Button
-                                        svgIcon={togglePassword ? eyeSlashIcon : eyeIcon}
-                                        fillMode="clear"
-                                        onClick={() => {
-                                            // Toggle password visibility
-                                            togglePasswordVisibility();
-                                        }}
-                                    />
-                                </InputSuffix>
-                            );
-                        })
-                    }
-                    {...others}
-                />
+                        value={value ?? ""}
+                        onChange={safeOnChange}
+                        aria-describedby={`${hintId} ${errorId}`}
+                        autoComplete={autoComplete}
+                        size='large'
+                        suffix={
+                            type === 'password' &&
+                            (() => {
+                                return (
+                                    <InputSuffix>
+                                        <Button
+                                            svgIcon={togglePassword ? eyeSlashIcon : eyeIcon}
+                                            fillMode="clear"
+                                            onClick={() => {
+                                                togglePasswordVisibility();
+                                            }}
+                                        />
+                                    </InputSuffix>
+                                );
+                            })
+                        }
+                        {...others}
+                    />
                 </FloatingLabelWrapper>
                 {showHint && <Hint id={hintId}>{hint}</Hint>}
                 {showValidationMessage && <Error id={errorId}>{validationMessage}</Error>}
@@ -83,4 +80,4 @@ const FormInput = (fieldRenderProps) => {
     );
 };
 
-export default FormInput;
+export default SafeFormInput;
