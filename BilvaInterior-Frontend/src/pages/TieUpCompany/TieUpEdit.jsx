@@ -95,7 +95,7 @@ const TieUpEdit = () => {
   useEffect(() => {
     const loadCompany = async () => {
       try {
-        const res = await fetch(`https://localhost:7142/api/TieUpCompany/${id}`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/${id}`);
         const data = await res.json();
         console.log('API Data Loaded:', data);
 
@@ -104,7 +104,7 @@ const TieUpEdit = () => {
         // Avatar
         if (data.profilePicPath) {
           // If profilePicPath already starts with '/', use as is
-          setAvatarSrc(`https://localhost:7142${data.profilePicPath}`);
+          setAvatarSrc(`${import.meta.env.VITE_API_BASE_URL}${data.profilePicPath}`);
         }
 
         // State & City
@@ -124,7 +124,7 @@ const TieUpEdit = () => {
           }
           billingTemplateArr = [{
             name: filePath.split('/').pop(),
-            url: `https://localhost:7142${filePath}`
+            url: `${import.meta.env.VITE_API_BASE_URL}${filePath}`
           }];
         }
         setExcelFile(billingTemplateArr);
@@ -242,7 +242,7 @@ const TieUpEdit = () => {
       // Uniqueness check
       let isUnique = true;
       try {
-        const checkResponse = await fetch(`https://localhost:7142/api/TieUpCompany/checkUnique/${id}`, {
+        const checkResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/checkUnique/${id}`, {
           method: 'POST',
           body: JSON.stringify({
             companyName: dataItem.companyName,
@@ -296,7 +296,7 @@ const TieUpEdit = () => {
       formData.append('state', selectedState);
       formData.append('city', selectedCity);
 
-      const response = await fetch(`https://localhost:7142/api/TieUpCompany/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/${id}`, {
         method: 'PUT',
         body: formData
       });

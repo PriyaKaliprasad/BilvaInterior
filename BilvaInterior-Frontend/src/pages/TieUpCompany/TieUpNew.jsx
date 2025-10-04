@@ -155,7 +155,7 @@ const TieUpNew = () => {
 
     try {
       // HARD-CODED URL
-      const checkResponse = await fetch(`https://localhost:7142/api/TieUpCompany/checkUnique/0`, {
+      const checkResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/checkUnique/0`, {
         method: 'POST',
         body: JSON.stringify({
           companyName: dataItem.companyName,
@@ -208,7 +208,7 @@ const TieUpNew = () => {
       }
 
       // HARD-CODED URL
-      const response = await fetch(`https://localhost:7142/api/TieUpCompany`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany`, {
         method: 'POST',
         body: formData
       });
