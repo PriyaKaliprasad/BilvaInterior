@@ -4,7 +4,7 @@ import { Grid, GridColumn } from "@progress/kendo-react-grid";
 import { filterBy } from "@progress/kendo-data-query";
 import "./ManageRoles.css";
 
-  const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
+const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
 
 /* ---------- Roles List Page ---------- */
 function RolesList({ roles, features, loading, error }) {
@@ -13,9 +13,8 @@ function RolesList({ roles, features, loading, error }) {
 
   if (loading) return <p>Loading roles...</p>;
 
-  // Generic cell renderer that respects wrapping / word-break
+  // Generic cell renderer
   const WrapCell = (props) => {
-    // value: use field if present otherwise fallback to dataItem
     const value =
       props.field && props.field in props.dataItem
         ? props.dataItem[props.field]
@@ -56,8 +55,6 @@ function RolesList({ roles, features, loading, error }) {
             filterable={true}
             filter={filter}
             onFilterChange={(e) => setFilter(e.filter)}
-            // optional: enable column resizing if desired
-            // resizable={true}
           >
             {/* Role Name */}
             <GridColumn
@@ -70,7 +67,7 @@ function RolesList({ roles, features, loading, error }) {
             <GridColumn
               field="description"
               title="Description"
-              width={300}
+              width={200}
               cell={WrapCell}
             />
             {/* Status */}
@@ -80,7 +77,7 @@ function RolesList({ roles, features, loading, error }) {
               width={120}
               cell={StatusCell}
             />
-            {/* Actions - no filter here */}
+            {/* Actions - no filter */}
             <GridColumn
               title="Actions"
               width={120}
@@ -108,8 +105,6 @@ function EditRole({ features }) {
   const [popupMessage, setPopupMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
-
-  // This useEffect hook runs once when the component is first loaded.
   useEffect(() => {
     fetchRole();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -165,7 +160,6 @@ function EditRole({ features }) {
       setPopupMessage("⚠️ Role name is required");
       return;
     }
-
     if (formData.featureIds.length === 0) {
       setPopupMessage("⚠️ Select at least one feature");
       return;
@@ -286,7 +280,10 @@ function EditRole({ features }) {
           <button className="btn btn-primary" onClick={handleSave}>
             Save
           </button>
-          <button className="btn" onClick={() => navigate("/manage-employees/roles")}>
+          <button
+            className="btn"
+            onClick={() => navigate("/manage-employees/roles")}
+          >
             Cancel
           </button>
         </div>
@@ -351,9 +348,3 @@ export default function ManageRoles() {
     </Routes>
   );
 }
-
-
-
-
-
-

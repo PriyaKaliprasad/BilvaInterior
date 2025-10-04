@@ -33,6 +33,8 @@ import MyAccount from "./pages/MyAccount";
 import LoginPage from "./pages/Login/LoginPage";
 import ResetPasswordPage from "./pages/PasswordReset/ResetPasswordPage";
 import ForgotPasswordPage from "./pages/ForgotPassword/ForgotPasswordPage";
+import NewProject from "./pages/NewProject";
+
 
 // Layout component for protected routes
 const AppLayout = ({ sidebarOpen, setSidebarOpen }) => (
@@ -93,6 +95,8 @@ const App = () => {
                 <Route path="/manage-employees/new-role" element={<AddNewRole />} />
                 <Route path="/audit-trail" element={<AuditTrail />} />
                 <Route path="/my-account" element={<MyAccount />} />
+                <Route path="/projects/new" element={<NewProject />} />
+
               </Route>
             </Route>
           </Routes>

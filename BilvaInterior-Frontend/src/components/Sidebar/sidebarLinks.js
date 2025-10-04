@@ -17,7 +17,8 @@ export const sidebarLinks = [
       { title: "All Enquiries", route: "/projects/enquiries" },
       { title: "Project Types", route: "/projects/types" },
       { title: "Add New Project Type", route: "/projects/types/new" },
-    ]
+      {title: "New Project", route: "/projects/new"}
+]
   },
   {
     title: "Site Visit",
