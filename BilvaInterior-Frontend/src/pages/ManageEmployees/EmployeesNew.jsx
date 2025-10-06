@@ -52,7 +52,7 @@ const EmployeesNew = () => {
 
             const formattedRoles = (data || []).map((role) => ({
                 text: role.name || role.roleName || role,
-                value: role.name || role.roleName || role,
+                value: role.id,
             }));
 
             console.log("Formatted roles:", formattedRoles);
@@ -89,7 +89,7 @@ const EmployeesNew = () => {
             Mobile: dataItem.mobile,
             Address: dataItem.address,
             Gender: dataItem.gender?.value || dataItem.gender,
-            Role: dataItem.role?.value,
+            RoleId: dataItem.role?.value,
             Status: !!dataItem.status,
             ProfilePicPath: avatarSrc,
         };

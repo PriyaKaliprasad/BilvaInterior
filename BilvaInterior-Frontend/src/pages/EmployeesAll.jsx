@@ -43,7 +43,7 @@ const MobileCell = (props) => (
 const RoleCell = (props) => (
   <td>
     <div className="cell-text" title={props.dataItem.role}>
-      {props.dataItem.role}
+      {props.dataItem.role.name}
     </div>
   </td>
 );
@@ -74,18 +74,18 @@ const ActionCell = (props) => (
 /* -------------------------
    Main Component
    ------------------------- */
+
 const EmployeeAll = () => {
   const [employees, setEmployees] = useState([]);
-
+  const [roles, setRoles] = useState([]);
   const [skip, setSkip] = useState(0);
   const [take, setTake] = useState(5);
-
   const [sort, setSort] = useState([{ field: "firstName", dir: "asc" }]);
-
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [saveMessage, setSaveMessage] = useState("");
 
   const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Employee`;
+  const ROLE_API = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
 
   useEffect(() => {
     fetch(API_BASE)
@@ -95,6 +95,14 @@ const EmployeeAll = () => {
       })
       .then((data) => setEmployees(Array.isArray(data) ? data : []))
       .catch((err) => console.error("Error fetching employees:", err));
+    // Fetch roles for dropdown
+    fetch(ROLE_API)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        return res.json();
+      })
+      .then((data) => setRoles(Array.isArray(data) ? data : []))
+      .catch((err) => console.error("Error fetching roles:", err));
   }, []);
 
   const handlePageChange = (event) => {
@@ -113,18 +121,31 @@ const EmployeeAll = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setSelectedEmployee((prev) => ({
-      ...prev,
-      [name]: name === "status" ? value === "true" : value,
-    }));
+    if (name === "RoleId") {
+      setSelectedEmployee((prev) => ({
+        ...prev,
+        RoleId: value,
+        role: roles.find((r) => String(r.id) === String(value)) || prev.role
+      }));
+    } else {
+      setSelectedEmployee((prev) => ({
+        ...prev,
+        [name]: name === "status" ? value === "true" : value,
+      }));
+    }
   };
 
   const handleSave = () => {
     if (!selectedEmployee || !selectedEmployee.id) return;
+    // Prepare data for backend, send RoleId
+    const payload = {
+      ...selectedEmployee,
+      RoleId: selectedEmployee.RoleId || (selectedEmployee.role?.id ?? "")
+    };
     fetch(`${API_BASE}/${selectedEmployee.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(selectedEmployee),
+      body: JSON.stringify(payload),
     })
       .then((res) => {
         if (!res.ok) throw new Error(`Failed (Status: ${res.status})`);
@@ -133,7 +154,7 @@ const EmployeeAll = () => {
       .then((data) => {
         setEmployees((prev) =>
           prev.map((emp) =>
-            emp.id === selectedEmployee.id ? selectedEmployee : emp
+            emp.id === selectedEmployee.id ? { ...emp, ...payload } : emp
           )
         );
         setSaveMessage(data?.message || "Employee details saved successfully ✅");
@@ -256,13 +277,17 @@ const EmployeeAll = () => {
 
           <div className="mb-2">
             <label>Role:</label>
-            <input
-              type="text"
-              name="role"
-              value={selectedEmployee.role || ""}
+            <select
+              name="RoleId"
+              value={selectedEmployee.RoleId || (selectedEmployee.role?.id ?? "")}
               onChange={handleInputChange}
-              className="form-control"
-            />
+              className="form-select"
+            >
+              <option value="">-- Select Role --</option>
+              {roles.map((role) => (
+                <option key={role.id} value={role.id}>{role.name}</option>
+              ))}
+            </select>
           </div>
 
           <div className="mb-2">
