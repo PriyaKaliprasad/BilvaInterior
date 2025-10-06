@@ -4,18 +4,21 @@ import "./ProfileDropdown.css";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-const user = {
-    name: "Vishnu P.",
-    avatar: null, // Replace with user avatar url if available
-    role: "Managing Director"
-};
+// user object will be set from AuthContext
 
 const ProfileDropdown = () => {
     const navigate = useNavigate();
-    const { logout } = useAuth();
+    const { user: authUser, logout } = useAuth();
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
     const buttonRef = useRef(null);
+
+    // Build local user object from authUser
+    const user = {
+        name: authUser ? `${authUser.firstName || ''} ${authUser.lastName || ''}`.trim() : '',
+        avatar: null,
+        role: authUser?.role || ''
+    };
 
     const handleAccountSettings = () => {
         setOpen(false);
