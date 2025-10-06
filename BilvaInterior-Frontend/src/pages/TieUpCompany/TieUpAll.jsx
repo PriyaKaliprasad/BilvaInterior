@@ -3,7 +3,7 @@ import { ListView } from "@progress/kendo-react-listview";
 import CustomAvatar from "../../components/Avatar/CustomAvatar";
 import { Button } from "@progress/kendo-react-buttons";
 import "./TieUpAll.css";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 // ------------------ Set API Base URL ------------------
@@ -21,9 +21,7 @@ const getAvatarUrl = (dataItem) => {
 
 // ------------------ List Item ------------------
 const ListViewItem = (props) => {
-  const { dataItem } = props;
-  const navigate = useNavigate();
-
+  const { dataItem, onEdit } = props;
   return (
     <div className="tieup-list-row">
       <div className="tieup-list-logo tieup-list-cell">
@@ -55,7 +53,7 @@ const ListViewItem = (props) => {
         <Button
           size="small"
           themeColor="primary"
-          onClick={() => navigate(`/tie-up-company/edit/${dataItem.id}`)}
+          onClick={() => onEdit(dataItem)}
         >
           Edit
         </Button>
@@ -95,9 +93,12 @@ class ErrorBoundary extends React.Component {
 }
 
 // ------------------ Main Component ------------------
+import TieUpEdit from "./TieUpEdit";
+
 const TieUpAll = () => {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCompany, setSelectedCompany] = useState(null);
 
   useEffect(() => {
     axios
@@ -114,18 +115,50 @@ const TieUpAll = () => {
       });
   }, []);
 
+  const handleEdit = (company) => {
+    setSelectedCompany(company);
+  };
+
+  const handleCloseEdit = () => {
+    setSelectedCompany(null);
+  };
+
+  // Update company in grid after edit success
+  const handleEditSuccess = (updatedCompany) => {
+    setCompanies((prev) =>
+      prev.map((c) =>
+        c.id === updatedCompany.id ? { ...c, ...updatedCompany } : c
+      )
+    );
+    setSelectedCompany(null);
+  };
+
   if (loading) return <div>Loading companies...</div>;
   if (companies.length === 0) return <div>No companies found.</div>;
 
   return (
     <div className="tieup-list-container">
       <div className="tieup-list-inner">
-        <ListViewHeader />
+        {!selectedCompany && <ListViewHeader />}
         <ErrorBoundary>
-          <ListView
-            data={companies}
-            item={(props) => <ListViewItem key={props.dataItem.id} {...props} />}
-          />
+          {!selectedCompany ? (
+            <ListView
+              data={companies}
+              item={(props) => (
+                <ListViewItem
+                  key={props.dataItem.id}
+                  {...props}
+                  onEdit={handleEdit}
+                />
+              )}
+            />
+          ) : (
+            <TieUpEdit
+              companyId={selectedCompany.id}
+              closeEdit={handleCloseEdit}
+              onEditSuccess={handleEditSuccess}
+            />
+          )}
         </ErrorBoundary>
       </div>
     </div>

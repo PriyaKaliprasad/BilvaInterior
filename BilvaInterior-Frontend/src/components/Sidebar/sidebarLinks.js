@@ -105,12 +105,6 @@ export const sidebarLinks = [
         label: "New Company",
         navMeta: { title: "New Company", breadcrumb: ["Tie Up Company", "New Company"] },
         content: TieUpNew,
-      },
-      {
-        id: "tie-up-edit",
-        label: "Edit Company",
-        navMeta: { title: "Edit Company", breadcrumb: ["Tie Up Company", "Edit Company"] },
-        content: TieUpEdit,
       }
     ]
   },
