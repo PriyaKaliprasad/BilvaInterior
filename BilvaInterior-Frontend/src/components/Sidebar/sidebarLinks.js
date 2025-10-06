@@ -9,6 +9,7 @@ import Dashboard from '../../pages/Dashboard.jsx';
 import ProjectsAll from '../../pages/ProjectsAll.jsx';
 import ProjectsEnquiries from '../../pages/ProjectsEnquiries.jsx';
 import ProjectsTypes from '../../pages/ProjectsTypes.jsx';
+import NewProject from '../../pages/NewProject.jsx';
 import AddProjectType from '../../pages/AddProjectType.jsx';
 import SiteVisitAll from '../../pages/SiteVisitAll.jsx';
 import SiteVisitNew from '../../pages/SiteVisit/SiteVisitNew.jsx';
@@ -47,6 +48,12 @@ export const sidebarLinks = [
         label: "All Projects",
         navMeta: { title: "All Projects", breadcrumb: ["Projects", "All Projects"] },
         content: ProjectsAll,
+      },
+      {
+        id: "projects-new",
+        label: "New Project",
+        navMeta: { title: "New Project", breadcrumb: ["Projects", "New Project"] },
+        content: NewProject,
       },
       {
         id: "projects-enquiries",

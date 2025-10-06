@@ -123,14 +123,20 @@ const TieUpAll = () => {
     setSelectedCompany(null);
   };
 
-  // Update company in grid after edit success
-  const handleEditSuccess = (updatedCompany) => {
-    setCompanies((prev) =>
-      prev.map((c) =>
-        c.id === updatedCompany.id ? { ...c, ...updatedCompany } : c
-      )
-    );
-    setSelectedCompany(null);
+  // Refetch companies from backend after edit success
+  const handleEditSuccess = () => {
+    axios
+      .get(`${API_BASE_URL}/api/TieUpCompany`)
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : [];
+        setCompanies(data);
+        setSelectedCompany(null);
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("Failed to load companies");
+        setSelectedCompany(null);
+      });
   };
 
   if (loading) return <div>Loading companies...</div>;
