@@ -155,7 +155,7 @@ const TieUpNew = () => {
 
     try {
       // HARD-CODED URL
-      const checkResponse = await fetch(`https://localhost:7142/api/TieUpCompany/checkUnique/0`, {
+      const checkResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/checkUnique/0`, {
         method: 'POST',
         body: JSON.stringify({
           companyName: dataItem.companyName,
@@ -208,7 +208,7 @@ const TieUpNew = () => {
       }
 
       // HARD-CODED URL
-      const response = await fetch(`https://localhost:7142/api/TieUpCompany`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany`, {
         method: 'POST',
         body: formData
       });
@@ -268,22 +268,44 @@ const TieUpNew = () => {
       render={(formRenderProps) => (
         <FormElement style={{ maxWidth: 900, padding: '0 1rem' }}>
           <CustomFormFieldSet cols={responsiveBreakpoints}>
+
+            {/* Inline style for fixed avatar preview */}
+            <style>{`
+              .custom-avatar-square {
+                width: 120px;
+                height: 120px;
+                border-radius: 8px;
+                border: 1px solid #e5e7eb;
+                background: #f3f4f6;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                font-size: 13px;
+                color: #888;
+                margin-bottom: 4px;
+              }
+              .custom-avatar-square img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 8px;
+              }
+            `}</style>
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center", // centers children horizontally
+                alignItems: "center",
                 marginBottom: 20,
                 width: "100%",
               }}
             >
               {/* Avatar Preview */}
               {avatarSrc ? (
-                <Avatar
-                  src={avatarSrc}
-                  shape="square"
-                  className="custom-avatar-square"
-                />
+                <div className="custom-avatar-square">
+                  <img src={avatarSrc} alt="Company Logo Preview" />
+                </div>
               ) : (
                 <div className="custom-avatar-square">
                   no image

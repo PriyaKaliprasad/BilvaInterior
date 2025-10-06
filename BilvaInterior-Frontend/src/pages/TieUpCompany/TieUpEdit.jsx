@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { Dialog } from '@progress/kendo-react-dialogs';
 import { Form, Field, FormElement } from '@progress/kendo-react-form';
@@ -63,11 +62,9 @@ const imageValidator = (files) => {
 };
 
 // ------------------- Component -------------------
-const TieUpEdit = () => {
+const TieUpEdit = ({ companyId, closeEdit, onEditSuccess }) => {
   // Avatar preview dialog state
   const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
-  const { id } = useParams();
-  const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
   const [avatarSrc, setAvatarSrc] = useState(null);
@@ -93,43 +90,31 @@ const TieUpEdit = () => {
 
   // Load company data
   useEffect(() => {
+    if (!companyId) return;
     const loadCompany = async () => {
       try {
-        const res = await fetch(`https://localhost:7142/api/TieUpCompany/${id}`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/${companyId}`);
         const data = await res.json();
-        console.log('API Data Loaded:', data);
-
         if (!data) return;
-
-        // Avatar
         if (data.profilePicPath) {
-          // If profilePicPath already starts with '/', use as is
-          setAvatarSrc(`https://localhost:7142${data.profilePicPath}`);
+          setAvatarSrc(`${import.meta.env.VITE_API_BASE_URL}${data.profilePicPath}`);
         }
-
-        // State & City
         setSelectedState(data.state || 'Karnataka');
         const stateObj = indiaStatesCities.find(s => s.state === (data.state || 'Karnataka'));
         setCities(stateObj ? stateObj.cities : []);
         setSelectedCity(data.city || stateObj?.cities?.[0] || '');
-
-        // Excel (Billing Template)
         let billingTemplateArr = null;
         if (data.billingTemplatePath) {
-          // Ensure the path starts with '/uploads/'
           let filePath = data.billingTemplatePath;
           if (!filePath.startsWith('/uploads/')) {
-            // If only filename is present, prepend '/uploads/'
-            filePath = `/uploads/${filePath.replace(/^\/+/, '')}`;
+            filePath = `/uploads/${filePath.replace(/^\/+/,'')}`;
           }
           billingTemplateArr = [{
             name: filePath.split('/').pop(),
-            url: `https://localhost:7142${filePath}`
+            url: `${import.meta.env.VITE_API_BASE_URL}${filePath}`
           }];
         }
         setExcelFile(billingTemplateArr);
-
-        // Save all other fields into initialValues
         setInitialValues({
           companyName: data.companyName || '',
           contactPerson: data.contactPerson || '',
@@ -148,7 +133,7 @@ const TieUpEdit = () => {
       }
     };
     loadCompany();
-  }, [id]);
+  }, [companyId]);
   // ------------------- Handlers -------------------
 
   useEffect(() => {
@@ -242,7 +227,7 @@ const TieUpEdit = () => {
       // Uniqueness check
       let isUnique = true;
       try {
-        const checkResponse = await fetch(`https://localhost:7142/api/TieUpCompany/checkUnique/${id}`, {
+        const checkResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/checkUnique/${companyId}`, {
           method: 'POST',
           body: JSON.stringify({
             companyName: dataItem.companyName,
@@ -281,7 +266,7 @@ const TieUpEdit = () => {
       });
 
       // Add the company ID to the form data for backend validation
-      formData.append('id', id);
+  formData.append('id', companyId);
 
       if (dataItem.billingTemplate?.length > 0) {
         const file = dataItem.billingTemplate[0].getRawFile?.() || dataItem.billingTemplate[0];
@@ -296,16 +281,27 @@ const TieUpEdit = () => {
       formData.append('state', selectedState);
       formData.append('city', selectedCity);
 
-      const response = await fetch(`https://localhost:7142/api/TieUpCompany/${id}`, {
+  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/${companyId}`, {
         method: 'PUT',
         body: formData
       });
 
       if (response.ok) {
         setToast({ visible: true, message: 'Company updated successfully!', type: 'success' });
+        // Get updated company data from response
+        let updatedCompany = null;
+        try {
+          updatedCompany = await response.json();
+        } catch (e) {
+          updatedCompany = null;
+        }
         setTimeout(() => {
           setToast({ visible: false, message: '', type: 'success' });
-          navigate('/tie-up-company/all');
+          if (onEditSuccess && updatedCompany) {
+            onEditSuccess(updatedCompany);
+          } else if (closeEdit) {
+            closeEdit();
+          }
         }, 2000);
       } else {
         // Try to parse error as JSON, fallback to text
@@ -536,7 +532,7 @@ const TieUpEdit = () => {
               >
                 {isSubmitting ? <div style={{ color: '#fff' }}>Saving...</div> : 'Save'}
               </Button>
-              <Button onClick={() => navigate('/tie-up-company/all')} style={{ marginLeft: 12 }}>
+              <Button onClick={closeEdit} style={{ marginLeft: 12 }}>
                 Cancel
               </Button>
             </div>

@@ -1,3 +1,50 @@
+/* Custom sidebar link button styles */
+.sidebar-link-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 400;
+  border-radius: 10px;
+  padding: 10px 18px;
+  text-align: left;
+  transition: background 0.2s, color 0.2s;
+}
+.sidebar-link-btn:hover {
+  background: #6673ad;
+  color: #fff;
+  cursor: pointer;
+}
+.sidebar-link-btn.selected {
+  background: #7c89c9;
+  font-weight: 500;
+}
+
+/* Sub-link styles (indented children) */
+.sidebar-sub-link {
+  padding-left: 35px !important;
+  font-size: 14px;
+}
+
+/* Accordion icon styles */
+.sidebar-accordion-icon {
+  transition: transform 0.3s ease;
+  font-size: 12px;
+}
+.sidebar-accordion-icon.open {
+  transform: rotate(180deg);
+}
+
+/* Accordion content styles */
+.sidebar-accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.sidebar-accordion-content.open {
+  max-height: 500px; /* Adjust based on your needs */
+}
 /* sidebar component */
 .sidebar {
   position: fixed;
@@ -13,9 +60,10 @@
   /* pale deep blue */
   overflow-y: auto;
   z-index: 1000;
-  padding-right: 10px;
+  padding: 0 10px;
   scrollbar-width: thin;
   scrollbar-color: #5e6da8 #405189;
+  transition: transform 0.3s ease-in-out;
 }
 
 /* Custom scrollbar for sidebar */
@@ -161,6 +209,7 @@
     min-height: 100vh;
     transform: translateX(-100%);
     box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease-in-out;
   }
   .sidebar.open {
     transform: translateX(0);
