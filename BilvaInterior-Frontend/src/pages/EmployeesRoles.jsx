@@ -53,8 +53,8 @@ function RolesList({ roles, features, loading, error, onEdit }) {
           <Grid
             style={{ minWidth: 800, height: 500 }}
             data={filterBy(roles, filter)}
-            // filterable={true}
-            // filter={filter}
+            filterable={true}
+            filter={filter}
             onFilterChange={(e) => setFilter(e.filter)}
           >
             {/* Role Name */}

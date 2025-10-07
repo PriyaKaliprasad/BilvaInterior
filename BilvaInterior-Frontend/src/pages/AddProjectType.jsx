@@ -144,7 +144,7 @@ const AddProjectType = () => {
                                 style={{ marginLeft: 12 }}
                                 disabled={isLoading}
                             >
-                                Reset
+                                Cancel
                             </Button>
                         </div>
                     </FormElement>
