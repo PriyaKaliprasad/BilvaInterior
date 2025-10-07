@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import "@progress/kendo-theme-default/dist/all.css";
 import { Checkbox } from "@progress/kendo-react-inputs";
 import { Button } from "@progress/kendo-react-buttons";
-import FormInput from "../components/Form/FormInput";
+import FormInput from "../../components/Form/FormInput";
 import { DropDownList } from "@progress/kendo-react-dropdowns";
 import { Form, Field, FormElement, FieldWrapper } from "@progress/kendo-react-form";
 import "./NewProject.css";
-import FloatingLabelWrapper from "../components/Form/FloatingLabelWrapper/FloatingLabelWrapper";
+import FloatingLabelWrapper from "../../components/Form/FloatingLabelWrapper/FloatingLabelWrapper";
 
 const MEMBERS_API = `${import.meta.env.VITE_API_BASE_URL}/api/Projects/members`;
 

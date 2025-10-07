@@ -1,15 +1,14 @@
-
-
 import { chartPieIcon, folderIcon, calendarIcon, globeIcon, stickyNoteIcon, 
          dollarIcon, moneyExchangeIcon, usersSolidIcon, clipboardTextIcon, 
          userIcon } from "@progress/kendo-svg-icons";
 
-// Import all page components
+// ✅ CHANGED IMPORT PATH for ProjectsAll
 import Dashboard from '../../pages/Dashboard.jsx';
-import ProjectsAll from '../../pages/ProjectsAll.jsx';
-import ProjectsEnquiries from '../../pages/ProjectsEnquiries.jsx';
-import ProjectsTypes from '../../pages/ProjectsTypes.jsx';
-import NewProject from '../../pages/NewProject.jsx';
+import ProjectsAll from '../../pages/project/ProjectsAll.jsx'; 
+import ProjectsEnquiries from '../../pages/project/ProjectsEnquiries.jsx';
+import ProjectsTypes from '../../pages/project/ProjectsTypes.jsx';
+import NewProject from '../../pages/project/NewProject.jsx';
+import AddProjectType from '../../pages/AddProjectType.jsx';
 import SiteVisitAll from '../../pages/SiteVisitAll.jsx';
 import SiteVisitNew from '../../pages/SiteVisit/SiteVisitNew.jsx';
 import TieUpAll from '../../pages/TieUpCompany/TieUpAll.jsx';
@@ -24,7 +23,6 @@ import EmployeesRoles from '../../pages/EmployeesRoles.jsx';
 import AddNewRole from '../../pages/AddNewRole.jsx';
 import AuditTrail from '../../pages/AuditTrail.jsx';
 import MyAccount from '../../pages/MyAccount.jsx';
-
 
 // Sidebar groups with navMeta, icons, tab IDs, and page components
 export const sidebarLinks = [
