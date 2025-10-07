@@ -146,12 +146,12 @@ export const sidebarLinks = [
         navMeta: { title: "All Employees", breadcrumb: ["Manage Employees", "All Employees"] },
         content: EmployeesAll,
       },
-      {
-        id: "employees-new",
-        label: "New Employee",
-        navMeta: { title: "New Employee", breadcrumb: ["Manage Employees", "New Employee"] },
-        content: EmployeesNew,
-      },
+      // {
+      //   id: "employees-new",
+      //   label: "New Employee",
+      //   navMeta: { title: "New Employee", breadcrumb: ["Manage Employees", "New Employee"] },
+      //   content: EmployeesNew,
+      // },
       {
         id: "employees-roles",
         label: "Employee Roles",

@@ -153,145 +153,151 @@ const EmployeesNew = () => {
         setShowDialog(!showDialog);
     };
 
+    // Bootstrap-based layout for form fields
     const leftColumn = (
         <div className="left-column">
-            <CustomFormFieldSet cols={responsiveBreakpoints}>
-                <Field
-                    name="firstName"
-                    component={FormInput}
-                    label="First Name"
-                    validator={nameValidator}
-                />
-                <Field
-                    name="lastName"
-                    component={FormInput}
-                    label="Last Name"
-                    validator={nameValidator}
-                />
-            </CustomFormFieldSet>
-
-            <CustomFormFieldSet cols={responsiveBreakpoints}>
-                <Field
-                    name="email"
-                    component={FormInput}
-                    label="Email"
-                    validator={emailValidator}
-                />
-                <Field
-                    name="mobile"
-                    component={FormInput}
-                    label="Mobile"
-                    validator={phoneValidator}
-                />
-            </CustomFormFieldSet>
-
-            <CustomFormFieldSet cols={responsiveBreakpoints}>
-                <Field
-                    name="address"
-                    component={FormInput}
-                    label="Address"
-                    validator={nameValidator}
-                    colSpan={responsiveBreakpoints}
-                />
-            </CustomFormFieldSet>
-
-            <CustomFormFieldSet cols={responsiveBreakpoints}>
-                <Field
-                    name="role"
-                    label="Role"
-                    validator={(value) => (value ? "" : "Role is required.")}
-                    component={(fieldProps) => (
-                        <DropDownList
-                            data={roles}
-                            textField="text"
-                            dataItemKey="value"
-                            value={roles.find((r) => r.value === fieldProps.value) || null}
-                            onChange={(e) =>
-                                fieldProps.onChange({ value: e.value ? e.value.value : null })
-                            }
-                            {...fieldProps}
-                        />
-                    )}
-                />
-                <Field
-                    name="gender"
-                    label="Gender"
-                    validator={(value) => (value ? "" : "Gender is required.")}
-                    component={(fieldProps) => (
-                        <DropDownList
-                            data={genders}
-                            textField="text"
-                            dataItemKey="value"
-                            value={genders.find((g) => g.value === fieldProps.value) || null}
-                            onChange={(e) => fieldProps.onChange(e.value?.value || "")}
-                            {...fieldProps}
-                        />
-                    )}
-                />
-            </CustomFormFieldSet>
-
-            <CustomFormFieldSet
-                layout={{
-                    cols: [{ minWidth: 0, value: 1 }],
-                    gap: 24,
-                }}
-            >
-                <Field
-                    name="status"
-                    label="Status"
-                    component={(fieldProps) => (
-                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                            <label>Status:</label>
-                            <Switch
-                                checked={!!fieldProps.value}
-                                onChange={(e) => fieldProps.onChange({ value: e.value })}
+            <div className="row">
+                <div className="col-12 col-md-6">
+                    <Field
+                        name="firstName"
+                        component={FormInput}
+                        label="First Name"
+                        validator={nameValidator}
+                    />
+                </div>
+                <div className="col-12 col-md-6">
+                    <Field
+                        name="lastName"
+                        component={FormInput}
+                        label="Last Name"
+                        validator={nameValidator}
+                    />
+                </div>
+            </div>
+            <div className="row">
+                <div className="col-12 col-md-6">
+                    <Field
+                        name="email"
+                        component={FormInput}
+                        label="Email"
+                        validator={emailValidator}
+                    />
+                </div>
+                <div className="col-12 col-md-6">
+                    <Field
+                        name="mobile"
+                        component={FormInput}
+                        label="Mobile"
+                        validator={phoneValidator}
+                    />
+                </div>
+            </div>
+            <div className="row">
+                <div className="col-12">
+                    <Field
+                        name="address"
+                        component={FormInput}
+                        label="Address"
+                        validator={nameValidator}
+                    />
+                </div>
+            </div>
+            <div className="row">
+                <div className="col-12 col-md-6">
+                    <Field
+                        name="role"
+                        label="Role"
+                        validator={(value) => (value ? "" : "Role is required.")}
+                        component={(fieldProps) => (
+                            <DropDownList
+                                data={roles}
+                                textField="text"
+                                dataItemKey="value"
+                                value={roles.find((r) => r.value === fieldProps.value) || null}
+                                onChange={(e) =>
+                                    fieldProps.onChange({ value: e.value ? e.value.value : null })
+                                }
+                                {...fieldProps}
                             />
-                            <span>{fieldProps.value ? "Active" : "Inactive"}</span>
-                        </div>
-                    )}
-                />
-            </CustomFormFieldSet>
+                        )}
+                    />
+                </div>
+                <div className="col-12 col-md-6">
+                    <Field
+                        name="gender"
+                        label="Gender"
+                        validator={(value) => (value ? "" : "Gender is required.")}
+                        component={(fieldProps) => (
+                            <DropDownList
+                                data={genders}
+                                textField="text"
+                                dataItemKey="value"
+                                value={genders.find((g) => g.value === fieldProps.value) || null}
+                                onChange={(e) => fieldProps.onChange(e.value?.value || "")}
+                                {...fieldProps}
+                            />
+                        )}
+                    />
+                </div>
+            </div>
+            <div className="row mt-3 mb-2">
+                <div className="col-12">
+                    <Field
+                        name="status"
+                        label="Status"
+                        component={(fieldProps) => (
+                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                                <label>Status:</label>
+                                <Switch
+                                    checked={!!fieldProps.value}
+                                    onChange={(e) => fieldProps.onChange({ value: e.value })}
+                                />
+                                <span>{fieldProps.value ? "Active" : "Inactive"}</span>
+                            </div>
+                        )}
+                    />
+                </div>
+            </div>
         </div>
     );
 
     const rightColumn = (
         <div className="right-column">
-            <CustomFormFieldSet cols={responsiveBreakpoints}>
-                <div className="img-container">
-                    <Avatar src={avatarSrc} height={200} />
+            <div className="row">
+                <div className="col-12">
+                    <div className="img-container">
+                        <Avatar src={avatarSrc} height={200} />
+                    </div>
                 </div>
-                <Field
-                    name="profilePic"
-                    component={FormUpload}
-                    label="Profile Picture"
-                    accept=".jpg,.jpeg,.png"
-                    allowedFormatsArray={[".jpg", ".jpeg", ".png"]}
-                    validator={imageValidator}
-                    onImageUpload={handleImageUpload}
-                />
-            </CustomFormFieldSet>
+                <div className="col-12">
+                    <Field
+                        name="profilePic"
+                        component={FormUpload}
+                        label="Profile Picture"
+                        accept=".jpg,.jpeg,.png"
+                        allowedFormatsArray={[".jpg", ".jpeg", ".png"]}
+                        validator={imageValidator}
+                        onImageUpload={handleImageUpload}
+                    />
+                </div>
+            </div>
         </div>
     );
 
     return (
         <>
             <Form
+                initialValues={{ status: true }}
                 onSubmit={handleSubmit}
                 render={(formRenderProps) => {
                     resetFnRef.current = formRenderProps.onFormReset;
 
                     return (
                         <FormElement className="form-container">
-                            <div className="column-container">
-                                {isWide ? (
-                                    <>
-                                        {leftColumn} {rightColumn}
-                                    </>
-                                ) : (
-                                    <>
-                                        {rightColumn} {leftColumn}
-                                    </>
-                                )}
+                            <div className="row column-container flex-lg-nowrap">
+                                {/* On wide screens, left and right columns side by side; on small, stack */}
+                                <div className="col-12 col-lg-8 order-2 order-lg-1">{leftColumn}</div>
+                                <div className="col-12 col-lg-4 order-1 order-lg-2 mb-3 mb-lg-0">{rightColumn}</div>
                             </div>
                             {/* Toast-like success/error message (moved to bottom above buttons) */}
                             {dialogMessage && (

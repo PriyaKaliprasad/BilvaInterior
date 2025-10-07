@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import EmployeesNew from "./ManageEmployees/EmployeesNew";
 import { Grid, GridColumn } from "@progress/kendo-react-grid";
 import { Button } from "@progress/kendo-react-buttons";
 import { orderBy } from "@progress/kendo-data-query";
@@ -75,6 +76,7 @@ const ActionCell = (props) => (
    Main Component
    ------------------------- */
 
+
 const EmployeeAll = () => {
   const [employees, setEmployees] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -83,11 +85,16 @@ const EmployeeAll = () => {
   const [sort, setSort] = useState([{ field: "firstName", dir: "asc" }]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [saveMessage, setSaveMessage] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth <= 600 : false
+  );
 
   const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Employee`;
   const ROLE_API = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
 
-  useEffect(() => {
+  // Fetch employees and roles
+  const fetchEmployees = () => {
     fetch(API_BASE)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -95,7 +102,6 @@ const EmployeeAll = () => {
       })
       .then((data) => setEmployees(Array.isArray(data) ? data : []))
       .catch((err) => console.error("Error fetching employees:", err));
-    // Fetch roles for dropdown
     fetch(ROLE_API)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -103,6 +109,16 @@ const EmployeeAll = () => {
       })
       .then((data) => setRoles(Array.isArray(data) ? data : []))
       .catch((err) => console.error("Error fetching roles:", err));
+  };
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 600);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
   const handlePageChange = (event) => {
@@ -171,74 +187,58 @@ const EmployeeAll = () => {
     return React.cloneElement(trElement, { style }, trElement.props.children);
   };
 
-  return (
-    <div className="container-fluid mt-4 employee-all-wrapper">
-      {/* Show Grid if no employee selected */}
-      {!selectedEmployee && (
-        <div className="card shadow-sm p-3">
-          <div className="table-responsive k-grid-wrap">
-            <Grid
-              data={orderBy(employees, sort).slice(skip, skip + take)}
-              pageable={true}
-              sortable={true}
-              skip={skip}
-              take={take}
-              total={employees.length}
-              onPageChange={handlePageChange}
-              sort={sort}
-              onSortChange={handleSortChange}
-              style={{ minWidth: "900px", border: "none" }}
-              rowRender={rowRender}
-            >
-              <GridColumn
-                field="firstName"
-                title="First Name"
-                cell={FirstNameCell}
-                width="150px"
-              />
-              <GridColumn
-                field="lastName"
-                title="Last Name"
-                cell={LastNameCell}
-                width="120px"
-              />
-              <GridColumn
-                field="email"
-                title="Email"
-                cell={EmailCell}
-                width="240px"
-              />
-              <GridColumn
-                field="mobile"
-                title="Mobile"
-                cell={MobileCell}
-                width="140px"
-              />
-              <GridColumn
-                field="role"
-                title="Role"
-                cell={RoleCell}
-                width="260px"
-              />
-              <GridColumn
-                field="status"
-                title="Status"
-                cell={StatusCell}
-                width="120px"
-              />
-              <GridColumn
-                title="Actions"
-                cell={(props) => <ActionCell {...props} onEdit={handleEdit} />}
-                sortable={false}
-                width="110px"
-              />
-            </Grid>
-          </div>
-        </div>
-      )}
+  // Responsive action bar style
+  const actionBarStyle = {
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
+    background: '#fff',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0.5rem 0.5rem 0.5rem 0.5rem',
+    borderBottom: '1px solid #eee',
+    minHeight: 48,
+    marginBottom: 10,
+  };
+  const actionBarBtnGroup = {
+    display: 'flex',
+    gap: '0.5rem',
+  };
 
-      {/* Show Form if editing */}
-      {selectedEmployee && (
+  // --- Main Render ---
+  if (showAdd) {
+    return (
+      <>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+          <Button
+            icon="arrow-left"
+            size="small"
+            onClick={() => setShowAdd(false)}
+            className="action-btn back-btn"
+            style={{ marginRight: 8 }}
+          >
+            <span className="tieup-action-btn-text">Back</span>
+          </Button>
+        </div>
+        <EmployeesNew />
+      </>
+    );
+  }
+  if (selectedEmployee) {
+    return (
+      <>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+          <Button
+            icon="arrow-left"
+            size="small"
+            onClick={() => setSelectedEmployee(null)}
+            className="action-btn back-btn"
+            style={{ marginRight: 8 }}
+          >
+            <span className="tieup-action-btn-text">Back</span>
+          </Button>
+        </div>
         <div className="card shadow-sm p-4">
           <h5 className="mb-3">Edit Employee</h5>
 
@@ -321,7 +321,98 @@ const EmployeeAll = () => {
             </div>
           )}
         </div>
-      )}
+      </>
+    );
+  }
+
+  return (
+    <div className="container-fluid employee-all-wrapper">
+      {/* Action Bar: Always visible, sticky */}
+      <div style={actionBarStyle} className="employee-action-bar">
+        <div style={actionBarBtnGroup}>
+          <Button
+            icon="refresh"
+            size="small"
+            onClick={fetchEmployees}
+            className="action-btn refresh-btn"
+          >
+            <span className="tieup-action-btn-text">Refresh</span>
+          </Button>
+        </div>
+        <div style={actionBarBtnGroup}>
+          <Button
+            icon="plus"
+            size="small"
+            onClick={() => setShowAdd(true)}
+            themeColor="primary"
+            className="action-btn add-btn"
+          >
+            <span className="tieup-action-btn-text">Add</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Show Grid if no employee selected */}
+      <div className="card shadow-sm p-3">
+        <div className="table-responsive k-grid-wrap empl-scrollbar">
+          <Grid
+            data={orderBy(employees, sort).slice(skip, skip + take)}
+            pageable={true}
+            sortable={true}
+            skip={skip}
+            take={take}
+            total={employees.length}
+            onPageChange={handlePageChange}
+            sort={sort}
+            onSortChange={handleSortChange}
+            style={{ minWidth: "900px", border: "none" }}
+            rowRender={rowRender}
+          >
+            <GridColumn
+              field="firstName"
+              title="First Name"
+              cell={FirstNameCell}
+              width="150px"
+            />
+            <GridColumn
+              field="lastName"
+              title="Last Name"
+              cell={LastNameCell}
+              width="120px"
+            />
+            <GridColumn
+              field="email"
+              title="Email"
+              cell={EmailCell}
+              width="240px"
+            />
+            <GridColumn
+              field="mobile"
+              title="Mobile"
+              cell={MobileCell}
+              width="140px"
+            />
+            <GridColumn
+              field="role"
+              title="Role"
+              cell={RoleCell}
+              width="260px"
+            />
+            <GridColumn
+              field="status"
+              title="Status"
+              cell={StatusCell}
+              width="120px"
+            />
+            <GridColumn
+              title="Actions"
+              cell={(props) => <ActionCell {...props} onEdit={handleEdit} />}
+              sortable={false}
+              width="110px"
+            />
+          </Grid>
+        </div>
+      </div>
     </div>
   );
 };
