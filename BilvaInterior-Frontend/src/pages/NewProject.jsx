@@ -4,8 +4,9 @@ import { Checkbox } from "@progress/kendo-react-inputs";
 import { Button } from "@progress/kendo-react-buttons";
 import FormInput from "../components/Form/FormInput";
 import { DropDownList } from "@progress/kendo-react-dropdowns";
-import { Form, Field, FormElement } from "@progress/kendo-react-form";
+import { Form, Field, FormElement, FieldWrapper } from "@progress/kendo-react-form";
 import "./NewProject.css";
+import FloatingLabelWrapper from "../components/Form/FloatingLabelWrapper/FloatingLabelWrapper";
 
 const MEMBERS_API = `${import.meta.env.VITE_API_BASE_URL}/api/Projects/members`;
 
@@ -198,51 +199,7 @@ const NewProject = () => {
                 </div>
               </fieldset>
 
-              <fieldset className="k-form-fieldset">
-                <div className="form-row">
-                  <div style={{ flex: 1, marginRight: 16, position: 'relative' }}>
-                    <style>{`
-                      .floating-label-static {
-                        position: absolute;
-                        top: -8px;
-                        left: 12px;
-                        background: white;
-                        padding: 0 4px;
-                        font-size: 12px;
-                        color: #666;
-                        z-index: 1;
-                        pointer-events: none;
-                        transition: none;
-                      }
-                    `}</style>
-                    <div className="floating-label-static">Tie-up Company</div>
-                    <Field
-                      name="tieUpCompanyId"
-                      validator={requiredValidator}
-                      required={true}
-                      component={props => (
-                        <DropDownList
-                          {...props}
-                          data={tieUpCompanies}
-                          textField="companyName"
-                          value={tieUpCompanies.find(c => c.id === props.value) || null}
-                          onChange={e => props.onChange({ value: e.value ? e.value.id : null })}
-                          filterable={true}
-                          style={{ width: "100%" }}
-                          size={'large'}
-                        />
-                      )}
-                    />
-                  </div>
-                  <Field
-                    name="address"
-                    component={FormInput}
-                    label="Address"
-                    validator={requiredValidator}
-                    required={true}
-                  />
-                </div>
-              </fieldset>
+
 
               <fieldset className="k-form-fieldset">
                 <div className="form-row">
@@ -264,6 +221,44 @@ const NewProject = () => {
                     required={true}
                     style={{ width: "100%" }}
                   />
+                </div>
+              </fieldset>
+
+              <fieldset className="k-form-fieldset">
+                <div className="form-row">
+                  <Field
+                    name="address"
+                    component={FormInput}
+                    label="Address"
+                    validator={requiredValidator}
+                    required={true}
+                  />
+                  <div style={{ flex: 1, marginRight: 16, position: 'relative' }}>
+                    <FieldWrapper>
+                      <div className="k-form-field-wrap">
+                        <FloatingLabelWrapper label={'Tie-up Company'} >
+                        <Field
+                          name="tieUpCompanyId"
+                          validator={requiredValidator}
+                          required={true}
+                          component={props => (
+                            <DropDownList
+                              {...props}
+                              data={tieUpCompanies}
+                              textField="companyName"
+                              value={tieUpCompanies.find(c => c.id === props.value) || null}
+                              onChange={e => props.onChange({ value: e.value ? e.value.id : null })}
+                              filterable={true}
+                              style={{ width: "100%" }}
+                              size={'large'}
+                            />
+                          )}
+                        />
+                        </FloatingLabelWrapper>
+                      </div>
+                    </FieldWrapper>
+                  </div>
+
                 </div>
               </fieldset>
 
