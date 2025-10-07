@@ -13,7 +13,7 @@ const ProjectsAll = () => {
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-  // Fetch projects, companies, and members
+  // Fetch projects, companies, members
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -61,11 +61,23 @@ const ProjectsAll = () => {
     if (projects.length === 0) return;
 
     const newTiles = projects.map((project, idx) => {
-      // Lookup company by numeric ID
-      const company = companies.find((c) => c.id === project.tieUpCompanyId);
-      const companyName = company ? company.companyName : "N/A";
+      let companyName = "N/A";
 
-      // Map project members
+      // 1️⃣ If tieUpCompanyId is a number or string, match with companies list
+      if (project.tieUpCompanyId !== null && project.tieUpCompanyId !== undefined) {
+        if (typeof project.tieUpCompanyId === "object" && project.tieUpCompanyId.companyName) {
+          // API returned full object
+          companyName = project.tieUpCompanyId.companyName;
+        } else {
+          // ID is number or string
+          const company = companies.find(
+            (c) => String(c.id) === String(project.tieUpCompanyId)
+          );
+          companyName = company ? company.companyName : "N/A";
+        }
+      }
+
+      // Project members
       const projectMemberNames = members
         .filter((m) => project.memberIds?.includes(m.id))
         .map((m) => `${m.firstName} ${m.lastName}`)
@@ -149,7 +161,7 @@ const ProjectsAll = () => {
           gap={{ rows: 20, columns: 20 }}
           positions={positions}
           items={tiles}
-          onReposition={(e) => setPositions(e.value)} // allow moving tiles
+          onReposition={(e) => setPositions(e.value)}
         />
       )}
 

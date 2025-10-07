@@ -509,7 +509,7 @@ const TieUpEdit = ({ companyId, closeEdit, onEditSuccess }) => {
               </div>
             )}
 
-            <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+            <div style={{ textAlign: 'left', marginTop: '1rem' }}>
               <Button themeColor="primary" type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Updating...' : 'Update'}
               </Button>
