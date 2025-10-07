@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './projectTypes.css';
+import '../project/projectTypes.css';
 
 // KendoReact imports
 import { Button } from '@progress/kendo-react-buttons';
