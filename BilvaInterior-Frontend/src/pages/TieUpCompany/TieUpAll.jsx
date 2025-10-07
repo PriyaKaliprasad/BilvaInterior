@@ -66,7 +66,7 @@ const ListViewItem = (props) => {
         )}
       </div>
       <div className="tieup-list-status tieup-list-cell">
-        {dataItem.isActive ? "Active" : "Inactive"}
+        {dataItem.isActive === false ? "Inactive" : "Active"}
       </div>
       <div className="tieup-list-actions tieup-list-cell">
         <Button
@@ -133,7 +133,7 @@ const TieUpAll = () => {
       })
       .catch((err) => {
         console.error(err);
-        alert("Failed to load companies");
+        // alert("Failed to load companies");
         setLoading(false);
       });
   };

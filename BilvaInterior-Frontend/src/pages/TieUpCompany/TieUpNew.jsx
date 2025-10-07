@@ -62,6 +62,7 @@ const imageValidator = (files) => {
 };
 
 // ------------------- Component -------------------
+
 const TieUpNew = ({ onCancel }) => {
   const [avatarSrc, setAvatarSrc] = useState(null);
   const [excelFile, setExcelFile] = useState(null);
@@ -85,6 +86,9 @@ const TieUpNew = ({ onCancel }) => {
 
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form reset key (like AddProjectType)
+  const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
     if ((showGlobalError || uniqueError) && errorRef.current) {
@@ -216,6 +220,14 @@ const TieUpNew = ({ onCancel }) => {
       if (response.ok) {
         await response.json();
         setToast({ visible: true, message: 'Form submitted successfully!', type: 'success' });
+        // Reset form after success
+        setFormKey(prev => prev + 1);
+        setAvatarSrc(null);
+        setExcelFile(null);
+        setExcelData(null);
+        setSelectedState('Karnataka');
+        setCities(indiaStatesCities.find((s) => s.state === 'Karnataka')?.cities || []);
+        setSelectedCity('Bengaluru');
       } else {
         const error = await response.text();
         setToast({ visible: true, message: 'Failed to submit form: ' + error, type: 'error' });
@@ -249,6 +261,7 @@ const TieUpNew = ({ onCancel }) => {
 
   return (
     <Form
+      key={formKey}
       ref={formRef}
       onSubmit={handleSubmit}
       initialValues={{
