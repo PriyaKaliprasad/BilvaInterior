@@ -1,14 +1,15 @@
+
 import React, { useEffect, useState } from "react";
-import { Routes, Route, useNavigate, useParams } from "react-router-dom";
+import { Button } from "@progress/kendo-react-buttons";
 import { Grid, GridColumn } from "@progress/kendo-react-grid";
 import { filterBy } from "@progress/kendo-data-query";
+import AddNewRole from "./AddNewRole";
 import "./ManageRoles.css";
 
 const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
 
 /* ---------- Roles List Page ---------- */
-function RolesList({ roles, features, loading, error }) {
-  const navigate = useNavigate();
+function RolesList({ roles, features, loading, error, onEdit }) {
   const [filter, setFilter] = useState(null);
 
   if (loading) return <p>Loading roles...</p>;
@@ -37,7 +38,7 @@ function RolesList({ roles, features, loading, error }) {
     <td style={{ textAlign: "center", padding: 12 }}>
       <button
         className="btn btn-primary"
-        onClick={() => navigate(`edit/${props.dataItem.id}`)}
+        onClick={() => onEdit(props.dataItem)}
       >
         Edit
       </button>
@@ -52,8 +53,8 @@ function RolesList({ roles, features, loading, error }) {
           <Grid
             style={{ minWidth: 800, height: 500 }}
             data={filterBy(roles, filter)}
-            filterable={true}
-            filter={filter}
+            // filterable={true}
+            // filter={filter}
             onFilterChange={(e) => setFilter(e.filter)}
           >
             {/* Role Name */}
@@ -92,9 +93,7 @@ function RolesList({ roles, features, loading, error }) {
 }
 
 /* ---------- Full Page Edit Form ---------- */
-function EditRole({ features }) {
-  const { id } = useParams();
-  const navigate = useNavigate();
+function EditRole({ features, role, onCancel, onSave }) {
   const [formData, setFormData] = useState({
     id: 0,
     name: "",
@@ -106,34 +105,21 @@ function EditRole({ features }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchRole();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
-  const fetchRole = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/${id}`);
-      if (!res.ok) throw new Error("Failed to fetch role");
-      const data = await res.json();
-
-      const assignedIds = data.featureIds?.length
-        ? data.featureIds
-        : data.roleFeatures?.map((rf) => rf.featureId) || [];
-
+    if (role) {
+      // Use role.features (array of feature objects) to get assigned featureIds
+      const assignedIds = Array.isArray(role.features)
+        ? role.features.map(f => f.featureId)
+        : [];
       setFormData({
-        id: data.id,
-        name: data.name ?? "",
-        description: data.description ?? "",
-        isActive: data.isActive ?? true,
+        id: role.id,
+        name: role.name ?? "",
+        description: role.description ?? "",
+        isActive: role.isActive ?? true,
         featureIds: assignedIds,
       });
-    } catch (err) {
-      console.error("Error fetching role:", err);
-      setPopupMessage("❌ Error loading role details");
-    } finally {
       setLoading(false);
     }
-  };
+  }, [role]);
 
   const handleFeatureToggle = (featureId) => {
     setFormData((prev) => ({
@@ -174,7 +160,10 @@ function EditRole({ features }) {
 
       if (res.ok) {
         setPopupMessage("✅ Role saved successfully!");
-        setTimeout(() => navigate("/manage-employees/roles"), 1200);
+        setTimeout(() => {
+          setPopupMessage("");
+          if (onSave) onSave(formData);
+        }, 1200);
       } else {
         const errData = await res
           .json()
@@ -282,7 +271,7 @@ function EditRole({ features }) {
           </button>
           <button
             className="btn"
-            onClick={() => navigate("/manage-employees/roles")}
+            onClick={onCancel}
           >
             Cancel
           </button>
@@ -292,12 +281,15 @@ function EditRole({ features }) {
   );
 }
 
-/* ---------- Main Component with Routes ---------- */
+/* ---------- Main Component with In-Place Edit ---------- */
+
 export default function ManageRoles() {
   const [roles, setRoles] = useState([]);
   const [features, setFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [editItem, setEditItem] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
 
   useEffect(() => {
     fetchRoles();
@@ -306,6 +298,7 @@ export default function ManageRoles() {
   }, []);
 
   const fetchRoles = async () => {
+    setLoading(true);
     try {
       const res = await fetch(API_BASE);
       if (!res.ok) throw new Error(`Failed to fetch roles`);
@@ -331,20 +324,107 @@ export default function ManageRoles() {
     }
   };
 
+  // When save is successful, update the roles list
+  const handleEditSave = (updatedRole) => {
+    setRoles((prev) => prev.map((r) => (r.id === updatedRole.id ? { ...r, ...updatedRole } : r)));
+    setEditItem(null);
+  };
+
+  // Responsive action bar style (same as ProjectTypes)
+  const actionBarStyle = {
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
+    background: '#fff',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0.5rem 0.5rem 0.5rem 0.5rem',
+    borderBottom: '1px solid #eee',
+    minHeight: 48,
+    marginBottom: 10,
+  };
+  const actionBarBtnGroup = {
+    display: 'flex',
+    gap: '0.5rem',
+  };
+
+  // --- Main Render ---
+  if (showAdd) {
+    return (
+      <>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+          <Button
+            icon="arrow-left"
+            size="small"
+            onClick={() => setShowAdd(false)}
+            className="action-btn back-btn"
+            style={{ marginRight: 8 }}
+          >
+            <span className="tieup-action-btn-text">Back</span>
+          </Button>
+        </div>
+        <AddNewRole />
+      </>
+    );
+  }
+  if (editItem) {
+    return (
+      <>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+          <Button
+            icon="arrow-left"
+            size="small"
+            onClick={() => setEditItem(null)}
+            className="action-btn back-btn"
+            style={{ marginRight: 8 }}
+          >
+            <span className="tieup-action-btn-text">Back</span>
+          </Button>
+        </div>
+        <EditRole
+          features={features}
+          role={editItem}
+          onCancel={() => setEditItem(null)}
+          onSave={handleEditSave}
+        />
+      </>
+    );
+  }
+
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <RolesList
-            roles={roles}
-            features={features}
-            loading={loading}
-            error={error}
-          />
-        }
+    <main className="page-container">
+      {/* Action Bar: Always visible, sticky */}
+      <div style={actionBarStyle} className="emprole-action-bar">
+        <div style={actionBarBtnGroup}>
+          <Button
+            icon="refresh"
+            size="small"
+            onClick={fetchRoles}
+            className="action-btn refresh-btn"
+          >
+            <span className="tieup-action-btn-text">Refresh</span>
+          </Button>
+        </div>
+        <div style={actionBarBtnGroup}>
+          <Button
+            icon="plus"
+            size="small"
+            themeColor={'primary'}
+            onClick={() => setShowAdd(true)}
+            className="action-btn add-btn"
+          >
+            <span className="tieup-action-btn-text">Add</span>
+          </Button>
+        </div>
+      </div>
+      <RolesList
+        roles={roles}
+        features={features}
+        loading={loading}
+        error={error}
+        onEdit={setEditItem}
       />
-      <Route path="edit/:id" element={<EditRole features={features} />} />
-    </Routes>
+    </main>
   );
 }
