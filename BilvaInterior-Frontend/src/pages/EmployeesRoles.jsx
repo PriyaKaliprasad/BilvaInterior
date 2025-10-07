@@ -101,7 +101,7 @@ function EditRole({ features, role, onCancel, onSave }) {
     isActive: true,
     featureIds: [],
   });
-  const [popupMessage, setPopupMessage] = useState("");
+  const [popupMessage, setPopupMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -143,11 +143,11 @@ function EditRole({ features, role, onCancel, onSave }) {
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      setPopupMessage("⚠️ Role name is required");
+      setPopupMessage({ text: "⚠️ Role name is required", type: "error" });
       return;
     }
     if (formData.featureIds.length === 0) {
-      setPopupMessage("⚠️ Select at least one feature");
+      setPopupMessage({ text: "⚠️ Select at least one feature", type: "error" });
       return;
     }
 
@@ -159,20 +159,20 @@ function EditRole({ features, role, onCancel, onSave }) {
       });
 
       if (res.ok) {
-        setPopupMessage("✅ Role saved successfully!");
+        setPopupMessage({ text: "✅ Role saved successfully!", type: "success" });
         setTimeout(() => {
-          setPopupMessage("");
+          setPopupMessage({ text: "", type: "" });
           if (onSave) onSave(formData);
         }, 1200);
       } else {
         const errData = await res
           .json()
           .catch(() => ({ message: "Failed to save role" }));
-        setPopupMessage(`❌ ${errData.message}`);
+        setPopupMessage({ text: `❌ ${errData.message}`, type: "error" });
       }
     } catch (err) {
       console.error("Error saving role:", err);
-      setPopupMessage("❌ Error saving role");
+      setPopupMessage({ text: "❌ Error saving role", type: "error" });
     }
   };
 
@@ -263,7 +263,22 @@ function EditRole({ features, role, onCancel, onSave }) {
           </div>
         </div>
 
-        {popupMessage && <p className="popup-message">{popupMessage}</p>}
+
+        {popupMessage.text && (
+          <div
+            style={{
+              marginBottom: "1rem",
+              padding: "8px",
+              borderRadius: "6px",
+              textAlign: "center",
+              fontWeight: "bold",
+              color: popupMessage.type === "success" ? "#065f46" : "#b91c1c",
+              backgroundColor: popupMessage.type === "success" ? "#d1fae5" : "#fee2e2"
+            }}
+          >
+            {popupMessage.text}
+          </div>
+        )}
 
         <div className="form-actions">
           <button className="btn btn-primary" onClick={handleSave}>

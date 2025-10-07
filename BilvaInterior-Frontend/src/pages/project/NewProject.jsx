@@ -167,13 +167,7 @@ const NewProject = () => {
   return (
     <main>
       <div className="card">
-        {notification && (
-          <div
-            style={{ marginBottom: "1rem", padding: "8px", borderRadius: "6px", textAlign: "center", fontWeight: "bold", color: notification.type === "success" ? "#065f46" : "#b91c1c", backgroundColor: notification.type === "success" ? "#d1fae5" : "#fee2e2" }}
-          >
-            {notification.message}
-          </div>
-        )}
+
         <Form
           key={formKey}
           onSubmit={handleSubmit}
@@ -237,23 +231,23 @@ const NewProject = () => {
                     <FieldWrapper>
                       <div className="k-form-field-wrap">
                         <FloatingLabelWrapper label={'Tie-up Company'} >
-                        <Field
-                          name="tieUpCompanyId"
-                          validator={requiredValidator}
-                          required={true}
-                          component={props => (
-                            <DropDownList
-                              {...props}
-                              data={tieUpCompanies}
-                              textField="companyName"
-                              value={tieUpCompanies.find(c => c.id === props.value) || null}
-                              onChange={e => props.onChange({ value: e.value ? e.value.id : null })}
-                              filterable={true}
-                              style={{ width: "100%" }}
-                              size={'large'}
-                            />
-                          )}
-                        />
+                          <Field
+                            name="tieUpCompanyId"
+                            validator={requiredValidator}
+                            required={true}
+                            component={props => (
+                              <DropDownList
+                                {...props}
+                                data={tieUpCompanies}
+                                textField="companyName"
+                                value={tieUpCompanies.find(c => c.id === props.value) || null}
+                                onChange={e => props.onChange({ value: e.value ? e.value.id : null })}
+                                filterable={true}
+                                style={{ width: "100%" }}
+                                size={'large'}
+                              />
+                            )}
+                          />
                         </FloatingLabelWrapper>
                       </div>
                     </FieldWrapper>
@@ -280,6 +274,14 @@ const NewProject = () => {
                   )}
                 </div>
               </fieldset>
+              
+              {notification && (
+                <div
+                  style={{ marginBottom: "1rem", padding: "8px", borderRadius: "6px", textAlign: "center", fontWeight: "bold", color: notification.type === "success" ? "#065f46" : "#b91c1c", backgroundColor: notification.type === "success" ? "#d1fae5" : "#fee2e2" }}
+                >
+                  {notification.message}
+                </div>
+              )}
 
               <div className="form-actions">
                 <Button themeColor="primary" type="submit" disabled={!formRenderProps.allowSubmit}>
