@@ -62,7 +62,7 @@ const imageValidator = (files) => {
 };
 
 // ------------------- Component -------------------
-const TieUpNew = () => {
+const TieUpNew = ({ onCancel }) => {
   const [avatarSrc, setAvatarSrc] = useState(null);
   const [excelFile, setExcelFile] = useState(null);
   const [excelData, setExcelData] = useState(null);
@@ -519,7 +519,7 @@ const TieUpNew = () => {
             </div>
           )}
           {/* Submit & Reset */}
-          <div className="k-form-buttons" style={{ marginTop: 24 }}>
+          <div className="k-form-buttons" style={{ marginTop: 24, display: 'flex', gap: 12 }}>
             <Button
               themeColor="primary"
               type="submit"
@@ -534,8 +534,13 @@ const TieUpNew = () => {
                 'Submit'
               )}
             </Button>
-            <Button onClick={formRenderProps.onFormReset} style={{ marginLeft: 12 }}>
-              Reset
+            <Button
+              onClick={() => {
+                formRenderProps.onFormReset();
+                if (onCancel) onCancel();
+              }}
+            >
+              Cancel
             </Button>
           </div>
 

@@ -99,21 +99,23 @@ export const sidebarLinks = [
     id: "tie-up",
     label: "Tie Up Company",
     icon: globeIcon,
-    isGroup: true,
-    children: [
-      {
-        id: "tie-up-all",
-        label: "All Companies",
-        navMeta: { title: "All Companies", breadcrumb: ["Tie Up Company", "All Companies"] },
-        content: TieUpAll,
-      },
-      {
-        id: "tie-up-new",
-        label: "New Company",
-        navMeta: { title: "New Company", breadcrumb: ["Tie Up Company", "New Company"] },
-        content: TieUpNew,
-      }
-    ]
+    navMeta: { title: "Tie Up Company", breadcrumb: ["Tie Up Company"] },
+    content: TieUpAll,
+    isGroup: false,
+    // children: [
+    //   {
+    //     id: "tie-up-all",
+    //     label: "All Companies",
+    //     navMeta: { title: "All Companies", breadcrumb: ["Tie Up Company", "All Companies"] },
+    //     content: TieUpAll,
+    //   },
+    //   {
+    //     id: "tie-up-new",
+    //     label: "New Company",
+    //     navMeta: { title: "New Company", breadcrumb: ["Tie Up Company", "New Company"] },
+    //     content: TieUpNew,
+    //   }
+    // ]
   },
   {
     id: "quotations",

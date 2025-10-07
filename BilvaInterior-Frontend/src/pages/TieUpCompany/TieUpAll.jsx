@@ -6,8 +6,27 @@ import "./TieUpAll.css";
 // import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// ------------------ Styles for Fixed Action Bar ------------------
+const actionBarStyle = {
+  position: "sticky",
+  top: 0,
+  zIndex: 10,
+  background: "#fff",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "0.5rem 0.5rem 0.5rem 0.5rem",
+  borderBottom: "1px solid #eee",
+  minHeight: 48,
+};
+
+const actionBarBtnGroup = {
+  display: "flex",
+  gap: "0.5rem",
+};
+
 // ------------------ Set API Base URL ------------------
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // ------------------ Avatar URL ------------------
 const getAvatarUrl = (dataItem) => {
@@ -94,13 +113,17 @@ class ErrorBoundary extends React.Component {
 
 // ------------------ Main Component ------------------
 import TieUpEdit from "./TieUpEdit";
+import TieUpNew from "./TieUpNew";
 
 const TieUpAll = () => {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCompany, setSelectedCompany] = useState(null);
+  const [showAddNew, setShowAddNew] = useState(false);
 
-  useEffect(() => {
+  // Refresh handler
+  const refreshCompanies = () => {
+    setLoading(true);
     axios
       .get(`${API_BASE_URL}/api/TieUpCompany`)
       .then((res) => {
@@ -113,6 +136,21 @@ const TieUpAll = () => {
         alert("Failed to load companies");
         setLoading(false);
       });
+  };
+
+  // Add new company handler
+  const handleAdd = () => {
+    setShowAddNew(true);
+  };
+
+  // Cancel add new company
+  const handleCancelAdd = () => {
+    setShowAddNew(false);
+  };
+
+  useEffect(() => {
+    refreshCompanies();
+    // eslint-disable-next-line
   }, []);
 
   const handleEdit = (company) => {
@@ -125,49 +163,100 @@ const TieUpAll = () => {
 
   // Refetch companies from backend after edit success
   const handleEditSuccess = () => {
-    axios
-      .get(`${API_BASE_URL}/api/TieUpCompany`)
-      .then((res) => {
-        const data = Array.isArray(res.data) ? res.data : [];
-        setCompanies(data);
-        setSelectedCompany(null);
-      })
-      .catch((err) => {
-        console.error(err);
-        alert("Failed to load companies");
-        setSelectedCompany(null);
-      });
+    refreshCompanies();
+    setSelectedCompany(null);
   };
 
+
   if (loading) return <div>Loading companies...</div>;
-  if (companies.length === 0) return <div>No companies found.</div>;
+  if (!showAddNew && companies.length === 0) return <div>No companies found.</div>;
 
   return (
-    <div className="tieup-list-container">
-      <div className="tieup-list-inner">
-        {!selectedCompany && <ListViewHeader />}
-        <ErrorBoundary>
-          {!selectedCompany ? (
-            <ListView
-              data={companies}
-              item={(props) => (
-                <ListViewItem
-                  key={props.dataItem.id}
-                  {...props}
-                  onEdit={handleEdit}
+    <>
+      {/* Action Bar: Always visible, sticky */}
+      {!selectedCompany && !showAddNew && (
+        <div style={actionBarStyle} className="tieup-action-bar">
+          <div style={actionBarBtnGroup}>
+            <Button
+              size="small"
+              icon="refresh"
+              onClick={refreshCompanies}
+              className="action-btn refresh-btn"
+            >
+              <span className="tieup-action-btn-text">Refresh</span>
+            </Button>
+          </div>
+          <div style={actionBarBtnGroup}>
+            <Button
+              size="small"
+              icon="plus"
+              onClick={handleAdd}
+              themeColor="primary"
+              className="action-btn add-btn"
+            >
+              <span className="tieup-action-btn-text">Add New Company</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      
+      {showAddNew ? (
+        <>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+            <Button
+              icon="arrow-left"
+              size="small"
+              onClick={handleCancelAdd}
+              className="action-btn back-btn"
+              style={{ marginRight: 8 }}
+            >
+              <span className="tieup-action-btn-text">Back</span>
+            </Button>
+          </div>
+          <TieUpNew onCancel={handleCancelAdd} />
+        </>
+      ) : selectedCompany ? (
+        <>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+            <Button
+              icon="arrow-left"
+              size="small"
+              onClick={handleCloseEdit}
+              className="action-btn back-btn"
+              style={{ marginRight: 8 }}
+            >
+              <span className="tieup-action-btn-text">Back</span>
+            </Button>
+          </div>
+          <TieUpEdit
+            companyId={selectedCompany.id}
+            closeEdit={handleCloseEdit}
+            onEditSuccess={handleEditSuccess}
+          />
+        </>
+      ) : (
+        <div className="tieup-list-container">
+          <div className="tieup-list-inner">
+            <>
+              <ListViewHeader />
+              <ErrorBoundary>
+                <ListView
+                  data={companies}
+                  item={(props) => (
+                    <ListViewItem
+                      key={props.dataItem.id}
+                      {...props}
+                      onEdit={handleEdit}
+                    />
+                  )}
                 />
-              )}
-            />
-          ) : (
-            <TieUpEdit
-              companyId={selectedCompany.id}
-              closeEdit={handleCloseEdit}
-              onEditSuccess={handleEditSuccess}
-            />
-          )}
-        </ErrorBoundary>
-      </div>
-    </div>
+              </ErrorBoundary>
+            </>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
