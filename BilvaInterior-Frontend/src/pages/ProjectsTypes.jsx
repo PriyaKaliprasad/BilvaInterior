@@ -268,6 +268,7 @@
 //   );
 // }
 
+
 // import React, { useState, useEffect } from 'react';
 // import './projectTypes.css';
 
@@ -364,8 +365,7 @@
 
 //         setTimeout(() => {
 //           setSuccessMessage('');
-//           setEditItem(null); // go back to grid/list
-//         }, 1200);
+//         }, 5000);
 //       } else {
 //         const errMsg = await res.text();
 //         setErrorMessage(`❌ Failed to update: ${errMsg}`);
@@ -426,7 +426,7 @@
 //     </div>
 //   );
 
-//   // Mobile list rendering (each item as a card)
+//   // ✅ Mobile list rendering (Edit button moved right after Status)
 //   const MobileList = ({ items }) => {
 //     if (!items || items.length === 0) {
 //       return <div className="empty-mobile">No project types available.</div>;
@@ -446,13 +446,17 @@
 //                 <span className={`badge ${p.status ? 'status-active' : 'status-inactive'}`}>
 //                   {p.status ? 'Active' : 'Inactive'}
 //                 </span>
-//               </div>
-//             </div>
 
-//             <div className="mobile-actions">
-//               <Button themeColor="primary" size="small" onClick={() => setEditItem(p)}>
-//                 Edit
-//               </Button>
+//                 {/* ✅ Edit button comes immediately after status */}
+//                 <Button
+//                   themeColor="primary"
+//                   size="small"
+//                   style={{ marginLeft: '10px' }}
+//                   onClick={() => setEditItem(p)}
+//                 >
+//                   Edit
+//                 </Button>
+//               </div>
 //             </div>
 //           </div>
 //         ))}
@@ -518,19 +522,59 @@
 //                     <Field name="status" component={SwitchField} />
 //                   </CustomFormFieldSet>
 
-//                   {/* Buttons */}
+//                   {/* ✅ Success Message ABOVE buttons */}
+//                   {successMessage && (
+//                     <div
+//                       style={{
+//                         marginBottom: '1rem',
+//                         padding: '8px',
+//                         borderRadius: '6px',
+//                         textAlign: 'center',
+//                         fontWeight: 'bold',
+//                         color: '#065f46',
+//                         backgroundColor: '#d1fae5',
+//                         border: '1px solid #34d399',
+//                       }}
+//                     >
+//                       {successMessage}
+//                     </div>
+//                   )}
+
+//                   {/* ✅ Buttons (Save first, Cancel second) */}
 //                   <div className="form-buttons" style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-//                     <Button type="button" onClick={() => setEditItem(null)} className="btn-cancel">
-//                       Cancel
-//                     </Button>
-//                     <Button type="submit" themeColor="primary" disabled={!formRenderProps.allowSubmit}>
+//                     <Button
+//                       type="submit"
+//                       themeColor="primary"
+//                       disabled={!formRenderProps.allowSubmit}
+//                     >
 //                       Save
+//                     </Button>
+//                     <Button
+//                       type="button"
+//                       onClick={() => setEditItem(null)}
+//                       className="btn-cancel"
+//                     >
+//                       Cancel
 //                     </Button>
 //                   </div>
 
-//                   {/* Inline Error / Success Message */}
-//                   {errorMessage && <div className="error-box">{errorMessage}</div>}
-//                   {successMessage && <div className="success-box">{successMessage}</div>}
+//                   {/* ❌ Error Message BELOW buttons */}
+//                   {errorMessage && (
+//                     <div
+//                       style={{
+//                         marginTop: '1rem',
+//                         padding: '8px',
+//                         borderRadius: '6px',
+//                         textAlign: 'center',
+//                         fontWeight: 'bold',
+//                         color: '#b91c1c',
+//                         backgroundColor: '#fee2e2',
+//                         border: '1px solid #f87171',
+//                       }}
+//                     >
+//                       {errorMessage}
+//                     </div>
+//                   )}
 //                 </FormElement>
 //               )}
 //             />
@@ -545,13 +589,11 @@
 import React, { useState, useEffect } from 'react';
 import './projectTypes.css';
 
-// KendoReact imports
 import { Grid, GridColumn } from '@progress/kendo-react-grid';
 import { Button } from '@progress/kendo-react-buttons';
 import { Form, Field, FormElement } from '@progress/kendo-react-form';
 import { Switch } from '@progress/kendo-react-inputs';
 
-// Custom components
 import FormInput from '../components/Form/FormInput';
 import CustomFormFieldSet from '../components/Form/CustomFormFieldSet';
 import { nameValidator } from '../utils/validators';
@@ -567,10 +609,8 @@ export default function ProjectTypes() {
     typeof window !== 'undefined' ? window.innerWidth <= 600 : false
   );
 
-  // ✅ Backend API URL
   const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/ProjectTypes`;
 
-  // Fetch data
   const fetchData = async () => {
     try {
       const res = await fetch(apiUrl);
@@ -589,7 +629,6 @@ export default function ProjectTypes() {
     fetchData();
   }, []);
 
-  // Listen for resize to toggle mobile view
   useEffect(() => {
     const onResize = () => {
       setIsMobile(window.innerWidth <= 600);
@@ -598,22 +637,21 @@ export default function ProjectTypes() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Save updated project type
+  // ✅ Save updated project type
   const handleEditSubmit = async (dataItem) => {
     const newName = dataItem.typeName.trim();
 
-    if (newName.toLowerCase() === editItem.name.trim().toLowerCase()) {
-      setErrorMessage('');
-    } else {
-      const duplicate = projectTypes.some(
-        (p) => p.name.trim().toLowerCase() === newName.toLowerCase()
-      );
-      if (duplicate) {
-        setErrorMessage('⚠️ Project type with this name already exists!');
-        return;
-      } else {
-        setErrorMessage('');
-      }
+    // Check for duplicate name (case-insensitive)
+    const duplicate = projectTypes.some(
+      (p) =>
+        p.name.trim().toLowerCase() === newName.toLowerCase() &&
+        p.id !== editItem.id
+    );
+
+    if (duplicate) {
+      setErrorMessage('⚠️ Project type with this name already exists!');
+      setSuccessMessage('');
+      return;
     }
 
     const updatedItem = {
@@ -638,14 +676,22 @@ export default function ProjectTypes() {
 
         setTimeout(() => {
           setSuccessMessage('');
-          setEditItem(null); // go back to grid/list
-        }, 1200);
+        }, 5000);
+      } else if (res.status === 409) {
+        // Server duplicate conflict (if applicable)
+        const errData = await res.text();
+        setErrorMessage(
+          `⚠️ ${errData || 'Project type with this name already exists!'}`
+        );
+        setSuccessMessage('');
       } else {
         const errMsg = await res.text();
         setErrorMessage(`❌ Failed to update: ${errMsg}`);
+        setSuccessMessage('');
       }
     } catch (err) {
       setErrorMessage('❌ Network error while updating project type');
+      setSuccessMessage('');
     }
   };
 
@@ -654,7 +700,6 @@ export default function ProjectTypes() {
     setTake(event.page.take);
   };
 
-  // Status cell
   const StatusCell = (props) => {
     const { status } = props.dataItem;
     return (
@@ -668,7 +713,6 @@ export default function ProjectTypes() {
     );
   };
 
-  // Action cell
   const ActionCell = (props) => (
     <td>
       <Button
@@ -681,7 +725,6 @@ export default function ProjectTypes() {
     </td>
   );
 
-  // Switch field
   const SwitchField = (fieldRenderProps) => (
     <div className="k-form-field" style={{ marginTop: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -700,7 +743,6 @@ export default function ProjectTypes() {
     </div>
   );
 
-  // ✅ Mobile list rendering (Edit button moved right after Status)
   const MobileList = ({ items }) => {
     if (!items || items.length === 0) {
       return <div className="empty-mobile">No project types available.</div>;
@@ -713,15 +755,16 @@ export default function ProjectTypes() {
               <div className="mobile-label">Project Type</div>
               <div className="mobile-value">{p.name}</div>
             </div>
-
             <div className="mobile-row">
               <div className="mobile-label">Status</div>
               <div className="mobile-value">
-                <span className={`badge ${p.status ? 'status-active' : 'status-inactive'}`}>
+                <span
+                  className={`badge ${
+                    p.status ? 'status-active' : 'status-inactive'
+                  }`}
+                >
                   {p.status ? 'Active' : 'Inactive'}
                 </span>
-
-                {/* ✅ Edit button comes immediately after status */}
                 <Button
                   themeColor="primary"
                   size="small"
@@ -742,14 +785,18 @@ export default function ProjectTypes() {
     <main className="page-container">
       {!editItem ? (
         <>
-          {/* Refresh Button */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              marginBottom: '10px',
+            }}
+          >
             <Button themeColor="primary" size="small" onClick={fetchData}>
               Refresh
             </Button>
           </div>
 
-          {/* Desktop / Tablet: Kendo Grid. Mobile: card list */}
           {!isMobile ? (
             <div className="card grid-wrapper">
               <Grid
@@ -774,48 +821,75 @@ export default function ProjectTypes() {
           )}
         </>
       ) : (
-        <>
-          {/* Full-page edit form */}
-          <div className="card">
-            <h2>Edit Project Type</h2>
-            <Form
-              onSubmit={handleEditSubmit}
-              initialValues={{
-                typeName: editItem.name,
-                status: editItem.status,
-              }}
-              render={(formRenderProps) => (
-                <FormElement className="responsive-form">
-                  <CustomFormFieldSet>
-                    <Field
-                      name="typeName"
-                      component={FormInput}
-                      label="Name of Project Type"
-                      validator={nameValidator}
-                    />
-                    <Field name="status" component={SwitchField} />
-                  </CustomFormFieldSet>
+        <div className="card">
+          <h2>Edit Project Type</h2>
+          <Form
+            onSubmit={handleEditSubmit}
+            initialValues={{
+              typeName: editItem.name,
+              status: editItem.status,
+            }}
+            render={(formRenderProps) => (
+              <FormElement className="responsive-form">
+                <CustomFormFieldSet>
+                  <Field
+                    name="typeName"
+                    component={FormInput}
+                    label="Name of Project Type"
+                    validator={nameValidator}
+                  />
+                  <Field name="status" component={SwitchField} />
+                </CustomFormFieldSet>
 
-                  {/* Buttons */}
-                  <div className="form-buttons" style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <Button type="button" onClick={() => setEditItem(null)} className="btn-cancel">
-                      Cancel
-                    </Button>
-                    <Button type="submit" themeColor="primary" disabled={!formRenderProps.allowSubmit}>
-                      Save
-                    </Button>
+                {/* ✅ Combined Messages ABOVE buttons */}
+                {(successMessage || errorMessage) && (
+                  <div
+                    style={{
+                      marginBottom: '1rem',
+                      padding: '8px',
+                      borderRadius: '6px',
+                      textAlign: 'center',
+                      fontWeight: 'bold',
+                      color: successMessage ? '#065f46' : '#b91c1c',
+                      backgroundColor: successMessage
+                        ? '#d1fae5'
+                        : '#fee2e2',
+                      border: successMessage
+                        ? '1px solid #34d399'
+                        : '1px solid #f87171',
+                    }}
+                  >
+                    {successMessage || errorMessage}
                   </div>
+                )}
 
-                  {/* Inline Error / Success Message */}
-                  {errorMessage && <div className="error-box">{errorMessage}</div>}
-                  {successMessage && <div className="success-box">{successMessage}</div>}
-                </FormElement>
-              )}
-            />
-          </div>
-        </>
+                {/* Buttons */}
+                <div
+                  className="form-buttons"
+                  style={{ display: 'flex', gap: '8px', marginTop: '12px' }}
+                >
+                  <Button
+                    type="submit"
+                    themeColor="primary"
+                    disabled={!formRenderProps.allowSubmit}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => setEditItem(null)}
+                    className="btn-cancel"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </FormElement>
+            )}
+          />
+        </div>
       )}
     </main>
   );
 }
+
 
