@@ -10,7 +10,6 @@ import ProjectsAll from '../../pages/ProjectsAll.jsx';
 import ProjectsEnquiries from '../../pages/ProjectsEnquiries.jsx';
 import ProjectsTypes from '../../pages/ProjectsTypes.jsx';
 import NewProject from '../../pages/NewProject.jsx';
-import AddProjectType from '../../pages/AddProjectType.jsx';
 import SiteVisitAll from '../../pages/SiteVisitAll.jsx';
 import SiteVisitNew from '../../pages/SiteVisit/SiteVisitNew.jsx';
 import TieUpAll from '../../pages/TieUpCompany/TieUpAll.jsx';
@@ -66,12 +65,6 @@ export const sidebarLinks = [
         label: "Project Types",
         navMeta: { title: "Project Types", breadcrumb: ["Projects", "Project Types"] },
         content: ProjectsTypes,
-      },
-      {
-        id: "add-project-type",
-        label: "Add Project Type",
-        navMeta: { title: "Add Project Type", breadcrumb: ["Projects", "Add Project Type"] },
-        content: AddProjectType,
       }
     ]
   },
