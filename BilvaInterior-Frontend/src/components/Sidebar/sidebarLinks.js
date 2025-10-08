@@ -8,7 +8,7 @@ import ProjectsAll from '../../pages/project/ProjectsAll.jsx';
 import ProjectsEnquiries from '../../pages/project/ProjectsEnquiries.jsx';
 import ProjectsTypes from '../../pages/project/ProjectsTypes.jsx';
 import NewProject from '../../pages/project/NewProject.jsx';
-import AddProjectType from '../../pages/AddProjectType.jsx';
+import AddProjectType from '../../pages/project/AddProjectType.jsx';
 import SiteVisitAll from '../../pages/SiteVisitAll.jsx';
 import SiteVisitNew from '../../pages/SiteVisit/SiteVisitNew.jsx';
 import TieUpAll from '../../pages/TieUpCompany/TieUpAll.jsx';

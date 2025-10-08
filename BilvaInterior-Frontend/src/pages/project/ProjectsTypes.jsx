@@ -11,7 +11,7 @@ import { Switch } from '@progress/kendo-react-inputs';
 import FormInput from '../../components/Form/FormInput';
 import CustomFormFieldSet from '../../components/Form/CustomFormFieldSet';
 import { nameValidator } from '../../utils/validators';
-import AddProjectType from '../AddProjectType';
+import AddProjectType from './AddProjectType';
 
 
 export default function ProjectTypes() {

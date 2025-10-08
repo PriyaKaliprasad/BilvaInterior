@@ -64,10 +64,10 @@ const ProjectsAll = () => {
       let companyName = "N/A";
 
       // 1️⃣ If tieUpCompanyId is a number or string, match with companies list
-      if (project.tieUpCompanyId !== null && project.tieUpCompanyId !== undefined) {
-        if (typeof project.tieUpCompanyId === "object" && project.tieUpCompanyId.companyName) {
+      if (project.tieUpCompany !== null && project.tieUpCompany !== undefined) {
+        if (typeof project.tieUpCompany === "object" && project.tieUpCompany.companyName) {
           // API returned full object
-          companyName = project.tieUpCompanyId.companyName;
+          companyName = project.tieUpCompany.companyName;
         } else {
           // ID is number or string
           const company = companies.find(

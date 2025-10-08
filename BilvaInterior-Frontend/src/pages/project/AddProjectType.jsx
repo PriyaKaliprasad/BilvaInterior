@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import './project/projectTypes.css';
+import './ProjectTypes.css';
 
 // KendoReact imports
 import { Button } from '@progress/kendo-react-buttons';
 import { Form, Field, FormElement } from '@progress/kendo-react-form';
 
 // Custom components
-import FormInput from '../components/Form/FormInput';
-import CustomFormFieldSet from '../components/Form/CustomFormFieldSet';
-import { nameValidator } from '../utils/validators';
+import FormInput from '../../components/Form/FormInput';
+import CustomFormFieldSet from '../../components/Form/CustomFormFieldSet';
+import { nameValidator } from '../../utils/validators';
 
 const AddProjectType = () => {
     const responsiveBreakpoints = [
