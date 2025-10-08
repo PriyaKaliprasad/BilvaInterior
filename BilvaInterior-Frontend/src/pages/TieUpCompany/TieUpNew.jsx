@@ -62,7 +62,8 @@ const imageValidator = (files) => {
 };
 
 // ------------------- Component -------------------
-const TieUpNew = () => {
+
+const TieUpNew = ({ onCancel }) => {
   const [avatarSrc, setAvatarSrc] = useState(null);
   const [excelFile, setExcelFile] = useState(null);
   const [excelData, setExcelData] = useState(null);
@@ -85,6 +86,9 @@ const TieUpNew = () => {
 
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form reset key (like AddProjectType)
+  const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
     if ((showGlobalError || uniqueError) && errorRef.current) {
@@ -216,6 +220,14 @@ const TieUpNew = () => {
       if (response.ok) {
         await response.json();
         setToast({ visible: true, message: 'Form submitted successfully!', type: 'success' });
+        // Reset form after success
+        setFormKey(prev => prev + 1);
+        setAvatarSrc(null);
+        setExcelFile(null);
+        setExcelData(null);
+        setSelectedState('Karnataka');
+        setCities(indiaStatesCities.find((s) => s.state === 'Karnataka')?.cities || []);
+        setSelectedCity('Bengaluru');
       } else {
         const error = await response.text();
         setToast({ visible: true, message: 'Failed to submit form: ' + error, type: 'error' });
@@ -249,6 +261,7 @@ const TieUpNew = () => {
 
   return (
     <Form
+      key={formKey}
       ref={formRef}
       onSubmit={handleSubmit}
       initialValues={{
@@ -519,7 +532,7 @@ const TieUpNew = () => {
             </div>
           )}
           {/* Submit & Reset */}
-          <div className="k-form-buttons" style={{ marginTop: 24 }}>
+          <div className="k-form-buttons" style={{ marginTop: 24, display: 'flex', gap: 12 }}>
             <Button
               themeColor="primary"
               type="submit"
@@ -534,8 +547,13 @@ const TieUpNew = () => {
                 'Submit'
               )}
             </Button>
-            <Button onClick={formRenderProps.onFormReset} style={{ marginLeft: 12 }}>
-              Reset
+            <Button
+              onClick={() => {
+                formRenderProps.onFormReset();
+                if (onCancel) onCancel();
+              }}
+            >
+              Cancel
             </Button>
           </div>
 
