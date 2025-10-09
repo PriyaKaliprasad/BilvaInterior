@@ -1,3 +1,12 @@
+/* Responsive Action Bar Button Text */
+.tieup-action-btn-text {
+    display: inline;
+}
+@media (max-width: 600px) {
+    .tieup-action-btn-text {
+        display: none;
+    }
+}
 .tieup-list-row,
 .tieup-list-header {
     display: flex;

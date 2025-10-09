@@ -17,7 +17,7 @@ const ProfileDropdown = () => {
     const user = {
         name: authUser ? `${authUser.firstName || ''} ${authUser.lastName || ''}`.trim() : '',
         avatar: null,
-        role: authUser?.role || ''
+        role: authUser?.role?.name || ''
     };
 
     const handleAccountSettings = () => {
