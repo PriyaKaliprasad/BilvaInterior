@@ -63,12 +63,6 @@ export const sidebarLinks = [
         label: "Project Types",
         navMeta: { title: "Project Types", breadcrumb: ["Projects", "Project Types"] },
         content: ProjectsTypes,
-      },
-      {
-        id: "add-project-type",
-        label: "Add Project Type",
-        navMeta: { title: "Add Project Type", breadcrumb: ["Projects", "Add Project Type"] },
-        content: AddProjectType,
       }
     ]
   },
@@ -96,21 +90,23 @@ export const sidebarLinks = [
     id: "tie-up",
     label: "Tie Up Company",
     icon: globeIcon,
-    isGroup: true,
-    children: [
-      {
-        id: "tie-up-all",
-        label: "All Companies",
-        navMeta: { title: "All Companies", breadcrumb: ["Tie Up Company", "All Companies"] },
-        content: TieUpAll,
-      },
-      {
-        id: "tie-up-new",
-        label: "New Company",
-        navMeta: { title: "New Company", breadcrumb: ["Tie Up Company", "New Company"] },
-        content: TieUpNew,
-      }
-    ]
+    navMeta: { title: "Tie Up Company", breadcrumb: ["Tie Up Company"] },
+    content: TieUpAll,
+    isGroup: false,
+    // children: [
+    //   {
+    //     id: "tie-up-all",
+    //     label: "All Companies",
+    //     navMeta: { title: "All Companies", breadcrumb: ["Tie Up Company", "All Companies"] },
+    //     content: TieUpAll,
+    //   },
+    //   {
+    //     id: "tie-up-new",
+    //     label: "New Company",
+    //     navMeta: { title: "New Company", breadcrumb: ["Tie Up Company", "New Company"] },
+    //     content: TieUpNew,
+    //   }
+    // ]
   },
   {
     id: "quotations",
@@ -149,22 +145,10 @@ export const sidebarLinks = [
         content: EmployeesAll,
       },
       {
-        id: "employees-new",
-        label: "New Employee",
-        navMeta: { title: "New Employee", breadcrumb: ["Manage Employees", "New Employee"] },
-        content: EmployeesNew,
-      },
-      {
         id: "employees-roles",
         label: "Employee Roles",
         navMeta: { title: "Employee Roles", breadcrumb: ["Manage Employees", "Employee Roles"] },
         content: EmployeesRoles,
-      },
-      {
-        id: "add-new-role",
-        label: "Add New Role",
-        navMeta: { title: "Add New Role", breadcrumb: ["Manage Employees", "Add New Role"] },
-        content: AddNewRole,
       }
     ]
   },

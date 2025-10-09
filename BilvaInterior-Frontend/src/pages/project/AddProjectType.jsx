@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './projectTypes.css';
+import './ProjectTypes.css';
 
 // KendoReact imports
 import { Button } from '@progress/kendo-react-buttons';
@@ -144,7 +144,7 @@ const AddProjectType = () => {
                                 style={{ marginLeft: 12 }}
                                 disabled={isLoading}
                             >
-                                Reset
+                                Cancel
                             </Button>
                         </div>
                     </FormElement>

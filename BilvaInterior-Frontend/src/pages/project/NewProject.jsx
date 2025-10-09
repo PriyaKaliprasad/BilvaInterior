@@ -4,26 +4,19 @@ import { Checkbox } from "@progress/kendo-react-inputs";
 import { Button } from "@progress/kendo-react-buttons";
 import FormInput from "../../components/Form/FormInput";
 import { DropDownList } from "@progress/kendo-react-dropdowns";
+import { Form, Field, FormElement, FieldWrapper } from "@progress/kendo-react-form";
 import "./NewProject.css";
+import FloatingLabelWrapper from "../../components/Form/FloatingLabelWrapper/FloatingLabelWrapper";
 
 const MEMBERS_API = `${import.meta.env.VITE_API_BASE_URL}/api/Projects/members`;
 
 const NewProject = () => {
-  const [formData, setFormData] = useState({
-    projectName: "",
-    description: "",
-    tieUpCompanyId: null,
-    projectMembers: [],
-    address: "",
-    location: "",
-  });
-
   const [notification, setNotification] = useState(null);
   const [members, setMembers] = useState([]);
-
   const [tieUpCompanies, setTieUpCompanies] = useState([]);
-  
-  
+  const [formKey, setFormKey] = useState(0); // for resetting form
+
+
   // Fetch tie-up companies for dropdown
   useEffect(() => {
     const fetchTieUpCompanies = async () => {
@@ -51,8 +44,8 @@ const NewProject = () => {
     fetchTieUpCompanies();
   }, []);
 
-  
-  
+
+
   // ✅ Fetch project members
   useEffect(() => {
     const loadMembers = async () => {
@@ -96,60 +89,50 @@ const NewProject = () => {
     loadMembers();
   }, []);
 
-  const safeGetChecked = (e) =>
-    (typeof e.target?.checked === "boolean" ? e.target.checked : e.value) ||
-    false;
-
-  const handleMemberToggle = (userId) => (e) => {
-    const checked = safeGetChecked(e);
-    setFormData((prev) => {
-      const exists = prev.projectMembers.includes(userId);
-      const next = checked
-        ? exists
-          ? prev.projectMembers
-          : [...prev.projectMembers, userId]
-        : prev.projectMembers.filter((id) => id !== userId);
-      return { ...prev, projectMembers: next };
-    });
+  // Validators
+  const projectNameValidator = (value) => {
+    if (!value || value.trim().length < 3) {
+      return "Project name must be at least 3 characters.";
+    }
+    return "";
+  };
+  const requiredValidator = (value) => {
+    if (value === undefined || value === null || value === "") {
+      return "This field is required.";
+    }
+    return "";
+  };
+  const budgetValidator = (value) => {
+    if (value === undefined || value === null || value === "") {
+      return "Budget is required.";
+    }
+    if (Number(value) < 1000) {
+      return "Budget must be at least 1000.";
+    }
+    return "";
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleTieUpCompanyChange = (e) => {
-    setFormData((prev) => ({ ...prev, tieUpCompanyId: e.value ? e.value.id : null }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Kendo Form submit handler
+  const handleSubmit = async (dataItem) => {
     setNotification(null);
 
-    if (
-      !formData.projectName ||
-      !formData.description ||
-      !formData.tieUpCompanyId ||
-      !formData.address ||
-      !formData.location
-    ) {
-      setNotification({
-        type: "error",
-        message: "All fields are required.",
-      });
-      return;
-    }
+    const selectedMemberIds = Object.keys(dataItem.projectMembers || {})
+      .filter(key => dataItem.projectMembers[key])
+      .map(id => Number(id));
 
+    // Compose request body
+    const requestBody = {
+      projectName: dataItem.projectName,
+      description: dataItem.description,
+      address: dataItem.address,
+      location: dataItem.location,
+      tieUpCompanyId: dataItem.tieUpCompanyId,
+      memberIds: selectedMemberIds,
+      Budget: Number(dataItem.budget)
+    };
+
+    console.log("Submitting new project:", requestBody);
     try {
-      // Prepare request body with correct field names
-      const requestBody = {
-        projectName: formData.projectName,
-        description: formData.description,
-        address: formData.address,
-        location: formData.location,
-        tieUpCompanyId: formData.tieUpCompanyId,
-        memberIds: formData.projectMembers,
-      };
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/Projects`, {
         method: "POST",
         headers: {
@@ -158,23 +141,12 @@ const NewProject = () => {
         },
         body: JSON.stringify(requestBody),
       });
-
       const text = await res.text();
       console.log("[Projects POST] status:", res.status, "body:", text);
-
       if (!res.ok) throw new Error(text || `Server returned ${res.status}`);
-
       setNotification({
         type: "success",
         message: "Project created successfully.",
-      });
-      setFormData({
-        projectName: "",
-        description: "",
-        tieUpCompanyId: null,
-        projectMembers: [],
-        address: "",
-        location: "",
       });
     } catch (err) {
       console.error("Error saving project:", err);
@@ -193,132 +165,142 @@ const NewProject = () => {
   }, [notification]);
 
   return (
-    <div className="page-root">
-      <div className="form-wrapper">
-        <form onSubmit={handleSubmit} className="form-grid">
-          {/* Project Name + Description side by side */}
-          <div className="form-row">
-            <FormInput
-              id="projectName"
-              name="projectName"
-              label="Project Name"
-              value={formData.projectName}
-              onChange={handleChange}
-            />
-            <FormInput
-              id="description"
-              name="description"
-              label="Description"
-              value={formData.description}
-              onChange={handleChange}
-            />
-          </div>
+    <main>
+      <div className="card">
 
-          {/* Tie-up Company + Address side by side */}
-          <div className="form-row">
-            <div style={{ flex: 1, marginRight: 16, position: 'relative' }}>
-              <style>{`
-                .floating-label-container {
-                  position: relative;
-                }
-                .floating-label {
-                  position: absolute;
-                  top: -8px;
-                  left: 12px;
-                  background: white;
-                  padding: 0 4px;
-                  font-size: 12px;
-                  color: #666;
-                  z-index: 1;
-                  pointer-events: none;
-                  transition: none;
-                }
-              `}</style>
-              <div className="floating-label-container">
-                <div className="floating-label">Tie-up Company</div>
-                <DropDownList
-                  id="tieUpCompanyId"
-                  name="tieUpCompanyId"
-                  data={tieUpCompanies}
-                  textField="companyName"
-                  value={tieUpCompanies.find(c => c.id === formData.tieUpCompanyId) || null}
-                  onChange={handleTieUpCompanyChange}
-                  filterable={true}
-                  style={{ width: "100%" }}
-                  placeholder="Select a company"
-                  size={'large'}
-                />
-              </div>
-            </div>
-            <FormInput
-              id="address"
-              name="address"
-              label="Address"
-              value={formData.address}
-              onChange={handleChange}
-            />
-          </div>
+        <Form
+          key={formKey}
+          onSubmit={handleSubmit}
+          initialValues={{ projectMembers: {} }}
+          render={formRenderProps => (
+            <FormElement>
+              <fieldset className="k-form-fieldset">
+                <div className="form-row">
+                  <Field
+                    name="projectName"
+                    component={FormInput}
+                    label="Project Name"
+                    validator={projectNameValidator}
+                    required={true}
+                  />
+                  <Field
+                    name="description"
+                    component={FormInput}
+                    label="Description"
+                    validator={requiredValidator}
+                    required={true}
+                  />
+                </div>
+              </fieldset>
 
-          {/* Location */}
-          <div className="form-row">
-            <FormInput
-              id="location"
-              name="location"
-              label="Location (Web link)"
-              value={formData.location}
-              onChange={handleChange}
-            />
-          </div>
 
-          {/* Project Members */}
-          <div className="members-box">
-            <label className="members-label">Project Members</label>
-            <div className="members-list">
-              {members.length === 0 ? (
-                <div style={{ color: "#666" }}>No employees found.</div>
-              ) : (
-                members.map((member) => (
-                  <div className="member-row" key={member.id}>
-                    <Checkbox
-                      checked={formData.projectMembers.includes(member.id)}
-                      onChange={handleMemberToggle(member.id)}
-                    />
-                    <span className="member-name">
-                      {member.firstName} {member.lastName}
-                    </span>
+
+              <fieldset className="k-form-fieldset">
+                <div className="form-row">
+                  <Field
+                    name="location"
+                    component={FormInput}
+                    label="Location (Web link)"
+                    validator={requiredValidator}
+                    required={true}
+                    style={{ flex: 1, marginRight: 16 }}
+                  />
+                  <Field
+                    name="budget"
+                    component={FormInput}
+                    label="Budget"
+                    type="number"
+                    min={1000}
+                    validator={budgetValidator}
+                    required={true}
+                    style={{ width: "100%" }}
+                  />
+                </div>
+              </fieldset>
+
+              <fieldset className="k-form-fieldset">
+                <div className="form-row">
+                  <Field
+                    name="address"
+                    component={FormInput}
+                    label="Address"
+                    validator={requiredValidator}
+                    required={true}
+                  />
+                  <div style={{ flex: 1, marginRight: 16, position: 'relative' }}>
+                    <FieldWrapper>
+                      <div className="k-form-field-wrap">
+                        <FloatingLabelWrapper label={'Tie-up Company'} >
+                          <Field
+                            name="tieUpCompanyId"
+                            validator={requiredValidator}
+                            required={true}
+                            component={props => (
+                              <DropDownList
+                                {...props}
+                                data={tieUpCompanies}
+                                textField="companyName"
+                                value={tieUpCompanies.find(c => c.id === props.value) || null}
+                                onChange={e => props.onChange({ value: e.value ? e.value.id : null })}
+                                filterable={true}
+                                style={{ width: "100%" }}
+                                size={'large'}
+                              />
+                            )}
+                          />
+                        </FloatingLabelWrapper>
+                      </div>
+                    </FieldWrapper>
                   </div>
-                ))
+
+                </div>
+              </fieldset>
+
+              <fieldset className="k-form-fieldset">
+                <legend className="k-form-legend">Project Members</legend>
+                <div className="members-list">
+                  {members.length === 0 ? (
+                    <div style={{ color: "#666" }}>No employees found.</div>
+                  ) : (
+
+                    members.map(member => (
+                      <Field
+                        key={member.id}
+                        name={`projectMembers.${member.id}`}
+                        component={Checkbox}
+                        label={`${member.firstName} ${member.lastName}`}
+                      />
+                    ))
+                  )}
+                </div>
+              </fieldset>
+              
+              {notification && (
+                <div
+                  style={{ marginBottom: "1rem", padding: "8px", borderRadius: "6px", textAlign: "center", fontWeight: "bold", color: notification.type === "success" ? "#065f46" : "#b91c1c", backgroundColor: notification.type === "success" ? "#d1fae5" : "#fee2e2" }}
+                >
+                  {notification.message}
+                </div>
               )}
-            </div>
-          </div>
 
-          {/* Buttons */}
-          <div className="form-actions">
-            <Button themeColor="primary" type="submit">
-              Save Project
-            </Button>
-            <Button
-              type="button"
-              look="outline"
-              onClick={() => window.history.back()}
-            >
-              Cancel
-            </Button>
-          </div>
-
-          {/* Notifications */}
-          {notification && (
-            <div
-              className={`notification-box ${
-                notification.type === "success" ? "success" : "error"
-              }`}
-            >
-              {notification.message}
-            </div>
+              <div className="form-actions">
+                <Button themeColor="primary" type="submit" disabled={!formRenderProps.allowSubmit}>
+                  Save Project
+                </Button>
+                <Button
+                  type="button"
+                  look="outline"
+                  onClick={() => setFormKey(k => k + 1)}
+                  style={{ marginLeft: "10px" }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </FormElement>
           )}
-        </form>
+        />
       </div>
-    </div>
+    </main>
   );
 };
 
