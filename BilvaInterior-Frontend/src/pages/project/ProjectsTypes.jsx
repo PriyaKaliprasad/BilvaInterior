@@ -8,9 +8,9 @@ import { Form, Field, FormElement } from '@progress/kendo-react-form';
 import { Switch } from '@progress/kendo-react-inputs';
 
 // Custom components
-import FormInput from '../components/Form/FormInput';
-import CustomFormFieldSet from '../components/Form/CustomFormFieldSet';
-import { nameValidator } from '../utils/validators';
+import FormInput from '../../components/Form/FormInput';
+import CustomFormFieldSet from '../../components/Form/CustomFormFieldSet';
+import { nameValidator } from '../../utils/validators';
 
 export default function ProjectTypes() {
   const [projectTypes, setProjectTypes] = useState([]);
