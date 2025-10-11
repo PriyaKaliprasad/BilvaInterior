@@ -1,17 +1,17 @@
+
 import React, { useState, useEffect } from 'react';
 import './projectTypes.css';
-
 // KendoReact imports
 import { Grid, GridColumn } from '@progress/kendo-react-grid';
 import { Button } from '@progress/kendo-react-buttons';
 import { Form, Field, FormElement } from '@progress/kendo-react-form';
 import { Switch } from '@progress/kendo-react-inputs';
-
 // Custom components
 import FormInput from '../../components/Form/FormInput';
 import CustomFormFieldSet from '../../components/Form/CustomFormFieldSet';
 import { nameValidator } from '../../utils/validators';
 import AddProjectType from './AddProjectType';
+import api from '../../api/axios';
 
 
 export default function ProjectTypes() {
@@ -26,20 +26,19 @@ export default function ProjectTypes() {
     typeof window !== 'undefined' ? window.innerWidth <= 600 : false
   );
 
-  // API URL
-  const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/ProjectTypes`;
+  // API URL (relative, baseURL is set in axios.js)
+  const apiUrl = '/api/ProjectTypes';
 
   const fetchData = async () => {
     try {
-      const res = await fetch(apiUrl);
-      if (res.ok) {
-        const data = await res.json();
-        setProjectTypes(data || []);
-      } else {
-        console.error('Failed to fetch project types:', await res.text());
-      }
+      const res = await api.get(apiUrl);
+      setProjectTypes(res.data || []);
     } catch (err) {
-      console.error('Network error while fetching:', err);
+      if (err.response) {
+        console.error('Failed to fetch project types:', err.response.data || err.response.statusText);
+      } else {
+        console.error('Network error while fetching:', err.message);
+      }
     }
   };
 
@@ -79,38 +78,30 @@ export default function ProjectTypes() {
     };
 
     try {
-      const res = await fetch(`${apiUrl}/${editItem.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedItem),
-      });
+      const res = await api.put(`${apiUrl}/${editItem.id}`, updatedItem);
+      setProjectTypes((prev) =>
+        prev.map((p) => (p.id === editItem.id ? updatedItem : p))
+      );
+      setSuccessMessage('✅ Project type saved successfully!');
+      setErrorMessage('');
 
-      if (res.ok) {
-        setProjectTypes((prev) =>
-          prev.map((p) => (p.id === editItem.id ? updatedItem : p))
-        );
-        setSuccessMessage('✅ Project type saved successfully!');
-        setErrorMessage('');
-
-        setTimeout(() => {
-          setSuccessMessage('');
-          setEditItem(null);
-        }, 5000);
-      } else if (res.status === 409) {
-        // Server duplicate conflict (if applicable)
-        const errData = await res.text();
+      setTimeout(() => {
+        setSuccessMessage('');
+        setEditItem(null);
+      }, 5000);
+    } catch (err) {
+      if (err.response && err.response.status === 409) {
         setErrorMessage(
-          `⚠️ ${errData || 'Project type with this name already exists!'}`
+          `⚠️ ${err.response.data || 'Project type with this name already exists!'}`
         );
+        setSuccessMessage('');
+      } else if (err.response) {
+        setErrorMessage(`❌ Failed to update: ${err.response.data || err.response.statusText}`);
         setSuccessMessage('');
       } else {
-        const errMsg = await res.text();
-        setErrorMessage(`❌ Failed to update: ${errMsg}`);
+        setErrorMessage('❌ Network error while updating project type');
         setSuccessMessage('');
       }
-    } catch (err) {
-      setErrorMessage('❌ Network error while updating project type');
-      setSuccessMessage('');
     }
   };
 
