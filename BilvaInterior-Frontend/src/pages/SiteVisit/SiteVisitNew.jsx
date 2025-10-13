@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grid, GridColumn } from '@progress/kendo-react-grid';
-import { Form, Field, FormElement } from '@progress/kendo-react-form';
+import { Form, Field, FormElement, FieldWrapper } from '@progress/kendo-react-form';
 import { Button } from '@progress/kendo-react-buttons';
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import FormInput from '../../components/Form/FormInput';
@@ -9,9 +9,12 @@ import FormDropDown from '../../components/Form/FormDropDown';
 import FormUpload from '../../components/Form/FormUpload';
 import UploadWithPreview from '../../components/UploadWithPreview';
 import CustomFormFieldSet from '../../components/Form/CustomFormFieldSet';
-import { nameValidator, emailValidator, phoneValidator } from '../../utils/validators';
+import { nameValidator, emailValidator, phoneValidator, requiredValidator } from '../../utils/validators';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './SiteVisitDialog.css';
+import api from '../../api/axios';
+import FloatingLabelWrapper from '../../components/Form/FloatingLabelWrapper/FloatingLabelWrapper';
+import { DropDownList } from '@progress/kendo-react-dropdowns';
 
 const reportTypes = [
 	{ text: 'Site Visit', value: 'sitevisit' },
@@ -20,6 +23,29 @@ const reportTypes = [
 ];
 
 const SiteVisitNew = () => {
+
+	// Projects state
+	const [projects, setProjects] = useState([]);
+	const [projectsLoading, setProjectsLoading] = useState(false);
+	const [projectsError, setProjectsError] = useState(null);
+
+	// Fetch projects on mount
+	useEffect(() => {
+		const fetchProjects = async () => {
+			setProjectsLoading(true);
+			setProjectsError(null);
+			try {
+				const res = await api.get('/api/projects');
+				console.log(res.data)
+				setProjects(res.data || []);
+			} catch (err) {
+				setProjectsError('Failed to load projects');
+			} finally {
+				setProjectsLoading(false);
+			}
+		};
+		fetchProjects();
+	}, []);
 
 	// Sample data for grid
 	const [lineItems, setLineItems] = useState([
@@ -110,17 +136,117 @@ const SiteVisitNew = () => {
 		setDialogData(prev => ({ ...prev, [name]: value }));
 	};
 
-	const handleSubmit = (dataItem) => {
-		alert('Form submitted!\n' + JSON.stringify(dataItem, null, 2));
-		console.log('Form Data:', dataItem);
-		// TODO: append the visiting line items to the form data before submission
+	const handleSubmit = async (dataItem) => {
+		// Create FormData
+		const formData = new FormData();
+
+		// Helper: append simple fields
+		const appendField = (key, value) => {
+			if (value !== undefined && value !== null) {
+				formData.append(key, value);
+			}
+		};
+
+		// Append all non-file fields
+		Object.entries(dataItem).forEach(([key, value]) => {
+			if (key === 'photos' || key === 'siteVisitDocument') return; // handle below
+			if (key === 'reportDate' && value instanceof Date) {
+				// Format date as ISO string
+				formData.append(key, value.toISOString());
+			} else if (typeof value !== 'object' || value === null) {
+				appendField(key, value);
+			}
+		});
+
+		// Append all files (photos and siteVisitDocument) under 'Documents' key, only the file
+		if (Array.isArray(dataItem.photos)) {
+			dataItem.photos.forEach(photo => {
+				if (photo.file) {
+					formData.append('Documents', photo.file);
+				}
+			});
+		}
+
+		if (Array.isArray(dataItem.siteVisitDocument)) {
+			dataItem.siteVisitDocument.forEach(doc => {
+				if (doc.getRawFile && typeof doc.getRawFile === 'function') {
+					const file = doc.getRawFile();
+					if (file) {
+						formData.append('Documents', file);
+					}
+				} else if (doc.file) {
+					formData.append('Documents', doc.file);
+				}
+			});
+		}
+
+		// Example: append line items (if needed)
+		// formData.append('lineItems', JSON.stringify(lineItems));
+
+		// For debugging: log FormData keys and values
+		for (let pair of formData.entries()) {
+			console.log(pair[0] + ':', pair[1]);
+		}
+
+		// submit formData to API endpoint using axios instance
+		try {
+			const response = await api.post('/api/sitevisit', formData, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			});
+			console.log('Site visit submitted successfully:', response.data);
+		} catch (error) {
+			if (error.response) {
+				// Server responded with a status other than 2xx
+				console.error('Submission failed:', error.response.status, error.response.data);
+			} else if (error.request) {
+				// Request was made but no response received
+				console.error('No response received:', error.request);
+			} else {
+				// Something else happened
+				console.error('Error during submission:', error.message);
+			}
+		}
 	};
+
 
 	return (
 		<Form
 			onSubmit={handleSubmit}
 			render={(formRenderProps) => (
 				<FormElement className="container py-4">
+
+					{/* Project Dropdown */}
+					<FieldWrapper>
+						<div className="k-form-field-wrap mb-4 w-50">
+							<FloatingLabelWrapper label={'Project'} >
+								<Field
+									name="projectId"
+									validator={requiredValidator}
+									required={true}
+									component={props => (
+										<DropDownList
+											{...props}
+											data={projects}
+											textField="projectName"
+											dataItemKey="id"
+											value={projects.find(p => p.id === props.value) || null}
+											onChange={e => props.onChange({ value: e.value ? e.value.id : null })}
+											filterable={true}
+											loading={projectsLoading}
+											disabled={projectsLoading || !!projectsError}
+											style={{ width: "100%" }}
+											size={'large'}
+											placeholder={projectsLoading ? 'Loading...' : (projectsError ? 'Failed to load' : 'Select Project')}
+										/>
+									)}
+								/>
+							</FloatingLabelWrapper>
+							{projectsError && <div className="text-danger small mt-1">{projectsError}</div>}
+						</div>
+					</FieldWrapper>
+
 					{/* Report Info */}
 					<CustomFormFieldSet legend="Report Info">
 						<div className="row g-3">
@@ -187,19 +313,19 @@ const SiteVisitNew = () => {
 					</CustomFormFieldSet>
 
 					{/* Photos (Capture/Upload) */}
-						{/* Intentionally left empty as requested */}
-						<CustomFormFieldSet legend="Photos (Capture/Upload)">
-							<div className="row">
-								<div className="col-12">
-									<Field
-										name="photos"
-										component={UploadWithPreview}
-										accept="image/*"
-									// multiple default true; set multiple={false} if you want single-image only
-									/>
-								</div>
+					{/* Intentionally left empty as requested */}
+					<CustomFormFieldSet legend="Photos (Capture/Upload)">
+						<div className="row">
+							<div className="col-12">
+								<Field
+									name="photos"
+									component={UploadWithPreview}
+									accept="image/*"
+								// multiple default true; set multiple={false} if you want single-image only
+								/>
 							</div>
-						</CustomFormFieldSet>
+						</div>
+					</CustomFormFieldSet>
 
 					{/* Site Visit Documents */}
 					<CustomFormFieldSet legend="Site Visit Documents">

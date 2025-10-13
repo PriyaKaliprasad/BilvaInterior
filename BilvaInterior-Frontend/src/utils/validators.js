@@ -45,4 +45,11 @@ const imageValidator = (files) => {
   return '';
 };
 
-export { nameValidator, emailValidator, passwordValidator, phoneValidator, pincodeValidator, imageValidator };
+const requiredValidator = (value) => {
+    if (value === undefined || value === null || value === "") {
+      return "This field is required.";
+    }
+    return "";
+  };
+
+export { nameValidator, emailValidator, passwordValidator, phoneValidator, pincodeValidator, imageValidator, requiredValidator };
