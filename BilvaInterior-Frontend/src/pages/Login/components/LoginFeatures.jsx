@@ -53,7 +53,7 @@ const LoginFeatures = () => {
     <section id="features" className="py-5">
       <div className="container">
         <div className="text-center mb-5">
-          <h2 className="fw-bold">Bilva Interior — modules at a glance</h2>
+          <h2 className="fw-bold">Bilva Interior - Modules at a glance</h2>
           <p className="text-muted">Everything needed for enquiries → quotation → execution → archive.</p>
         </div>
         <div className="row g-4">
