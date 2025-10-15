@@ -57,7 +57,7 @@ const LoginPage = () => {
       />
       <LoginFeatures />
       <LoginWorkflow />
-      <LoginFAQ />
+      {/* <LoginFAQ /> */}
       <LoginFooter />
     </div>
   )
