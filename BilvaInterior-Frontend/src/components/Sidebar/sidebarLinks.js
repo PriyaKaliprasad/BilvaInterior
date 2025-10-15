@@ -14,6 +14,7 @@ import SiteVisitNew from '../../pages/SiteVisit/SiteVisitNew.jsx';
 import TieUpAll from '../../pages/TieUpCompany/TieUpAll.jsx';
 import TieUpNew from '../../pages/TieUpCompany/TieUpNew.jsx';
 import TieUpEdit from '../../pages/TieUpCompany/TieUpEdit.jsx';
+import ManageVendors from '../../pages/ManageVendors.jsx';
 import Quotations from '../../pages/Quotations.jsx';
 import ExpenseTracker from '../../pages/Expense Tracker/ExpenseTracker.jsx';
 import Billing from '../../pages/Billing.jsx';
@@ -160,6 +161,14 @@ export const sidebarLinks = [
     icon: clipboardTextIcon,
     navMeta: { title: "Audit Trail", breadcrumb: ["Audit Trail"] },
     content: AuditTrail,
+    isGroup: false
+  },
+  {
+    id: "manage-vendors",
+    label: "Manage Vendors",
+    icon: userIcon,
+    navMeta: { title: "Manage Vendors", breadcrumb: ["Manage Vendors"] },
+    content: ManageVendors,
     isGroup: false
   },
   // {
