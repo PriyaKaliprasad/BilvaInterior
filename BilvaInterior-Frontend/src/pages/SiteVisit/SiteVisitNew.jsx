@@ -17,9 +17,10 @@ import FloatingLabelWrapper from '../../components/Form/FloatingLabelWrapper/Flo
 import { DropDownList } from '@progress/kendo-react-dropdowns';
 
 const reportTypes = [
-	{ text: 'Site Visit', value: 'sitevisit' },
-	{ text: 'Completion', value: 'completion' },
-	{ text: 'Hand-Over', value: 'handover' },
+	{ text: 'Site Visit', value: 0 },
+	{ text: 'Work Completion', value: 1 },
+	{ text: 'Handover', value: 2 },
+	{ text: 'Delivery Challan', value: 3 },
 ];
 
 const SiteVisitNew = () => {
@@ -47,7 +48,18 @@ const SiteVisitNew = () => {
 		fetchProjects();
 	}, []);
 
-	// Sample data for grid
+	// Helper to create an empty line item
+	const createEmptyLineItem = (id) => ({
+		id,
+		description: '',
+		uom: '',
+		boqQty: '',
+		onsiteQty: '',
+		finalReview: '',
+		remarks: '',
+	});
+
+	// Initial data with one empty row at the end
 	const [lineItems, setLineItems] = useState([
 		{
 			id: 1,
@@ -76,7 +88,52 @@ const SiteVisitNew = () => {
 			finalReview: 'Pending',
 			remarks: 'Awaiting delivery',
 		},
+		createEmptyLineItem(4),
 	]);
+
+	// For in-cell editing
+	const [editLineItems, setEditLineItems] = useState({});
+
+	// Success/Error message state (toast)
+	const [successMessage, setSuccessMessage] = useState('');
+	const [errorMessage, setErrorMessage] = useState('');
+
+
+	const isRowEmpty = (item) => {
+		// Check if all fields except id are empty
+		return [
+			'description',
+			'uom',
+			'boqQty',
+			'onsiteQty',
+			'finalReview',
+			'remarks',
+		].every(key => !item[key] && item[key] !== 0);
+	};
+
+	const handleLineItemChange = (event) => {
+		const inEditID = event.dataItem.id;
+		const field = event.field || '';
+		let updated = lineItems.map(item =>
+			item.id === inEditID ? { ...item, [field]: event.value } : item
+		);
+
+		// Remove any non-last row that is now empty
+		updated = updated.filter((item, idx) => {
+			// Always keep the last row
+			if (idx === updated.length - 1) return true;
+			return !isRowEmpty(item);
+		});
+
+		// If the last row is not empty, add a new empty row
+		const last = updated[updated.length - 1];
+		if (!isRowEmpty(last)) {
+			const maxId = updated.length ? Math.max(...updated.map(i => i.id)) : 0;
+			updated.push(createEmptyLineItem(maxId + 1));
+		}
+
+		setLineItems(updated);
+	};
 
 	// Dialog state
 	const [dialogOpen, setDialogOpen] = useState(false);
@@ -114,9 +171,16 @@ const SiteVisitNew = () => {
 		setEditId(item.id);
 	};
 
+
 	// Delete item handler
 	const handleDeleteLineItem = (id) => {
-		setLineItems(lineItems.filter(item => item.id !== id));
+		let updated = lineItems.filter(item => item.id !== id);
+		// Always ensure one empty row at the end
+		if (!updated.length || !isRowEmpty(updated[updated.length - 1])) {
+			const maxId = updated.length ? Math.max(...updated.map(i => i.id)) : 0;
+			updated.push(createEmptyLineItem(maxId + 1));
+		}
+		setLineItems(updated);
 	};
 
 	// Save dialog handler
@@ -180,8 +244,17 @@ const SiteVisitNew = () => {
 			});
 		}
 
-		// Example: append line items (if needed)
-		// formData.append('lineItems', JSON.stringify(lineItems));
+		// Append line items as JSON string, excluding the last empty row
+		const nonEmptyLineItems = lineItems.filter(item => !isRowEmpty(item));
+		const lineItemsPayload = nonEmptyLineItems.map(item => ({
+			description: item.description,
+			uom: item.uom,
+			boq: item.boqQty,
+			onsiteWorkQuantity: item.onsiteQty,
+			finalReview: item.finalReview,
+			remarks: item.remarks
+		}));
+		formData.append('lineItems', JSON.stringify(lineItemsPayload));
 
 		// For debugging: log FormData keys and values
 		for (let pair of formData.entries()) {
@@ -196,17 +269,22 @@ const SiteVisitNew = () => {
 				},
 			});
 			console.log('Site visit submitted successfully:', response.data);
+			setSuccessMessage('✅ Site visit submitted successfully!');
+			setErrorMessage('');
+			setTimeout(() => setSuccessMessage(''), 5000);
 		} catch (error) {
 			if (error.response) {
-				// Server responded with a status other than 2xx
 				console.error('Submission failed:', error.response.status, error.response.data);
+				setErrorMessage(`❌ Submission failed: ${error.response.data?.message || error.response.statusText || 'Unknown error'}`);
 			} else if (error.request) {
-				// Request was made but no response received
 				console.error('No response received:', error.request);
+				setErrorMessage('❌ No response received from server.');
 			} else {
-				// Something else happened
 				console.error('Error during submission:', error.message);
+				setErrorMessage(`❌ Error during submission: ${error.message}`);
 			}
+			setSuccessMessage('');
+			setTimeout(() => setErrorMessage(''), 5000);
 		}
 	};
 
@@ -219,7 +297,7 @@ const SiteVisitNew = () => {
 
 					{/* Project Dropdown */}
 					<FieldWrapper>
-						<div className="k-form-field-wrap mb-4 w-50">
+						<div className="k-form-field-wrap mb-4 col-12 col-md-6">
 							<FloatingLabelWrapper label={'Project'} >
 								<Field
 									name="projectId"
@@ -279,7 +357,7 @@ const SiteVisitNew = () => {
 								<Field name="storeName" label="Store Name" component={FormInput} validator={nameValidator} />
 							</div>
 							<div className="col-md-6">
-								<Field name="storeCode" label="Store Code" component={FormInput} validator={nameValidator} />
+								<Field name="storeLocation" label="Store Location" component={FormInput} validator={nameValidator} />
 							</div>
 
 							<div className="col-md-6">
@@ -289,8 +367,9 @@ const SiteVisitNew = () => {
 								<Field name="vendorCode" label="Vendor Code" component={FormInput} validator={nameValidator} />
 							</div>
 
+
 							<div className="col-md-6">
-								<Field name="storeLocation" label="Store Location" component={FormInput} validator={nameValidator} />
+								<Field name="storeCode" label="Store Code" component={FormInput} validator={nameValidator} />
 							</div>
 							<div className="col-md-6">
 								<Field name="sapCode" label="SAP Code" component={FormInput} validator={nameValidator} />
@@ -338,6 +417,7 @@ const SiteVisitNew = () => {
 									accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
 									allowedFormatsArray={[".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"]}
 									colSpan={1}
+									multiple
 								/>
 							</div>
 						</div>
@@ -345,13 +425,7 @@ const SiteVisitNew = () => {
 
 					{/* Visiting line items */}
 					<CustomFormFieldSet legend="Visiting line items">
-						<div className="row mb-2">
-							<div className="col-12 text-end">
-								<Button themeColor="primary" type="button" onClick={handleAddLineItem}>
-									Add item
-								</Button>
-							</div>
-						</div>
+						{/* Removed Add item button */}
 						<div className="row">
 							<div className="col-12">
 								<div className="table-responsive" style={{ overflowX: 'auto' }}>
@@ -361,19 +435,21 @@ const SiteVisitNew = () => {
 										pageable={false}
 										resizable={true}
 										className="k-table-bordered w-100"
+										editable={true}
+										onItemChange={handleLineItemChange}
+										dataItemKey="id"
 									>
 										<GridColumn field="description" title="Description" />
 										<GridColumn field="uom" title="UOM" />
-										<GridColumn field="boqQty" title="BOQ quantity" />
-										<GridColumn field="onsiteQty" title="On-site work quantity" />
+										<GridColumn field="boqQty" title="BOQ quantity" editor="numeric" />
+										<GridColumn field="onsiteQty" title="On-site work quantity" editor="numeric" />
 										<GridColumn field="finalReview" title="Final Review" />
 										<GridColumn field="remarks" title="Remarks" />
 										<GridColumn
 											title="Actions"
 											cell={props => (
 												<td>
-													<Button type="button" size="small" icon="edit" onClick={() => handleEditLineItem(props.dataItem)} />
-													<Button type="button" size="small" icon="delete" style={{ marginLeft: 8 }} onClick={() => handleDeleteLineItem(props.dataItem.id)} />
+													<Button type="button" size="small" icon="delete" onClick={() => handleDeleteLineItem(props.dataItem.id)} />
 												</td>
 											)}
 										/>
@@ -401,82 +477,14 @@ const SiteVisitNew = () => {
 
 					{/* ...existing code... */}
 
-					{dialogOpen && (
-						<Dialog
-							title={dialogMode === 'add' ? 'Add Line Item' : 'Edit Line Item'}
-							onClose={() => setDialogOpen(false)}
-						>
-							<CustomFormFieldSet>
-								<div className="row g-2">
-									<div className="col-12 col-md-6 mb-2">
-										<FormInput
-											label="Description"
-											name="description"
-											value={dialogData.description}
-											onChange={handleDialogInputChange}
-										/>
-									</div>
-									<div className="col-12 col-md-6 mb-2">
-										<FormInput
-											label="UOM"
-											name="uom"
-											value={dialogData.uom}
-											onChange={handleDialogInputChange}
-										/>
-									</div>
-									<div className="col-12 col-md-6 mb-2">
-										<FormInput
-											label="BOQ quantity"
-											name="boqQty"
-											type="number"
-											value={dialogData.boqQty}
-											onChange={handleDialogInputChange}
-										/>
-									</div>
-									<div className="col-12 col-md-6 mb-2">
-										<FormInput
-											label="On-site work quantity"
-											name="onsiteQty"
-											type="number"
-											value={dialogData.onsiteQty}
-											onChange={handleDialogInputChange}
-										/>
-									</div>
-									<div className="col-12 col-md-6 mb-2">
-										<FormInput
-											label="Final Review"
-											name="finalReview"
-											value={dialogData.finalReview}
-											onChange={handleDialogInputChange}
-										/>
-									</div>
-									<div className="col-12 col-md-6 mb-2">
-										<FormInput
-											label="Remarks"
-											name="remarks"
-											value={dialogData.remarks}
-											onChange={handleDialogInputChange}
-										/>
-									</div>
-								</div>
-							</CustomFormFieldSet>
+					{/* Removed dialog for add/edit line item */}
 
-							<DialogActionsBar>
-								<Button
-									themeColor="primary"
-									onClick={handleDialogSave}
-									style={{ minWidth: 100 }}
-								>
-									{dialogMode === 'add' ? 'Add' : 'Save'}
-								</Button>
-								<Button
-									onClick={() => setDialogOpen(false)}
-									style={{ minWidth: 100, marginLeft: 10 }}
-								>
-									Cancel
-								</Button>
-							</DialogActionsBar>
-						</Dialog>
+					{/* Success/Error Toast Message */}
+					{(errorMessage || successMessage) && (
+						<div style={{ marginBottom: 12 }}>
+							{errorMessage && <div className="error-box">{errorMessage}</div>}
+							{successMessage && <div className="success-box">{successMessage}</div>}
+						</div>
 					)}
 
 					<div className="row mt-4">

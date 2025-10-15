@@ -9,7 +9,7 @@ import ProjectsEnquiries from '../../pages/project/ProjectsEnquiries.jsx';
 import ProjectsTypes from '../../pages/project/ProjectsTypes.jsx';
 import NewProject from '../../pages/project/NewProject.jsx';
 import AddProjectType from '../../pages/project/AddProjectType.jsx';
-import SiteVisitAll from '../../pages/SiteVisitAll.jsx';
+import SiteVisitAll from '../../pages/SiteVisit/SiteVisitAll.jsx';
 import SiteVisitNew from '../../pages/SiteVisit/SiteVisitNew.jsx';
 import TieUpAll from '../../pages/TieUpCompany/TieUpAll.jsx';
 import TieUpNew from '../../pages/TieUpCompany/TieUpNew.jsx';
@@ -70,21 +70,23 @@ export const sidebarLinks = [
     id: "site-visit",
     label: "Site Visit",
     icon: calendarIcon,
-    isGroup: true,
-    children: [
-      {
-        id: "site-visit-all",
-        label: "All Site Visits",
-        navMeta: { title: "All Site Visits", breadcrumb: ["Site Visit", "All Site Visits"] },
-        content: SiteVisitAll,
-      },
-      {
-        id: "site-visit-new",
-        label: "New Site Visit",
-        navMeta: { title: "New Site Visit", breadcrumb: ["Site Visit", "New Site Visit"] },
-        content: SiteVisitNew,
-      }
-    ]
+    isGroup: false,
+    navMeta: { title: "Site Visit", breadcrumb: ["Site Visit"] },
+    content: SiteVisitAll
+    // children: [
+    //   {
+    //     id: "site-visit-all",
+    //     label: "All Site Visits",
+    //     navMeta: { title: "All Site Visits", breadcrumb: ["Site Visit", "All Site Visits"] },
+    //     content: SiteVisitAll,
+    //   },
+    //   {
+    //     id: "site-visit-new",
+    //     label: "New Site Visit",
+    //     navMeta: { title: "New Site Visit", breadcrumb: ["Site Visit", "New Site Visit"] },
+    //     content: SiteVisitNew,
+    //   }
+    // ]
   },
   {
     id: "tie-up",
