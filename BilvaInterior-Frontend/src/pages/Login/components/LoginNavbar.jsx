@@ -14,7 +14,7 @@ const LoginNavbar = () => {
         <a className="navbar-brand d-flex align-items-center gap-2" href="#">
           <i className="bi bi-bricks fs-3 text-primary"></i>
           <span>Bilva<span className="text-primary">Interior</span></span>
-          <span className="badge badge-beta ms-2">Beta</span>
+          {/* <span className="badge badge-beta ms-2">Beta</span> */}
         </a>
         <button 
           className="navbar-toggler" 

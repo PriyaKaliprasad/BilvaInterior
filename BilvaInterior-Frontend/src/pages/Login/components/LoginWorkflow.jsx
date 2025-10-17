@@ -13,7 +13,7 @@ const LoginWorkflow = () => {
       <div className="container">
         <div className="row g-4 align-items-start">
           <div className="col-12 col-lg-6">
-            <h3 className="fw-bold mb-3">Bilva Interior Pvt Ltd — typical workflow</h3>
+            <h3 className="fw-bold mb-3">Bilva Interior - Typical Workflow</h3>
             <ol className="text-muted fs-6">
               <li className="mb-2">
                 <strong>Enquiry intake</strong> from tie‑up company (auto‑tag source + SLA).
@@ -37,12 +37,12 @@ const LoginWorkflow = () => {
                 <strong>Gallery & Expenses</strong> maintained for reporting and client showcase.
               </li>
             </ol>
-            <button 
+            {/* <button 
               onClick={scrollToLogin}
               className="btn btn-brand"
             >
               Start with an enquiry →
-            </button>
+            </button> */}
           </div>
           <div className="col-12 col-lg-6">
             <img 

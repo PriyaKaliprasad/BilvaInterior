@@ -21,7 +21,7 @@ const LoginFooter = () => {
       <div className="container">
         <div className="row align-items-center g-3">
           <div className="col-md-6 text-center text-md-start">
-            <small>© <span id="year"></span> Bilva Interior Pvt Ltd. All rights reserved.</small>
+            <small>© <span id="year"></span> Bilva Interior. All rights reserved.</small>
           </div>
           <div className="col-md-6">
             <ul className="nav justify-content-center justify-content-md-end gap-3">

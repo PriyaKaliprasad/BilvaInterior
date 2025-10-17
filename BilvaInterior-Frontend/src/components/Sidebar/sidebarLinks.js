@@ -15,7 +15,7 @@ import TieUpAll from '../../pages/TieUpCompany/TieUpAll.jsx';
 import TieUpNew from '../../pages/TieUpCompany/TieUpNew.jsx';
 import TieUpEdit from '../../pages/TieUpCompany/TieUpEdit.jsx';
 import Quotations from '../../pages/Quotations.jsx';
-import ExpenseTracker from '../../pages/ExpenseTracker.jsx';
+import ExpenseTracker from '../../pages/Expense Tracker/ExpenseTracker.jsx';
 import Billing from '../../pages/Billing.jsx';
 import EmployeesAll from '../../pages/EmployeesAll.jsx';
 import EmployeesNew from '../../pages/ManageEmployees/EmployeesNew.jsx';
