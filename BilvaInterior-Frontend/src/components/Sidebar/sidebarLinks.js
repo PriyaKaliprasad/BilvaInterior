@@ -14,7 +14,7 @@ import SiteVisitNew from '../../pages/SiteVisit/SiteVisitNew.jsx';
 import TieUpAll from '../../pages/TieUpCompany/TieUpAll.jsx';
 import TieUpNew from '../../pages/TieUpCompany/TieUpNew.jsx';
 import TieUpEdit from '../../pages/TieUpCompany/TieUpEdit.jsx';
-import ManageVendors from '../../pages/ManageVendors.jsx';
+import ManageVendors from '../../pages/Manage Vendor/ManageVendors.jsx';
 import Quotations from '../../pages/Quotations.jsx';
 import ExpenseTracker from '../../pages/Expense Tracker/ExpenseTracker.jsx';
 import Billing from '../../pages/Billing.jsx';
@@ -24,6 +24,8 @@ import EmployeesRoles from '../../pages/EmployeesRoles.jsx';
 import AddNewRole from '../../pages/AddNewRole.jsx';
 import AuditTrail from '../../pages/AuditTrail.jsx';
 import MyAccount from '../../pages/MyAccount.jsx';
+import ManageVendorsAll from "../../pages/Manage Vendor/ManageVendorsAll.jsx";
+
 
 // Sidebar groups with navMeta, icons, tab IDs, and page components
 export const sidebarLinks = [
@@ -166,9 +168,10 @@ export const sidebarLinks = [
     label: "Manage Vendors",
     icon: userIcon,
     navMeta: { title: "Manage Vendors", breadcrumb: ["Manage Vendors"] },
-    content: ManageVendors,
+    content: ManageVendorsAll,
     isGroup: false
   },
+   
   // {
   //   id: "my-account",
   //   label: "My Account",
