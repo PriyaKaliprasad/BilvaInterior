@@ -117,7 +117,21 @@ export const sidebarLinks = [
     icon: stickyNoteIcon,
     navMeta: { title: "Quotations", breadcrumb: ["Quotations"] },
     content: Quotations,
-    isGroup: false
+    isGroup: true,
+    children: [
+      {
+        id: "all-quotations",
+        label: "All Quotations",
+        navMeta: { title: "All Quotations", breadcrumb: ["Quotations", "All Quotations"] },
+        content: AllQuotations,
+      },
+      {
+        id: "new-quotation",
+        label: "New Quotation",
+        navMeta: { title: "New Quotation", breadcrumb: ["Quotations", "New Quotation"] },
+        content: Quotations,
+      }
+    ]
   },
   {
     id: "expense-tracker",

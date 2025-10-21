@@ -1,0 +1,62 @@
+/* Base layout */
+.allquotation-page {
+  background-color: #fff;
+}
+
+.quotation-table {
+  background: #ffffff;
+}
+
+/* Edit page */
+.edit-page {
+  background-color: #f8f9fc;
+}
+
+.edit-card {
+  background: #ffffff;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .edit-card {
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  .edit-page {
+    background: #ffffff !important;
+  }
+
+  .allquotation-page {
+    padding: 0.5rem !important;
+  }
+
+  .quotation-table {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .k-grid {
+    font-size: 0.85rem;
+  }
+
+  h4 {
+    font-size: 1.2rem;
+  }
+
+  label.form-label {
+    font-size: 0.9rem;
+  }
+
+  input.form-control,
+  select.form-select {
+    font-size: 0.9rem;
+    padding: 8px 10px;
+  }
+}
