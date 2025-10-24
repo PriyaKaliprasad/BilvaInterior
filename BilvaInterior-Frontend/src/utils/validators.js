@@ -1,3 +1,8 @@
+const minMaxLengthValidator = (value) => {
+  if (value?.length < 5) return 'Should be at least 5 characters long.';
+  if (value?.length > 100) return 'Should not exceed 100 characters.';
+  return '';
+};
 const nameValidator = (value) =>
     !value ? 'Required' : value.length < 3 ? 'Should be at least 3 characters long.' : '';
 
@@ -52,4 +57,4 @@ const requiredValidator = (value) => {
     return "";
   };
 
-export { nameValidator, emailValidator, passwordValidator, phoneValidator, pincodeValidator, imageValidator, requiredValidator };
+export { nameValidator, emailValidator, passwordValidator, phoneValidator, pincodeValidator, imageValidator, requiredValidator, minMaxLengthValidator };

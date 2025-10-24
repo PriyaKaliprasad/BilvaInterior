@@ -3,6 +3,7 @@ import { Loader } from '@progress/kendo-react-indicators';
 import { Grid, GridColumn } from '@progress/kendo-react-grid';
 import { Button } from '@progress/kendo-react-buttons';
 import SiteVisitNew from './SiteVisitNew';
+import SiteVisitEdit from './SiteVisitUpdated/SiteVisitEdit';
 import api from '../../api/axios';
 
 
@@ -16,6 +17,7 @@ const SiteVisitAll = () => {
 		typeof window !== 'undefined' ? window.innerWidth <= 600 : false
 	);
 	const [showAdd, setShowAdd] = useState(false);
+	const [editId, setEditId] = useState(null);
 
 	// Fetch site visit data
 	const fetchData = async () => {
@@ -63,7 +65,7 @@ const SiteVisitAll = () => {
 	// Actions cell
 	const ActionCell = (props) => (
 		<td>
-			<Button icon="edit" size="small" style={{ marginRight: 8 }} onClick={() => alert('Edit ' + props.dataItem.id)} />
+			<Button icon="edit" size="small" style={{ marginRight: 8 }} onClick={() => setEditId(props.dataItem.id)} />
 			<Button icon="delete" size="small" themeColor="error" onClick={() => alert('Delete ' + props.dataItem.id)} />
 		</td>
 	);
@@ -88,95 +90,115 @@ const SiteVisitAll = () => {
 				gap: '0.5rem',
 			};
 
-			// --- Main Render ---
-			if (showAdd) {
-				return (
-					<>
-						<div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
-							<Button
-								icon="arrow-left"
-								size="small"
-								onClick={() => setShowAdd(false)}
-								className="action-btn back-btn"
-								style={{ marginRight: 8 }}
-							>
-								<span className="tieup-action-btn-text">Back</span>
-							</Button>
-						</div>
-						<SiteVisitNew />
-					</>
-				);
-			}
 
-			return (
-				<main className="page-container">
-					{/* Action Bar: Always visible, sticky */}
-					<div style={actionBarStyle} className="sitevisit-action-bar">
-						<div style={actionBarBtnGroup}>
-							<Button
-								icon="refresh"
-								size="small"
-								onClick={fetchData}
-								className="action-btn refresh-btn"
-							>
-								<span className="tieup-action-btn-text">Refresh</span>
-							</Button>
-						</div>
-						<div style={actionBarBtnGroup}>
-							<Button
-								icon="plus"
-								size="small"
-								onClick={() => setShowAdd(true)}
-								themeColor="primary"
-								className="action-btn add-btn"
-							>
-								<span className="tieup-action-btn-text">Add</span>
-							</Button>
-						</div>
-					</div>
-
-					{/* Desktop / Tablet: Kendo Grid. Mobile: card list (not implemented, fallback to grid) */}
-					<div className="card grid-wrapper">
-						{error && <div className="error-box">{error}</div>}
-						<div className="table-responsive" style={{ position: 'relative' }}>
-							{loading && (
-								<div style={{
-									position: 'absolute',
-									top: 0,
-									left: 0,
-									width: '100%',
-									height: '100%',
-									background: 'rgba(255,255,255,0.7)',
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-									zIndex: 10
-								}}>
-									<Loader size="large" type="infinite-spinner" />
-								</div>
-							)}
-							<Grid
-								data={siteVisits.slice(skip, skip + take)}
-								pageable={true}
-								skip={skip}
-								take={take}
-								total={siteVisits.length}
-								onPageChange={e => { setSkip(e.page.skip); setTake(e.page.take); }}
-								style={{ minWidth: 900, border: 'none' }}
-								dataItemKey="id"
-								loading={loading}
-								resizable={true}
-								noRecords={<div style={{ textAlign: 'center', padding: 24 }}>No records available</div>}
-							>
-								<GridColumn field="projectName" title="Project Name" width="160px" cell={props => <td>{props.dataItem.project?.name || ''}</td>} />
-								<GridColumn field="lastModifiedUtc" title="Last Modified At" width="220px" cell={props => <td>{formatDate(props.dataItem.lastModifiedUtc)}</td>} />
-								<GridColumn field="lastModifiedBy" title="Last Modified By" width="220px" cell={props => <td>{getUserName(props.dataItem.lastModifiedBy)}</td>} />
-								<GridColumn title="Actions" width="160px" cell={ActionCell} />
-							</Grid>
-						</div>
-					</div>
-						</main>
+	// --- Main Render ---
+	if (showAdd) {
+		return (
+			<>
+				<div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+					<Button
+						icon="arrow-left"
+						size="small"
+						onClick={() => setShowAdd(false)}
+						className="action-btn back-btn"
+						style={{ marginRight: 8 }}
+					>
+						<span className="tieup-action-btn-text">Back</span>
+					</Button>
+				</div>
+				<SiteVisitNew />
+			</>
 		);
-		}
+	}
 
-		export default SiteVisitAll;
+	if (editId) {
+		return (
+			<>
+				<div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+					<Button
+						icon="arrow-left"
+						size="small"
+						onClick={() => setEditId(null)}
+						className="action-btn back-btn"
+						style={{ marginRight: 8 }}
+					>
+						<span className="tieup-action-btn-text">Back</span>
+					</Button>
+				</div>
+				<SiteVisitEdit siteVisitId={editId} />
+			</>
+		);
+	}
+
+	return (
+		<main className="page-container">
+			{/* Action Bar: Always visible, sticky */}
+			<div style={actionBarStyle} className="sitevisit-action-bar">
+				<div style={actionBarBtnGroup}>
+					<Button
+						icon="refresh"
+						size="small"
+						onClick={fetchData}
+						className="action-btn refresh-btn"
+					>
+						<span className="tieup-action-btn-text">Refresh</span>
+					</Button>
+				</div>
+				<div style={actionBarBtnGroup}>
+					<Button
+						icon="plus"
+						size="small"
+						onClick={() => setShowAdd(true)}
+						themeColor="primary"
+						className="action-btn add-btn"
+					>
+						<span className="tieup-action-btn-text">Add</span>
+					</Button>
+				</div>
+			</div>
+
+			{/* Desktop / Tablet: Kendo Grid. Mobile: card list (not implemented, fallback to grid) */}
+			<div className="card grid-wrapper">
+				{error && <div className="error-box">{error}</div>}
+				<div className="table-responsive" style={{ position: 'relative' }}>
+					{loading && (
+						<div style={{
+							position: 'absolute',
+							top: 0,
+							left: 0,
+							width: '100%',
+							height: '100%',
+							background: 'rgba(255,255,255,0.7)',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							zIndex: 10
+						}}>
+							<Loader size="large" type="infinite-spinner" />
+						</div>
+					)}
+					<Grid
+						data={siteVisits.slice(skip, skip + take)}
+						pageable={true}
+						skip={skip}
+						take={take}
+						total={siteVisits.length}
+						onPageChange={e => { setSkip(e.page.skip); setTake(e.page.take); }}
+						style={{ minWidth: 900, border: 'none' }}
+						dataItemKey="id"
+						loading={loading}
+						resizable={true}
+						noRecords={<div style={{ textAlign: 'center', padding: 24 }}>No records available</div>}
+					>
+						<GridColumn field="projectName" title="Project Name" width="160px" cell={props => <td>{props.dataItem.project?.name || ''}</td>} />
+						<GridColumn field="lastModifiedUtc" title="Last Modified At" width="220px" cell={props => <td>{formatDate(props.dataItem.lastModifiedUtc)}</td>} />
+						<GridColumn field="lastModifiedBy" title="Last Modified By" width="220px" cell={props => <td>{getUserName(props.dataItem.lastModifiedBy)}</td>} />
+						<GridColumn title="Actions" width="160px" cell={ActionCell} />
+					</Grid>
+				</div>
+			</div>
+		</main>
+	);
+}
+
+export default SiteVisitAll;

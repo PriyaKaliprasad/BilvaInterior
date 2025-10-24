@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, GridColumn } from '@progress/kendo-react-grid';
+// import { Grid, GridColumn } from '@progress/kendo-react-grid';
+import EditableLineItemsGrid from '../../components/EditableLineItemsGrid';
 import { Form, Field, FormElement, FieldWrapper } from '@progress/kendo-react-form';
 import { Button } from '@progress/kendo-react-buttons';
 import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import FormInput from '../../components/Form/FormInput';
+import FormMaskedInput from '../../components/Form/FormMaskedInput';
 import FormDatePicker from '../../components/Form/FormDatePicker';
 import FormDropDown from '../../components/Form/FormDropDown';
 import FormUpload from '../../components/Form/FormUpload';
 import UploadWithPreview from '../../components/UploadWithPreview';
 import CustomFormFieldSet from '../../components/Form/CustomFormFieldSet';
-import { nameValidator, emailValidator, phoneValidator, requiredValidator } from '../../utils/validators';
+import { nameValidator, emailValidator, phoneValidator, requiredValidator, minMaxLengthValidator } from '../../utils/validators';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './SiteVisitDialog.css';
 import api from '../../api/axios';
@@ -24,6 +26,19 @@ const reportTypes = [
 ];
 
 const SiteVisitNew = () => {
+	// Employee state for dropdown
+	const [employees, setEmployees] = useState([]);
+	const [employeesLoading, setEmployeesLoading] = useState(false);
+	const [employeesError, setEmployeesError] = useState(null);
+	// Define columns for manual grid
+	const lineItemColumns = [
+		{ field: 'description', title: 'Description' },
+		{ field: 'uom', title: 'UOM' },
+		{ field: 'boqQty', title: 'BOQ quantity', type: 'numeric' },
+		{ field: 'onsiteQty', title: 'On-site work quantity', type: 'numeric' },
+		{ field: 'finalReview', title: 'Final Review' },
+		{ field: 'remarks', title: 'Remarks' },
+	];
 
 	// Projects state
 	const [projects, setProjects] = useState([]);
@@ -38,14 +53,38 @@ const SiteVisitNew = () => {
 			try {
 				const res = await api.get('/api/projects');
 				console.log(res.data)
-				setProjects(res.data || []);
+				// Sort projects alphabetically by projectName
+				const sortedProjects = (res.data || []).slice().sort((a, b) => {
+					if (!a.projectName) return -1;
+					if (!b.projectName) return 1;
+					return a.projectName.localeCompare(b.projectName);
+				});
+				setProjects(sortedProjects);
 			} catch (err) {
 				setProjectsError('Failed to load projects');
 			} finally {
 				setProjectsLoading(false);
 			}
 		};
+		const fetchEmployees = async () => {
+			setEmployeesLoading(true);
+			setEmployeesError(null);
+			try {
+				const res = await api.get('/api/employee');
+				// Map employees to have a 'name' property as 'firstName lastName'
+				const mappedEmployees = (res.data || []).map(emp => ({
+					...emp,
+					name: [emp.firstName, emp.lastName].filter(Boolean).join(' ').trim() || emp.name || '',
+				}));
+				setEmployees(mappedEmployees);
+			} catch (err) {
+				setEmployeesError('Failed to load employees');
+			} finally {
+				setEmployeesLoading(false);
+			}
+		};
 		fetchProjects();
+		fetchEmployees();
 	}, []);
 
 	// Helper to create an empty line item
@@ -61,34 +100,7 @@ const SiteVisitNew = () => {
 
 	// Initial data with one empty row at the end
 	const [lineItems, setLineItems] = useState([
-		{
-			id: 1,
-			description: 'Wall Painting',
-			uom: 'Sqft',
-			boqQty: 120,
-			onsiteQty: 110,
-			finalReview: 'OK',
-			remarks: 'Minor touchups',
-		},
-		{
-			id: 2,
-			description: 'Floor Tiling',
-			uom: 'Sqft',
-			boqQty: 200,
-			onsiteQty: 195,
-			finalReview: 'Good',
-			remarks: 'Completed',
-		},
-		{
-			id: 3,
-			description: 'Ceiling Lights',
-			uom: 'Nos',
-			boqQty: 30,
-			onsiteQty: 28,
-			finalReview: 'Pending',
-			remarks: 'Awaiting delivery',
-		},
-		createEmptyLineItem(4),
+		createEmptyLineItem(1),
 	]);
 
 	// For in-cell editing
@@ -254,7 +266,15 @@ const SiteVisitNew = () => {
 			finalReview: item.finalReview,
 			remarks: item.remarks
 		}));
-		formData.append('lineItems', JSON.stringify(lineItemsPayload));
+		// formData.append('lineItems', JSON.stringify(lineItemsPayload));
+		nonEmptyLineItems.forEach((item, index) => {
+			formData.append(`LineItems[${index}].Description`, item.description || '');
+			formData.append(`LineItems[${index}].UOM`, item.uom || '');
+			formData.append(`LineItems[${index}].BOQ`, item.boqQty || '');
+			formData.append(`LineItems[${index}].OnsiteWorkQuantity`, item.onsiteQty || '');
+			formData.append(`LineItems[${index}].FinalReview`, item.finalReview || '');
+			formData.append(`LineItems[${index}].Remarks`, item.remarks || '');
+		});
 
 		// For debugging: log FormData keys and values
 		for (let pair of formData.entries()) {
@@ -311,7 +331,7 @@ const SiteVisitNew = () => {
 											dataItemKey="id"
 											value={projects.find(p => p.id === props.value) || null}
 											onChange={e => props.onChange({ value: e.value ? e.value.id : null })}
-											filterable={true}
+											// filterable={true}
 											loading={projectsLoading}
 											disabled={projectsLoading || !!projectsError}
 											style={{ width: "100%" }}
@@ -332,7 +352,6 @@ const SiteVisitNew = () => {
 								<Field
 									name="reportType"
 									label="Report Type"
-									validator={nameValidator}
 									component={FormDropDown}
 									data={reportTypes}
 									textField="text"
@@ -344,7 +363,6 @@ const SiteVisitNew = () => {
 									name="reportDate"
 									label="Report Date"
 									component={FormDatePicker}
-									validator={nameValidator}
 								/>
 							</div>
 						</div>
@@ -354,39 +372,51 @@ const SiteVisitNew = () => {
 					<CustomFormFieldSet legend="Store/Project Details">
 						<div className="row g-3">
 							<div className="col-md-6">
-								<Field name="storeName" label="Store Name" component={FormInput} validator={nameValidator} />
+								<Field name="storeName" label="Store Name" component={FormInput} validator={minMaxLengthValidator} />
 							</div>
 							<div className="col-md-6">
-								<Field name="storeLocation" label="Store Location" component={FormInput} validator={nameValidator} />
-							</div>
-
-							<div className="col-md-6">
-								<Field name="storeManagerName" label="Store Manager Name" component={FormInput} validator={nameValidator} />
-							</div>
-							<div className="col-md-6">
-								<Field name="vendorCode" label="Vendor Code" component={FormInput} validator={nameValidator} />
-							</div>
-
-
-							<div className="col-md-6">
-								<Field name="storeCode" label="Store Code" component={FormInput} validator={nameValidator} />
-							</div>
-							<div className="col-md-6">
-								<Field name="sapCode" label="SAP Code" component={FormInput} validator={nameValidator} />
+								<Field name="storeLocation" label="Store Location" component={FormInput} validator={minMaxLengthValidator} />
 							</div>
 
 							<div className="col-md-6">
-								<Field name="storeManagerNumber" label="Store Manager Number" component={FormInput} validator={phoneValidator} />
+								<Field name="storeManagerName" label="Store Manager Name" component={FormInput} validator={minMaxLengthValidator} />
 							</div>
 							<div className="col-md-6">
-								<Field name="personVisitName" label="Person Visit Name" component={FormInput} validator={nameValidator} />
+								<Field name="vendorCode" label="Vendor Code" component={FormInput} validator={minMaxLengthValidator} />
+							</div>
+
+
+							<div className="col-md-6">
+								<Field name="storeCode" label="Store Code" component={FormInput} validator={minMaxLengthValidator} />
+							</div>
+							<div className="col-md-6">
+								<Field name="sapCode" label="SAP Code" component={FormInput} validator={minMaxLengthValidator} />
+							</div>
+
+							<div className="col-md-6">
+								<Field name="storeManagerNumber" label="Store Manager Number" component={FormMaskedInput} validator={phoneValidator} mask="9999999999" />
+							</div>
+							<div className="col-md-6">
+								<Field
+									name="personVisitId"
+									label="Person Visit Name"
+									required={true}
+									component={FormDropDown}
+									data={employees}
+									textField="name"
+									dataItemKey="id"
+									loading={employeesLoading}
+									disabled={employeesLoading || !!employeesError}
+									placeholder={employeesLoading ? 'Loading...' : (employeesError ? 'Failed to load' : 'Select Employee')}
+								/>
+								{employeesError && <div className="text-danger small mt-1">{employeesError}</div>}
 							</div>
 
 							<div className="col-md-6">
 								<Field name="storeMailId" label="Store Mail ID" component={FormInput} validator={emailValidator} />
 							</div>
 							<div className="col-md-6">
-								<Field name="storeAddress" label="Store Address" component={FormInput} validator={nameValidator} />
+								<Field name="storeAddress" label="Store Address" component={FormInput} validator={minMaxLengthValidator} />
 							</div>
 						</div>
 					</CustomFormFieldSet>
@@ -425,38 +455,13 @@ const SiteVisitNew = () => {
 
 					{/* Visiting line items */}
 					<CustomFormFieldSet legend="Visiting line items">
-						{/* Removed Add item button */}
 						<div className="row">
 							<div className="col-12">
-								<div className="table-responsive" style={{ overflowX: 'auto' }}>
-									<Grid
-										style={{ minHeight: 200, minWidth: 900 }}
-										data={lineItems}
-										pageable={false}
-										resizable={true}
-										className="k-table-bordered w-100"
-										editable={true}
-										onItemChange={handleLineItemChange}
-										dataItemKey="id"
-									>
-										<GridColumn field="description" title="Description" />
-										<GridColumn field="uom" title="UOM" />
-										<GridColumn field="boqQty" title="BOQ quantity" editor="numeric" />
-										<GridColumn field="onsiteQty" title="On-site work quantity" editor="numeric" />
-										<GridColumn field="finalReview" title="Final Review" />
-										<GridColumn field="remarks" title="Remarks" />
-										<GridColumn
-											title="Actions"
-											cell={props => (
-												<td>
-													<Button type="button" size="small" icon="delete" onClick={() => handleDeleteLineItem(props.dataItem.id)} />
-												</td>
-											)}
-										/>
-									</Grid>
-								</div>
-								{/* Kendo Dialog for add/edit */}
-
+								<EditableLineItemsGrid
+									value={lineItems}
+									onChange={setLineItems}
+									columns={lineItemColumns}
+								/>
 							</div>
 						</div>
 					</CustomFormFieldSet>
