@@ -142,7 +142,7 @@
    ============================ */
 
 /* Base action button (small outlined square to match screenshot #1) */
-.action-btn {
+.vendors-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -160,7 +160,7 @@
 }
 
 /* If you use Kendo button classes, keep baseline but ensure outlined look */
-.action-btn.k-button {
+.vendors-action-btn.k-button {
   background: #fff;
   border-radius: 6px;
   padding: 0;
@@ -169,21 +169,21 @@
 }
 
 /* Hover / focus / active states */
-.action-btn:hover {
+.vendors-action-btn:hover {
   background: #f1f5f9;
   transform: translateY(-1px);
   box-shadow: 0 6px 12px rgba(7, 10, 25, 0.04);
 }
-.action-btn:active {
+.vendors-action-btn:active {
   transform: translateY(0);
 }
-.action-btn:focus {
+.vendors-action-btn:focus {
   outline: 3px solid rgba(59,130,246,0.12); /* faint focus ring */
   outline-offset: 2px;
 }
 
 /* Kendo icon specific tweaks — make icon small and inherit color */
-.action-btn .k-icon {
+.vendors-action-btn .k-icon {
   font-size: 14px;
   width: 14px;
   height: 14px;
@@ -193,12 +193,12 @@
 }
 
 /* If the icon appears too large on some themes, force smaller line-height */
-.action-btn .k-button-icon {
+.vendors-action-btn .k-button-icon {
   line-height: 14px;
 }
 
 /* Small-screen spacing fix */
 @media (max-width: 480px) {
   .vendors-col.actions { width: 100px; }
-  .action-btn { width: 30px; height: 30px; border-radius: 6px; }
+  .vendors-action-btn { width: 30px; height: 30px; border-radius: 6px; }
 }

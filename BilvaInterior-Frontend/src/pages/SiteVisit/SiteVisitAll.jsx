@@ -114,18 +114,7 @@ const SiteVisitAll = () => {
 	if (editId) {
 		return (
 			<>
-				<div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
-					<Button
-						icon="arrow-left"
-						size="small"
-						onClick={() => setEditId(null)}
-						className="action-btn back-btn"
-						style={{ marginRight: 8 }}
-					>
-						<span className="tieup-action-btn-text">Back</span>
-					</Button>
-				</div>
-				<SiteVisitEdit siteVisitId={editId} />
+				<SiteVisitEdit siteVisitId={editId} onBack={() => setEditId(null)} />
 			</>
 		);
 	}

@@ -1,7 +1,12 @@
-const minMaxLengthValidator = (value) => {
+const minMaxLengthWarning = (value) => {
   if (value?.length < 5) return 'Should be at least 5 characters long.';
   if (value?.length > 100) return 'Should not exceed 100 characters.';
   return '';
+};
+
+// Non-blocking validator: always returns undefined
+const minMaxLengthValidator = (value) => {
+  return undefined;
 };
 const nameValidator = (value) =>
     !value ? 'Required' : value.length < 3 ? 'Should be at least 3 characters long.' : '';
@@ -9,7 +14,13 @@ const nameValidator = (value) =>
 const emailRegex = new RegExp(/\S+@\S+\.\S+/);
 const emailValidator = (value) => (emailRegex.test(value) ? '' : 'Please enter a valid email.');
 
-const passwordValidator = (value) => (value && value.length >= 8 ? '' : 'Password must be at least 8 symbols.');
+const emailWarning = (value) => {
+  if (!value) return '';
+  if (!emailRegex.test(value)) return 'Please enter a valid email.';
+  return '';
+};
+
+const passwordValidator = (value) => (value && value.length >= 8 ? '' : 'Password must be at least 8 characters.');
 
 const phoneValidator = (value) => {
   // Remove everything except digits
@@ -23,6 +34,14 @@ const phoneValidator = (value) => {
     return "Phone must be 10 digits.";
   }
 
+  return "";
+};
+
+const phoneWarning = (value) => {
+  // Only show warning if value is present but not valid
+  const digits = (value || "").replace(/\D/g, "");
+  if (!value) return "";
+  if (digits.length !== 10) return "Phone should be 10 digits.";
   return "";
 };
 
@@ -57,4 +76,4 @@ const requiredValidator = (value) => {
     return "";
   };
 
-export { nameValidator, emailValidator, passwordValidator, phoneValidator, pincodeValidator, imageValidator, requiredValidator, minMaxLengthValidator };
+export { nameValidator, emailValidator, emailWarning, passwordValidator, phoneValidator, phoneWarning, pincodeValidator, imageValidator, requiredValidator, minMaxLengthValidator, minMaxLengthWarning };

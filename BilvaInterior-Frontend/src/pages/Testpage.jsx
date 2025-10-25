@@ -24,12 +24,14 @@ const Testpage = () => {
     useEffect(() => {
         const fetchSiteVisit = async () => {
             try {
-                const response = await api.get("/api/sitevisit/4");
+                const response = await api.get("/api/sitevisit/1");
                 const docs = response.data.documents || [];
-                const existingFiles = docs.map(toKendoFile);
+                // Only keep images (fileType starts with 'image/')
+                const imageDocs = docs.filter(doc => doc.fileType && doc.fileType.startsWith('image/'));
+                const existingFiles = imageDocs.map(toKendoFile);
                 setFiles(existingFiles);
                 if (existingFiles.length > 0) setSelectedFile(existingFiles[0]);
-                console.log("Fetched Documents:", existingFiles);
+                console.log("Fetched Image Documents:", existingFiles);
             } catch (error) {
                 console.error("API Error:", error);
             }
@@ -66,21 +68,36 @@ const Testpage = () => {
         });
     };
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
     const formData = new FormData();
 
     // Add other fields
     formData.append("siteVisitId", 4);
     formData.append("reportType", 1);
 
-    files.forEach((file) => {
+    // Helper to fetch blob for existing files
+    const fetchBlob = async (url) => {
+        const response = await fetch(url);
+        return await response.blob();
+    };
+
+    // Prepare promises for all files
+    const filePromises = files.map(async (file) => {
         if (!file.fromServer && file.getRawFile) {
-            // Only new files are appended as IFormFile
-            formData.append("documents", file.getRawFile());
+            // New files: append as Blob
+            formData.append("documents", file.getRawFile(), file.name);
+        } else if (file.fromServer && file.src) {
+            // Existing files: fetch blob and append
+            try {
+                const blob = await fetchBlob(file.src);
+                formData.append("documents", blob, file.name);
+            } catch (err) {
+                console.error("Failed to fetch blob for", file.name, err);
+            }
         }
-        // If you want to delete old files, you can track them separately
-        // e.g., formData.append("deletedFileIds", file.uid) for removed server files
     });
+
+    await Promise.all(filePromises);
 
     // Log for debug
     for (let [key, value] of formData.entries()) {

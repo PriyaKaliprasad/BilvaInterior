@@ -2,13 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import EditableLineItemsGrid from '../../../components/EditableLineItemsGrid';
 import { Button } from '@progress/kendo-react-buttons';
-import { Input, MaskedTextBox } from '@progress/kendo-react-inputs';
+import { TextBox, MaskedTextBox } from '@progress/kendo-react-inputs';
 import { DatePicker } from '@progress/kendo-react-dateinputs';
 import { DropDownList } from '@progress/kendo-react-dropdowns';
 import api from '../../../api/axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../SiteVisit/SiteVisitDialog.css';
 import { nameValidator, emailValidator, phoneValidator, requiredValidator, minMaxLengthValidator } from '../../../utils/validators';
+import { minMaxLengthWarning, emailWarning, phoneWarning } from '../../../utils/validators';
+import UploadPreviewEdit from './UploadPreviewEdit';
+import UploadPreviewDocuments from './UploadPreviewDocuments';
+import CustomFormFieldSet from '../../../components/Form/CustomFormFieldSet';
+import FloatingLabelWrapper from '../../../components/Form/FloatingLabelWrapper/FloatingLabelWrapper';
+import { FieldWrapper } from '@progress/kendo-react-form';
 
 const reportTypes = [
 	{ text: 'Site Visit', value: 0 },
@@ -17,33 +23,7 @@ const reportTypes = [
 	{ text: 'Delivery Challan', value: 3 },
 ];
 
-// Image preview component for documents
-const ImageDocumentsPreview = ({ documents, onRemove }) => {
-	const apiBase = import.meta.env.VITE_API_BASE_URL;
-	return (
-		<div className="d-flex flex-wrap gap-2">
-			{documents.filter(doc => doc.fileType && doc.fileType.startsWith('image')).map(doc => (
-				<div key={doc.id} className="position-relative" style={{ width: 120 }}>
-					<img
-						src={apiBase + doc.filePathOrUrl}
-						alt={doc.fileName}
-						style={{ width: '100px', height: '100px', objectFit: 'cover', border: '1px solid #ccc', borderRadius: 8 }}
-					/>
-					<Button
-						style={{ position: 'absolute', top: 2, right: 2, minWidth: 24, padding: 0 }}
-						themeColor="error"
-						size="small"
-						onClick={() => onRemove(doc.id)}
-					>
-						×
-					</Button>
-				</div>
-			))}
-		</div>
-	);
-};
-
-const SiteVisitEdit = ({ siteVisitId }) => {
+const SiteVisitEdit = ({ siteVisitId, onBack }) => {
 	// State for form fields
 	const [form, setForm] = useState({});
 	const [loading, setLoading] = useState(true);
@@ -63,6 +43,12 @@ const SiteVisitEdit = ({ siteVisitId }) => {
 	// Photos and documents
 	const [photos, setPhotos] = useState([]);
 	const [documents, setDocuments] = useState([]);
+	const [imageFiles, setImageFiles] = useState([]); // for UploadPreviewEdit (images)
+	const [docFiles, setDocFiles] = useState([]); // for UploadPreviewDocuments (non-images)
+
+	// Last modified info
+	const [lastModifiedBy, setLastModifiedBy] = useState('');
+	const [lastModifiedAt, setLastModifiedAt] = useState(null);
 
 	// Fetch projects and employees
 	useEffect(() => {
@@ -99,6 +85,7 @@ const SiteVisitEdit = ({ siteVisitId }) => {
 		api.get(`/api/sitevisit/${siteVisitId}`)
 			.then(res => {
 				const data = res.data;
+				console.log(data);
 				// Project
 				let projectValue = '';
 				if (data.projectId && Array.isArray(projects)) {
@@ -139,6 +126,17 @@ const SiteVisitEdit = ({ siteVisitId }) => {
 					storeAddress: data.storeAddress || '',
 					notes: data.notes || '',
 				});
+				// Last modified info
+				let modifiedBy = '';
+				if (data.lastModifiedBy && typeof data.lastModifiedBy === 'object' && data.lastModifiedBy.email) {
+					modifiedBy = data.lastModifiedBy.email;
+				} else if (typeof data.lastModifiedBy === 'string') {
+					modifiedBy = data.lastModifiedBy;
+				} else if (data.lastModifiedByName) {
+					modifiedBy = data.lastModifiedByName;
+				}
+				setLastModifiedBy(modifiedBy);
+				setLastModifiedAt(data.lastModifiedUtc || null);
 				// Line items
 				if (Array.isArray(data.lineItems) && data.lineItems.length) {
 					const mappedLineItems = data.lineItems.map((item, idx) => ({
@@ -199,11 +197,6 @@ const SiteVisitEdit = ({ siteVisitId }) => {
 		setForm(prev => ({ ...prev, [name]: value }));
 	};
 
-	// Remove image document
-	const handleRemoveDocument = (id) => {
-		setDocuments(prev => prev.filter(doc => doc.id !== id));
-	};
-
 	// Submit handler
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -217,6 +210,7 @@ const SiteVisitEdit = ({ siteVisitId }) => {
 			setErrorMessage('Please fix validation errors.');
 			return;
 		}
+
 		// Prepare FormData
 		const formData = new FormData();
 		Object.entries(form).forEach(([key, value]) => {
@@ -229,7 +223,6 @@ const SiteVisitEdit = ({ siteVisitId }) => {
 		});
 		// Line items: exclude the last empty row
 		const nonEmptyLineItems = lineItems.filter((item, idx) => {
-			// If last row, check if all fields except id are empty
 			if (idx === lineItems.length - 1) {
 				return Object.keys(item).filter(k => k !== 'id').some(k => item[k]);
 			}
@@ -243,216 +236,377 @@ const SiteVisitEdit = ({ siteVisitId }) => {
 			formData.append(`LineItems[${index}].FinalReview`, item.finalReview || '');
 			formData.append(`LineItems[${index}].Remarks`, item.remarks || '');
 		});
-		// Photos and documents upload logic can be added here
-		try {
-			let response;
-			if (siteVisitId) {
-				response = await api.put(`/api/sitevisit/${siteVisitId}`, formData, {
-					headers: { 'Content-Type': 'multipart/form-data' },
-				});
-			} else {
-				response = await api.post('/api/sitevisit', formData, {
-					headers: { 'Content-Type': 'multipart/form-data' },
-				});
-			}
-			setSuccessMessage('✅ Site visit submitted successfully!');
-			setErrorMessage('');
-			setTimeout(() => setSuccessMessage(''), 5000);
-		} catch (error) {
-			setErrorMessage('❌ Submission failed.');
-			setSuccessMessage('');
-			setTimeout(() => setErrorMessage(''), 5000);
+
+		// Add images from imageFiles (from UploadPreviewEdit)
+		const fetchBlob = async (url) => {
+			const response = await fetch(url);
+			return await response.blob();
+		};
+		// Helper to append files (images or docs)
+		const appendFilesToFormData = async (filesArr) => {
+			const promises = (filesArr || []).map(async (file) => {
+				if (!file.fromServer && file.getRawFile) {
+					formData.append('documents', file.getRawFile(), file.name);
+				} else if (file.fromServer && file.src) {
+					try {
+						const blob = await fetchBlob(file.src);
+						formData.append('documents', blob, file.name);
+					} catch (err) {
+						console.error('Failed to fetch blob for', file.name, err);
+					}
+				}
+			});
+			await Promise.all(promises);
+		};
+		await appendFilesToFormData(imageFiles);
+		await appendFilesToFormData(docFiles);
+
+		// For debugging: log FormData keys and values
+		for (let pair of formData.entries()) {
+			console.log(pair[0] + ':', pair[1]);
 		}
+
+		try {
+		 let response;
+		 if (siteVisitId) {
+		     response = await api.put(`/api/sitevisit/${siteVisitId}`, formData, {
+		         headers: { 'Content-Type': 'multipart/form-data' },
+		     });
+		 } else {
+		     response = await api.post('/api/sitevisit', formData, {
+		         headers: { 'Content-Type': 'multipart/form-data' },
+		     });
+		 }
+		 setSuccessMessage('✅ Site visit submitted successfully!');
+		 setErrorMessage('');
+		 setTimeout(() => setSuccessMessage(''), 5000);
+		} catch (error) {
+		 setErrorMessage('❌ Submission failed.');
+		 setSuccessMessage('');
+		 setTimeout(() => setErrorMessage(''), 5000);
+		}
+	};
+
+
+	// Format last modified date to DD/MM/YY and IST time
+	const getLastModifiedDisplay = () => {
+		if (!lastModifiedAt) return '';
+		const d = new Date(lastModifiedAt);
+		// Convert to IST
+		const istOffset = 5.5 * 60 * 60 * 1000;
+		const istDate = new Date(d.getTime() + istOffset);
+		const day = String(istDate.getDate()).padStart(2, '0');
+		const month = String(istDate.getMonth() + 1).padStart(2, '0');
+		const year = String(istDate.getFullYear()).slice(-2);
+		const hours = String(istDate.getHours()).padStart(2, '0');
+		const mins = String(istDate.getMinutes()).padStart(2, '0');
+		return `${day}/${month}/${year} ${hours}:${mins} IST`;
 	};
 
 	if (loading) return <div>Loading...</div>;
 
 	return (
+		<>
+			{/* Header with back button and last modified info */}
+			<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: '0.5rem' }}>
+				<Button
+					icon="arrow-left"
+					size="small"
+					onClick={onBack}
+					className="action-btn back-btn"
+				>
+					<span className="tieup-action-btn-text">Back</span>
+				</Button>
+				
+				{/* Last modified info on right side */}
+				{(lastModifiedBy || lastModifiedAt) && (
+					<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+						{lastModifiedBy && (
+							<span className="text-muted small" style={{ fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+								<span style={{ fontWeight: 500 }}>Last modified by:</span> {lastModifiedBy}
+							</span>
+						)}
+						{lastModifiedAt && (
+							<span className="text-muted small" style={{ fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+								<span style={{ fontWeight: 500 }}>Last modified at:</span> {getLastModifiedDisplay()}
+							</span>
+						)}
+					</div>
+				)}
+			</div>
+
 		<form className="container py-4" onSubmit={handleSubmit}>
 
 			{/* Project Dropdown */}
-			<div className="mb-4 col-12 col-md-6">
-				<label className="form-label">Project</label>
-				<DropDownList
-					data={projects}
-					textField="projectName"
-					dataItemKey="id"
-					value={projects.find(p => p.id === form.projectId) || null}
-					onChange={e => handleDropDownChange('projectId', e.value ? e.value.id : null)}
-					loading={projectsLoading}
-					disabled={projectsLoading || !!projectsError}
-					style={{ width: "100%" }}
-					size={'large'}
-					placeholder={projectsLoading ? 'Loading...' : (projectsError ? 'Failed to load' : 'Select Project')}
-				/>
-				{projectsError && <div className="text-danger small mt-1">{projectsError}</div>}
-			</div>
-			{/* Report Info */}
-			<fieldset className="mb-4">
-				<legend>Report Info</legend>
-				<div className="row g-3">
-					<div className="col-md-6">
-						<label className="form-label">Report Type</label>
+			<FieldWrapper>
+				<div className="k-form-field-wrap mb-4 col-12 col-md-6">
+					<FloatingLabelWrapper label={'Project'}>
 						<DropDownList
-							data={reportTypes}
-							textField="text"
-							dataItemKey="value"
-							value={reportTypes.find(rt => rt.value === form.reportType) || null}
-							onChange={e => handleDropDownChange('reportType', e.value ? e.value.value : null)}
-							style={{ width: "100%" }}
-						/>
-					</div>
-					<div className="col-md-6">
-						<label className="form-label">Report Date</label>
-						<DatePicker
-							value={form.reportDate || null}
-							onChange={e => handleDateChange('reportDate', e.value)}
-							style={{ width: "100%" }}
-						/>
-					</div>
-				</div>
-			</fieldset>
-			{/* Store/Project Details */}
-			<fieldset className="mb-4">
-				<legend>Store/Project Details</legend>
-				<div className="row g-3">
-					<div className="col-md-6">
-						<label className="form-label">Store Name</label>
-						<Input
-							name="storeName"
-							value={form.storeName || ''}
-							onChange={handleInputChange}
-							style={{ width: "100%" }}
-						/>
-					</div>
-					<div className="col-md-6">
-						<label className="form-label">Store Location</label>
-						<Input
-							name="storeLocation"
-							value={form.storeLocation || ''}
-							onChange={handleInputChange}
-							style={{ width: "100%" }}
-						/>
-					</div>
-					<div className="col-md-6">
-						<label className="form-label">Store Manager Name</label>
-						<Input
-							name="storeManagerName"
-							value={form.storeManagerName || ''}
-							onChange={handleInputChange}
-							style={{ width: "100%" }}
-						/>
-					</div>
-					<div className="col-md-6">
-						<label className="form-label">Vendor Code</label>
-						<Input
-							name="vendorCode"
-							value={form.vendorCode || ''}
-							onChange={handleInputChange}
-							style={{ width: "100%" }}
-						/>
-					</div>
-					<div className="col-md-6">
-						<label className="form-label">Store Code</label>
-						<Input
-							name="storeCode"
-							value={form.storeCode || ''}
-							onChange={handleInputChange}
-							style={{ width: "100%" }}
-						/>
-					</div>
-					<div className="col-md-6">
-						<label className="form-label">SAP Code</label>
-						<Input
-							name="sapCode"
-							value={form.sapCode || ''}
-							onChange={handleInputChange}
-							style={{ width: "100%" }}
-						/>
-					</div>
-					<div className="col-md-6">
-						<label className="form-label">Store Manager Number</label>
-						<MaskedTextBox
-							name="storeManagerNumber"
-							value={form.storeManagerNumber || ''}
-							onChange={handleInputChange}
-							mask="9999999999"
-							style={{ width: "100%" }}
-						/>
-					</div>
-					<div className="col-md-6">
-						<label className="form-label">Person Visit Name</label>
-						<DropDownList
-							data={employees}
-							textField="name"
+							data={projects}
+							textField="projectName"
 							dataItemKey="id"
-							value={employees.find(e => e.id === form.personVisitId) || null}
-							onChange={e => handleDropDownChange('personVisitId', e.value ? e.value.id : null)}
-							loading={employeesLoading}
-							disabled={employeesLoading || !!employeesError}
+							value={projects.find(p => p.id === form.projectId) || null}
+							onChange={e => handleDropDownChange('projectId', e.value ? e.value.id : null)}
+							loading={projectsLoading}
+							disabled={projectsLoading || !!projectsError}
 							style={{ width: "100%" }}
-							placeholder={employeesLoading ? 'Loading...' : (employeesError ? 'Failed to load' : 'Select Employee')}
+							size={'large'}
+							placeholder={projectsLoading ? 'Loading...' : (projectsError ? 'Failed to load' : 'Select Project')}
 						/>
-						{employeesError && <div className="text-danger small mt-1">{employeesError}</div>}
-					</div>
-					<div className="col-md-6">
-						<label className="form-label">Store Mail ID</label>
-						<Input
-							name="storeMailId"
-							value={form.storeMailId || ''}
-							onChange={handleInputChange}
-							style={{ width: "100%" }}
-						/>
-					</div>
-					<div className="col-md-6">
-						<label className="form-label">Store Address</label>
-						<Input
-							name="storeAddress"
-							value={form.storeAddress || ''}
-							onChange={handleInputChange}
-							style={{ width: "100%" }}
-						/>
+					</FloatingLabelWrapper>
+					{projectsError && <div className="text-danger small mt-1">{projectsError}</div>}
+				</div>
+			</FieldWrapper>
+
+			{/* Report Info */}
+			<CustomFormFieldSet legend="Report Info">
+				<div className="mt-4">
+					<div className="row g-3">
+						<div className="col-md-6">
+							<FloatingLabelWrapper label="Report Type">
+								<DropDownList
+									data={reportTypes}
+									textField="text"
+									dataItemKey="value"
+									value={reportTypes.find(rt => rt.value === form.reportType) || null}
+									onChange={e => handleDropDownChange('reportType', e.value ? e.value.value : null)}
+									style={{ width: "100%" }}
+									size="large"
+									className="mb-3"
+								/>
+							</FloatingLabelWrapper>
+						</div>
+						<div className="col-md-6">
+							<FloatingLabelWrapper label="Report Date" value={form.reportDate}>
+								<DatePicker
+									value={form.reportDate || null}
+									onChange={e => handleDateChange('reportDate', e.value)}
+									style={{ width: "100%" }}
+									size="large"
+									className="mb-3"
+								/>
+							</FloatingLabelWrapper>
+						</div>
 					</div>
 				</div>
-			</fieldset>
+			</CustomFormFieldSet>
+
+			{/* Store/Project Details */}
+			<CustomFormFieldSet legend="Store/Project Details">
+				<div className="mt-4">
+					<div className="row g-3">
+						<div className="col-md-6">
+							<FloatingLabelWrapper label="Store Name" value={form.storeName}>
+								<TextBox
+									name="storeName"
+									value={form.storeName || ''}
+									onChange={handleInputChange}
+									style={{ width: "100%" }}
+									size={"large"}
+									className="mb-3"
+								/>
+							</FloatingLabelWrapper>
+							{minMaxLengthWarning(form.storeName) && (
+								<div className="text-warning small mt-1">{minMaxLengthWarning(form.storeName)}</div>
+							)}
+						</div>
+						<div className="col-md-6">
+							<FloatingLabelWrapper label="Store Location" value={form.storeLocation}>
+								<TextBox
+									name="storeLocation"
+									value={form.storeLocation || ''}
+									onChange={handleInputChange}
+									style={{ width: "100%" }}
+									size="large"
+									className="mb-3"
+								/>
+							</FloatingLabelWrapper>
+							{minMaxLengthWarning(form.storeLocation) && (
+								<div className="text-warning small mt-1">{minMaxLengthWarning(form.storeLocation)}</div>
+							)}
+						</div>
+						<div className="col-md-6">
+							<FloatingLabelWrapper label="Store Manager Name" value={form.storeManagerName}>
+								<TextBox
+									name="storeManagerName"
+									value={form.storeManagerName || ''}
+									onChange={handleInputChange}
+									style={{ width: "100%" }}
+									size="large"
+									className="mb-3"
+								/>
+							</FloatingLabelWrapper>
+							{minMaxLengthWarning(form.storeManagerName) && (
+								<div className="text-warning small mt-1">{minMaxLengthWarning(form.storeManagerName)}</div>
+							)}
+						</div>
+						<div className="col-md-6">
+							<FloatingLabelWrapper label="Vendor Code" value={form.vendorCode}>
+								<TextBox
+									name="vendorCode"
+									value={form.vendorCode || ''}
+									onChange={handleInputChange}
+									style={{ width: "100%" }}
+									size="large"
+									className="mb-3"
+								/>
+							</FloatingLabelWrapper>
+							{minMaxLengthWarning(form.vendorCode) && (
+								<div className="text-warning small mt-1">{minMaxLengthWarning(form.vendorCode)}</div>
+							)}
+						</div>
+						<div className="col-md-6">
+							<FloatingLabelWrapper label="Store Code" value={form.storeCode}>
+								<TextBox
+									name="storeCode"
+									value={form.storeCode || ''}
+									onChange={handleInputChange}
+									style={{ width: "100%" }}
+									size="large"
+									className="mb-3"
+								/>
+							</FloatingLabelWrapper>
+							{minMaxLengthWarning(form.storeCode) && (
+								<div className="text-warning small mt-1">{minMaxLengthWarning(form.storeCode)}</div>
+							)}
+						</div>
+						<div className="col-md-6">
+							<FloatingLabelWrapper label="SAP Code" value={form.sapCode}>
+								<TextBox
+									name="sapCode"
+									value={form.sapCode || ''}
+									onChange={handleInputChange}
+									style={{ width: "100%" }}
+									size="large"
+									className="mb-3"
+								/>
+							</FloatingLabelWrapper>
+							{minMaxLengthWarning(form.sapCode) && (
+								<div className="text-warning small mt-1">{minMaxLengthWarning(form.sapCode)}</div>
+							)}
+						</div>
+						<div className="col-md-6">
+							<FloatingLabelWrapper label="Store Manager Number" value={form.storeManagerNumber}>
+								<MaskedTextBox
+									name="storeManagerNumber"
+									value={form.storeManagerNumber || ''}
+									onChange={handleInputChange}
+									mask="9999999999"
+									style={{ width: "100%" }}
+									size="large"
+									className="mb-3"
+								/>
+							</FloatingLabelWrapper>
+							{phoneWarning(form.storeManagerNumber) && (
+								<div className="text-warning small mt-1">{phoneWarning(form.storeManagerNumber)}</div>
+							)}
+						</div>
+						<div className="col-md-6">
+							<FloatingLabelWrapper label="Person Visit Name">
+								<DropDownList
+									data={employees}
+									textField="name"
+									dataItemKey="id"
+									value={employees.find(e => e.id === form.personVisitId) || null}
+									onChange={e => handleDropDownChange('personVisitId', e.value ? e.value.id : null)}
+									loading={employeesLoading}
+									disabled={employeesLoading || !!employeesError}
+									style={{ width: "100%" }}
+									size="large"
+									placeholder={employeesLoading ? 'Loading...' : (employeesError ? 'Failed to load' : 'Select Employee')}
+									className="mb-3"
+								/>
+							</FloatingLabelWrapper>
+							{employeesError && <div className="text-danger small mt-1">{employeesError}</div>}
+						</div>
+						<div className="col-md-6">
+							<FloatingLabelWrapper label="Store Mail ID" value={form.storeMailId}>
+								<TextBox
+									name="storeMailId"
+									value={form.storeMailId || ''}
+									onChange={handleInputChange}
+									style={{ width: "100%" }}
+									size="large"
+									className="mb-3"
+								/>
+							</FloatingLabelWrapper>
+							{emailWarning(form.storeMailId) && (
+								<div className="text-warning small mt-1">{emailWarning(form.storeMailId)}</div>
+							)}
+						</div>
+						<div className="col-md-6">
+							<FloatingLabelWrapper label="Store Address" value={form.storeAddress}>
+								<TextBox
+									name="storeAddress"
+									value={form.storeAddress || ''}
+									onChange={handleInputChange}
+									style={{ width: "100%" }}
+									size="large"
+									className="mb-3"
+								/>
+							</FloatingLabelWrapper>
+							{minMaxLengthWarning(form.storeAddress) && (
+								<div className="text-warning small mt-1">{minMaxLengthWarning(form.storeAddress)}</div>
+							)}
+						</div>
+					</div>
+				</div>
+			</CustomFormFieldSet>
+
 			{/* Photos (Capture/Upload) */}
-			<fieldset className="mb-4">
-				<legend>Photos (Capture/Upload)</legend>
+			<CustomFormFieldSet legend="Photos (Capture/Upload)">
 				<div className="row">
 					<div className="col-12">
-						{/* Implement photo upload/preview as needed */}
-						{/* ...existing code... */}
-					</div>
-				</div>
-			</fieldset>
-			{/* Site Visit Documents (Image Preview) */}
-			<fieldset className="mb-4">
-				<legend>Site Visit Documents</legend>
-				<ImageDocumentsPreview documents={documents} onRemove={handleRemoveDocument} />
-			</fieldset>
-			{/* Visiting line items */}
-			<fieldset className="mb-4">
-				<legend>Visiting line items</legend>
-				<EditableLineItemsGrid
-					value={lineItems}
-					onChange={setLineItems}
-					columns={[{ field: 'description', title: 'Description' }, { field: 'uom', title: 'UOM' }, { field: 'boqQty', title: 'BOQ quantity', type: 'numeric' }, { field: 'onsiteQty', title: 'On-site work quantity', type: 'numeric' }, { field: 'finalReview', title: 'Final Review' }, { field: 'remarks', title: 'Remarks' }]}
-				/>
-			</fieldset>
-			{/* Notes */}
-			<fieldset className="mb-4">
-				<legend>Notes</legend>
-				<div className="row">
-					<div className="col-12">
-						<Input
-							name="notes"
-							value={form.notes || ''}
-							onChange={handleInputChange}
-							style={{ width: "100%" }}
+						<UploadPreviewEdit
+							initialFiles={documents}
+							onFilesChange={setImageFiles}
 						/>
 					</div>
 				</div>
-			</fieldset>
+			</CustomFormFieldSet>
+
+			{/* Site Visit Documents (Non-image preview/upload) */}
+			<CustomFormFieldSet legend="Site Visit Documents">
+				<div className="row">
+					<div className="col-12">
+						<UploadPreviewDocuments
+							initialFiles={documents}
+							onFilesChange={setDocFiles}
+						/>
+					</div>
+				</div>
+			</CustomFormFieldSet>
+
+			{/* Visiting line items */}
+			<CustomFormFieldSet legend="Visiting line items">
+				<div className="row">
+					<div className="col-12">
+						<EditableLineItemsGrid
+							value={lineItems}
+							onChange={setLineItems}
+							columns={[{ field: 'description', title: 'Description' }, { field: 'uom', title: 'UOM' }, { field: 'boqQty', title: 'BOQ quantity', type: 'numeric' }, { field: 'onsiteQty', title: 'On-site work quantity', type: 'numeric' }, { field: 'finalReview', title: 'Final Review' }, { field: 'remarks', title: 'Remarks' }]}
+						/>
+					</div>
+				</div>
+			</CustomFormFieldSet>
+
+			{/* Notes */}
+			<CustomFormFieldSet legend="Notes">
+				<div className="row">
+					<div className="col-12">
+						<FloatingLabelWrapper label="Notes" value={form.notes}>
+							<TextBox
+								name="notes"
+								value={form.notes || ''}
+								onChange={handleInputChange}
+								style={{ width: "100%" }}
+								size="large"
+								className="mb-3"
+							/>
+						</FloatingLabelWrapper>
+					</div>
+				</div>
+			</CustomFormFieldSet>
 			{(errorMessage || successMessage) && (
 				<div style={{ marginBottom: 12 }}>
 					{errorMessage && <div className="error-box">{errorMessage}</div>}
@@ -470,6 +624,7 @@ const SiteVisitEdit = ({ siteVisitId }) => {
 				</div>
 			</div>
 		</form>
+		</>
 	);
 };
 

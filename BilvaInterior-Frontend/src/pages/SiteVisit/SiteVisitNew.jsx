@@ -11,7 +11,7 @@ import FormDropDown from '../../components/Form/FormDropDown';
 import FormUpload from '../../components/Form/FormUpload';
 import UploadWithPreview from '../../components/UploadWithPreview';
 import CustomFormFieldSet from '../../components/Form/CustomFormFieldSet';
-import { nameValidator, emailValidator, phoneValidator, requiredValidator, minMaxLengthValidator } from '../../utils/validators';
+import { nameValidator, emailValidator, emailWarning, phoneValidator, phoneWarning, requiredValidator, minMaxLengthValidator, minMaxLengthWarning } from '../../utils/validators';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './SiteVisitDialog.css';
 import api from '../../api/axios';
@@ -372,29 +372,50 @@ const SiteVisitNew = () => {
 					<CustomFormFieldSet legend="Store/Project Details">
 						<div className="row g-3">
 							<div className="col-md-6">
-								<Field name="storeName" label="Store Name" component={FormInput} validator={minMaxLengthValidator} />
+								<Field name="storeName" label="Store Name" component={FormInput}  />
+								{minMaxLengthWarning(formRenderProps.valueGetter('storeName')) && (
+									<div className="text-warning small mt-1">{minMaxLengthWarning(formRenderProps.valueGetter('storeName'))}</div>
+								)}
 							</div>
 							<div className="col-md-6">
-								<Field name="storeLocation" label="Store Location" component={FormInput} validator={minMaxLengthValidator} />
-							</div>
-
-							<div className="col-md-6">
-								<Field name="storeManagerName" label="Store Manager Name" component={FormInput} validator={minMaxLengthValidator} />
-							</div>
-							<div className="col-md-6">
-								<Field name="vendorCode" label="Vendor Code" component={FormInput} validator={minMaxLengthValidator} />
-							</div>
-
-
-							<div className="col-md-6">
-								<Field name="storeCode" label="Store Code" component={FormInput} validator={minMaxLengthValidator} />
-							</div>
-							<div className="col-md-6">
-								<Field name="sapCode" label="SAP Code" component={FormInput} validator={minMaxLengthValidator} />
+								<Field name="storeLocation" label="Store Location" component={FormInput}  />
+								{minMaxLengthWarning(formRenderProps.valueGetter('storeLocation')) && (
+									<div className="text-warning small mt-1">{minMaxLengthWarning(formRenderProps.valueGetter('storeLocation'))}</div>
+								)}
 							</div>
 
 							<div className="col-md-6">
-								<Field name="storeManagerNumber" label="Store Manager Number" component={FormMaskedInput} validator={phoneValidator} mask="9999999999" />
+								<Field name="storeManagerName" label="Store Manager Name" component={FormInput}  />
+								{minMaxLengthWarning(formRenderProps.valueGetter('storeManagerName')) && (
+									<div className="text-warning small mt-1">{minMaxLengthWarning(formRenderProps.valueGetter('storeManagerName'))}</div>
+								)}
+							</div>
+							<div className="col-md-6">
+								<Field name="vendorCode" label="Vendor Code" component={FormInput}  />
+								{minMaxLengthWarning(formRenderProps.valueGetter('vendorCode')) && (
+									<div className="text-warning small mt-1">{minMaxLengthWarning(formRenderProps.valueGetter('vendorCode'))}</div>
+								)}
+							</div>
+
+
+							<div className="col-md-6">
+								<Field name="storeCode" label="Store Code" component={FormInput}  />
+								{minMaxLengthWarning(formRenderProps.valueGetter('storeCode')) && (
+									<div className="text-warning small mt-1">{minMaxLengthWarning(formRenderProps.valueGetter('storeCode'))}</div>
+								)}
+							</div>
+							<div className="col-md-6">
+								<Field name="sapCode" label="SAP Code" component={FormInput}  />
+								{minMaxLengthWarning(formRenderProps.valueGetter('sapCode')) && (
+									<div className="text-warning small mt-1">{minMaxLengthWarning(formRenderProps.valueGetter('sapCode'))}</div>
+								)}
+							</div>
+
+							<div className="col-md-6">
+								<Field name="storeManagerNumber" label="Store Manager Number" component={FormMaskedInput} mask="9999999999" />
+								{phoneWarning(formRenderProps.valueGetter('storeManagerNumber')) && (
+									<div className="text-warning small mt-1">{phoneWarning(formRenderProps.valueGetter('storeManagerNumber'))}</div>
+								)}
 							</div>
 							<div className="col-md-6">
 								<Field
@@ -413,10 +434,16 @@ const SiteVisitNew = () => {
 							</div>
 
 							<div className="col-md-6">
-								<Field name="storeMailId" label="Store Mail ID" component={FormInput} validator={emailValidator} />
+								<Field name="storeMailId" label="Store Mail ID" component={FormInput} />
+								{emailWarning(formRenderProps.valueGetter('storeMailId')) && (
+									<div className="text-warning small mt-1">{emailWarning(formRenderProps.valueGetter('storeMailId'))}</div>
+								)}
 							</div>
 							<div className="col-md-6">
-								<Field name="storeAddress" label="Store Address" component={FormInput} validator={minMaxLengthValidator} />
+								<Field name="storeAddress" label="Store Address" component={FormInput}  />
+								{minMaxLengthWarning(formRenderProps.valueGetter('storeAddress')) && (
+									<div className="text-warning small mt-1">{minMaxLengthWarning(formRenderProps.valueGetter('storeAddress'))}</div>
+								)}
 							</div>
 						</div>
 					</CustomFormFieldSet>
