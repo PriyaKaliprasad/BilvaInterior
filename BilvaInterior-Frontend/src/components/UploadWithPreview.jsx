@@ -5,7 +5,7 @@ import { Upload } from '@progress/kendo-react-upload';
 import { Button } from '@progress/kendo-react-buttons';
 import ImagePreview from './ImagePreview';
 import CapturePhotoButton from './CapturePhotoButton';
-import { compressImage } from '../utils/imageCompression';
+import { compressImage, readFileAsDataURL } from '../utils/imageCompression';
 import { truncateFileName } from '../utils/truncateFileName';
 
 export default function UploadWithPreview(props) {
@@ -118,15 +118,29 @@ export default function UploadWithPreview(props) {
                     continue;
                 }
 
-                const { base64, size, thumb } = await compressImage(file, 500);
+                const { file: compressedFile, size, thumb } = await compressImage(file, 500);
+                const previewBase64 = await readFileAsDataURL(compressedFile);
+
                 newItems.push({
-                    name: file.name || 'image',
-                    originalSize: file.size || 0,
+                    name: compressedFile.name,
+                    originalSize: file.size,
                     size,
-                    base64,
+                    file: compressedFile,   // store actual File object
                     thumb,
+                    base64: previewBase64,  // only for preview display
                     type: 'image/jpeg',
                 });
+
+                // // OLD CODE (WORKING)
+                // const { base64, size, thumb } = await compressImage(file, 500);
+                // newItems.push({
+                //     name: file.name || 'image',
+                //     originalSize: file.size || 0,
+                //     size,
+                //     base64,
+                //     thumb,
+                //     type: 'image/jpeg',
+                // });
             } catch (err) {
                 console.error('Failed to process image', err);
             }

@@ -55,7 +55,7 @@ const VendorsListRow = ({ v, onEdit }) => (
     <div className="vendors-col actions">
       <button
         type="button"
-        className="action-btn edit k-button"
+        className="vendors-action-btn edit k-button"
         title="Edit"
         aria-label={`Edit vendor ${v.id}`}
         onClick={() => onEdit(v)}
