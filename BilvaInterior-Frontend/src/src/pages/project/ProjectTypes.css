@@ -1,0 +1,164 @@
+.page-container {
+  padding: 1rem;
+}
+
+.card {
+  margin-bottom: 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* Make form fields stack on small screens */
+.responsive-form .k-form-fieldset {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .responsive-form .k-form-fieldset {
+    grid-template-columns: 1fr;
+  }
+
+  .form-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-cancel {
+    width: 100%;
+  }
+
+  .form-buttons button {
+    width: 100%;
+  }
+}
+
+/* =========================
+   Desktop / Tablet Grid
+   ========================= */
+
+/* Wrapper to make grid scrollable on small screens */
+.grid-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Grid should never collapse columns on small screens (forces scroll) */
+.k-grid {
+  min-width: 700px; /* enough for columns including Edit button */
+}
+
+/* Optional: slightly smaller grid min-width if you have fewer columns */
+/* .k-grid { min-width: 600px; } */
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.status-active {
+  background: #e6f4ea;
+  color: #0f5132;
+}
+.status-inactive {
+  background: #fff0f0;
+  color: #7a1a1a;
+}
+
+/* =========================
+   Mobile list (phone)
+   ========================= */
+
+.mobile-wrapper {
+  padding: 8px;
+}
+
+.mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Each mobile item looks like a card */
+.mobile-item {
+  background: #ffffff;
+  border: 1px solid #e6e9ee;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(16, 24, 40, 0.03);
+}
+
+/* Row inside mobile card */
+.mobile-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.mobile-label {
+  font-weight: 700;
+  color: #111827;
+  margin-right: 10px;
+  flex: 0 0 auto;
+}
+
+.mobile-value {
+  text-align: right;
+  color: #374151;
+  word-break: break-word;
+  max-width: 60%;
+  flex: 1 1 auto;
+}
+
+/* Action button row */
+.mobile-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+/* Empty mobile placeholder */
+.empty-mobile {
+  padding: 12px;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* Inline error/success boxes */
+.error-box {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  background: #fff0f0;
+  color: #7a1a1a;
+  border: 1px solid #f5c6cb;
+}
+.success-box {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  background: #e6f4ea;
+  color: #0f5132;
+  border: 1px solid #c3e6cb;
+}
+
+/* Ensure card + list spacing on tiny phones */
+@media (max-width: 420px) {
+  .mobile-value {
+    max-width: 58%;
+    font-size: 14px;
+  }
+  .mobile-label {
+    font-size: 13px;
+  }
+  .mobile-item {
+    padding: 10px;
+  }
+}

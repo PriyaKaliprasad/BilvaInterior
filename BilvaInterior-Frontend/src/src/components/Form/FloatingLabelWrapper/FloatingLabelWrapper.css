@@ -1,0 +1,56 @@
+.floating-input {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.floating-input .k-input,
+.floating-input .k-textbox,
+.floating-input .k-picker,
+.floating-input .k-numerictextbox {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.floating-input label {
+  position: absolute;
+  left: 12px;
+  top: -12px;
+  font-size: 0.85rem;
+  color: rgba(33, 37, 41, 0.7);
+  background: #f3f3f9;
+  padding: 0 4px;
+  pointer-events: none;
+  /* Remove transition for instant appearance */
+  transition: none;
+}
+
+/* for kendo dialog with white bg */
+.k-dialog .floating-input label{
+  background: #fff;
+}
+
+/* Animated floating label (previously used) */
+
+/* .floating-input label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #f3f3f9;
+  padding: 0 4px;
+  color: #777;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.floating-input.filled label {
+  top: -1px;
+  font-size: 12px;
+  color: rgba(33, 37, 41, 0.7);
+} */
+
+/* 🔴 Error state */
+.floating-input.invalid label {
+  color: #d32f2f; /* material red */
+}

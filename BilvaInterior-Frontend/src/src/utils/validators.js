@@ -1,0 +1,48 @@
+const nameValidator = (value) =>
+    !value ? 'Required' : value.length < 3 ? 'Should be at least 3 characters long.' : '';
+
+const emailRegex = new RegExp(/\S+@\S+\.\S+/);
+const emailValidator = (value) => (emailRegex.test(value) ? '' : 'Please enter a valid email.');
+
+const passwordValidator = (value) => (value && value.length >= 8 ? '' : 'Password must be at least 8 symbols.');
+
+const phoneValidator = (value) => {
+  // Remove everything except digits
+  const digits = (value || "").replace(/\D/g, "");
+
+  if (!digits) {
+    return "Phone is required";
+  }
+
+  if (digits.length !== 10) {
+    return "Phone must be 10 digits.";
+  }
+
+  return "";
+};
+
+const pincodeValidator = (value) => {
+  // Keep only digits
+  const digits = (value || "").replace(/\D/g, "");
+
+  if (!digits) {
+    return "Pincode is required";
+  }
+
+  if (digits.length !== 6) {
+    return "Pincode must be 6 digits.";
+  }
+
+  return "";
+};
+
+const imageValidator = (files) => {
+  if (!files || files.length === 0) return 'Profile picture is required';
+  const file = files[0]?.getRawFile ? files[0].getRawFile() : files[0];
+  if (!file) return 'Profile picture is required';
+  if (!['image/jpeg', 'image/png'].includes(file.type)) return 'Only JPG or PNG allowed';
+  if (file.size > 500 * 1024) return 'Max file size is 500KB';
+  return '';
+};
+
+export { nameValidator, emailValidator, passwordValidator, phoneValidator, pincodeValidator, imageValidator };
