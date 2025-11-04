@@ -31,14 +31,32 @@ const LoginPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setError('');
-    
-    const result = await login({ email, password });
-    
+
+    let ip = '';
+    let iana = '';
+    try {
+      // Get public IP
+      const ipRes = await fetch('https://api.ipify.org?format=json');
+      if (ipRes.ok) {
+        const ipData = await ipRes.json();
+        ip = ipData.ip;
+      }
+    } catch (err) {
+      // ignore IP fetch error
+    }
+    try {
+      iana = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    } catch (err) {
+      iana = '';
+    }
+
+    const result = await login({ email, password, ip, iana });
+
     if (!result.success) {
       setError(result.error);
     }
     // No manual navigation needed - PublicRoute will handle redirect automatically
-    
+
     setIsSubmitting(false);
   };
 

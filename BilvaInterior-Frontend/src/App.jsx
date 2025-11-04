@@ -88,6 +88,7 @@ const AppLayout = ({ sidebarOpen, setSidebarOpen }) => {
 
 
 import PrivateRoute from "./routes/PrivateRoute";
+import Testpage from "./pages/Testpage";
 
 const App = () => {
 
@@ -100,6 +101,7 @@ const App = () => {
           <Routes>
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/test" element={<Testpage />} />
             <Route element={<PublicRoute />}>
               <Route path="/login" element={<LoginPage />} />
             </Route>
