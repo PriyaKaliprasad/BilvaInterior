@@ -1,0 +1,91 @@
+/* ========== RESPONSIVE FIXES FOR QUOTATION PAGE ========== */
+
+/* On small screens */
+@media (max-width: 768px) {
+  /* Make form container have padding */
+  .container-fluid {
+    padding: 10px;
+  }
+
+  /* Stack address boxes */
+  .row.g-3 > .col-md-6 {
+    width: 100%;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Stack document details (each field full width) */
+  .row.g-3.align-items-end > .col-md-3 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Make date pickers full width */
+  .k-input-inner,
+  .k-picker {
+    width: 100% !important;
+  }
+
+  /* Line items grid – make it scrollable */
+  .k-grid {
+    overflow-x: auto;
+  }
+
+  /* Tax and totals stack vertically */
+  .row.align-items-start {
+    flex-direction: column;
+  }
+
+  .col-md-6 {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Totals input widths */
+  .form-control.w-25 {
+    width: 50% !important;
+  }
+
+  /* Reduce padding inside boxes */
+  .border.rounded.p-3 {
+    padding: 1rem !important;
+  }
+
+  /* Buttons stay side by side on all screens */
+.d-flex.justify-content-start.gap-2.mt-3.mb-4 {
+  justify-content: flex-start !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px;
+}
+
+/* Optional: make sure buttons fit on small screens */
+@media (max-width: 480px) {
+  .d-flex.justify-content-start.gap-2.mt-3.mb-4 button {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+}
+
+
+  /* Dropdown width fix */
+  .k-dropdownlist,
+  .form-control,
+  textarea {
+    width: 100% !important;
+  }
+
+  /* Labels readable on small screens */
+  label,
+  h6 {
+    font-size: 0.9rem;
+  }
+}
+
+/* Slight improvement for tablet screens */
+@media (min-width: 769px) and (max-width: 992px) {
+  .col-md-3.col-sm-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
