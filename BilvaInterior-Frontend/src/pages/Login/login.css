@@ -81,14 +81,13 @@ footer a:hover{
 /* Responsive helpers */
 @media (min-width: 992px){
   .hero-split{ 
-    min-height: 60vh; /* Reduced from 78vh */
+    min-height: 60vh; 
   }
   
-  /* Center hero content but with reduced height */
   .hero {
     display: flex;
     align-items: center;
-    min-height: 60vh; /* Much smaller than full viewport */
+    min-height: 60vh; 
     padding-top: 3rem;
     padding-bottom: 2rem;
   }
@@ -122,4 +121,70 @@ footer a:hover{
 
 .password-toggle:hover {
   color: var(--brand);
+}
+
+/* TC_111 visual consistency */
+.navbar .navbar-nav .nav-link,
+.navbar .navbar-nav .btn {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  color: #333;
+  padding: .4rem .75rem;
+}
+
+.navbar .navbar-brand span {
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.navbar .navbar-nav .nav-item .btn.btn-link,
+.navbar .navbar-nav .nav-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (max-width: 991px) {
+  .navbar .navbar-nav .nav-link,
+  .navbar .navbar-nav .btn {
+    font-size: .95rem;
+  }
+}
+/* TC_111 footer link alignment fix */
+footer ul.list-inline a {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+footer ul.list-inline a:hover {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+footer ul.list-inline {
+  gap: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+/* TC_111 footer alignment + font fix */
+footer .nav-link {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 0;
+}
+
+footer .nav-link:hover {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+footer .nav {
+  align-items: center;
+}
+
+footer small {
+  font-size: 0.9rem;
 }
