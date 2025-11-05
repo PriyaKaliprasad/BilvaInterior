@@ -1,62 +1,94 @@
-/* Base layout */
-.allquotation-page {
-  background-color: #fff;
+
+/* ✅ AllQuotations.css - Clean, mobile-friendly, scrollable grid */
+
+/* ✅ Outer wrapper for horizontal scrolling */
+.quotation-grid-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  background: #fff;
 }
 
-.quotation-table {
-  background: #ffffff;
+/* ✅ Inner wrapper ensures grid fits larger screens */
+.quotation-grid-inner {
+  min-width: 950px;
+  display: inline-block;
 }
 
-/* Edit page */
-.edit-page {
-  background-color: #f8f9fc;
+/* ✅ Prevent nested scrollbars */
+.k-grid-content,
+.k-grid-table-wrap {
+  overflow-x: visible !important;
+  overflow-y: visible !important;
 }
 
-.edit-card {
-  background: #ffffff;
-  border: none;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+/* ✅ Table structure */
+.k-grid-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-/* Responsive */
+/* ✅ Table cells */
+.k-grid-table td,
+.k-grid-table th {
+  white-space: nowrap;
+  padding: 8px 10px;
+  vertical-align: middle;
+}
+
+/* ✅ Sticky last column (Actions) */
+.k-grid-table th:last-child,
+.k-grid-table td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 5;
+  background: #fff;
+  border-left: 1px solid #dee2e6;
+  box-shadow: -4px 0 6px -3px rgba(0, 0, 0, 0.1);
+  min-width: 110px;
+}
+
+/* ✅ Kendo buttons */
+.k-grid-table td .k-button {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* ✅ Mobile view adjustments */
 @media (max-width: 768px) {
-  .edit-card {
-    box-shadow: none !important;
-    border: none !important;
-    background: transparent !important;
-    padding: 0 !important;
-  }
-
-  .edit-page {
-    background: #ffffff !important;
-  }
-
-  .allquotation-page {
-    padding: 0.5rem !important;
-  }
-
-  .quotation-table {
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
+  .quotation-grid-inner {
+    min-width: 900px;
   }
 
   .k-grid {
-    font-size: 0.85rem;
+    font-size: 13px;
   }
 
-  h4 {
-    font-size: 1.2rem;
+  .k-grid-table td,
+  .k-grid-table th {
+    padding: 6px;
   }
 
-  label.form-label {
-    font-size: 0.9rem;
+  .k-grid-table td .k-button {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+}
+
+/* ✅ Small screens (mobile-first improvements) */
+@media (max-width: 576px) {
+  .quotation-grid-wrapper {
+    overflow-x: scroll;
   }
 
-  input.form-control,
-  select.form-select {
-    font-size: 0.9rem;
-    padding: 8px 10px;
+  .quotation-grid-inner {
+    min-width: 850px;
+  }
+
+  .k-grid {
+    font-size: 12px;
   }
 }
