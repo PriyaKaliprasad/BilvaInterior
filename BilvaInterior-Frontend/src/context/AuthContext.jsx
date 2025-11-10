@@ -16,11 +16,10 @@ export function AuthProvider({ children }) {
       setUser(null);
     }
   }, [data, error]);
-
-  // flush browser cached page so that auth is re-verified on back/forward navigation
+// flush browser cached page so that auth is re-verified on back/forward navigation
   useEffect(() => {
     const handlePopState = () => {
-      refetch(); // verify auth again when user navigates with browser buttons
+      refetch();   // verify auth again when user navigates with browser buttons
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -34,10 +33,12 @@ export function AuthProvider({ children }) {
       await refetch();
       return { success: true, data: response.data };
     } catch (err) {
-      return {
-        success: false,
-        error: err.response?.data?.error || err.message
-      };
+      const message =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        "Login failed. Please try again.";
+      return { success: false, error: message };
     }
   };
 
@@ -48,7 +49,7 @@ export function AuthProvider({ children }) {
       console.error("Logout error:", err);
     } finally {
       setUser(null);
-      setSignOutMessage('Signed out successfully.'); // set the message here
+      setSignOutMessage('Signed out successfully.');   // set the message here
     }
   };
 

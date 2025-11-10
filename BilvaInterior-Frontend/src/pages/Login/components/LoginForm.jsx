@@ -26,23 +26,20 @@ const LoginForm = ({
     const togglePassword = () => {
         setShowPassword(!showPassword);
     };
+// Check caps lock status
 
-    // Check caps lock status
     const checkCapsLock = (event) => {
         const capsLock = event.getModifierState && event.getModifierState('CapsLock');
         setCapsLockOn(capsLock);
     };
-
-    // Global caps lock detection
+// Global caps lock detection
     useEffect(() => {
         const handleGlobalKeyEvent = (event) => {
             checkCapsLock(event);
         };
-
         // Add global event listeners
         document.addEventListener('keydown', handleGlobalKeyEvent);
         document.addEventListener('keyup', handleGlobalKeyEvent);
-
         // Cleanup event listeners on unmount
         return () => {
             document.removeEventListener('keydown', handleGlobalKeyEvent);
@@ -75,7 +72,7 @@ const LoginForm = ({
                                     disabled={isSubmitting}
                                 />
                                 <label htmlFor="email">Email address</label>
-                                <div className="invalid-feedback">Please enter a valid email.</div>
+                                {!email.trim() && <div className="invalid-feedback d-block">Enter Email address</div>}
                             </div>
                         </div>
                         <div className="col-12">
@@ -101,9 +98,9 @@ const LoginForm = ({
                                 >
                                     <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
                                 </button>
-                                <div className="invalid-feedback">Password must be at least 6 characters.</div>
+                                {!password.trim() && <div className="invalid-feedback d-block">Enter Password</div>}
                             </div>
-                            {/* Caps Lock Warning - Always reserve space */}
+                             {/* Caps Lock Warning - Always reserve space */}
                             <div className="mt-1 small d-flex align-items-center" style={{ minHeight: '1.25rem' }}>
                                 {capsLockOn && (
                                     <>

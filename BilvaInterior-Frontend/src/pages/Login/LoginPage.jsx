@@ -18,6 +18,7 @@ const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { login, signOutMessage, setSignOutMessage } = useAuth();
+
   // Show message and clear it after first render
   useEffect(() => {
     if (signOutMessage) {
@@ -27,10 +28,23 @@ const LoginPage = () => {
     }
   }, [signOutMessage, setSignOutMessage]);
 
+  useEffect(() => {
+    document.title = "Bilva Interior";
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError('');
+
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
+      setError("Please enter valid email and password.");
+      setIsSubmitting(false);
+      return;
+    }
 
     let ip = '';
     let iana = '';
@@ -50,13 +64,12 @@ const LoginPage = () => {
       iana = '';
     }
 
-    const result = await login({ email, password, ip, iana });
+    const result = await login({ email: trimmedEmail, password: trimmedPassword, ip, iana });
 
     if (!result.success) {
       setError(result.error);
     }
-    // No manual navigation needed - PublicRoute will handle redirect automatically
-
+// No manual navigation needed - PublicRoute will handle redirect automatically
     setIsSubmitting(false);
   };
 
@@ -75,8 +88,8 @@ const LoginPage = () => {
       />
       <LoginFeatures />
       <LoginWorkflow />
-      {/* <LoginFAQ /> */}
-      <LoginFooter />
+      <LoginFAQ />
+      <LoginFooter />    
     </div>
   )
 }

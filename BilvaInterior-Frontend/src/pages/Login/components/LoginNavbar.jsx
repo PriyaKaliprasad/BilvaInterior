@@ -2,10 +2,17 @@ import React from 'react';
 
 const LoginNavbar = () => {
   const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    const byId = document.getElementById(sectionId);
+    if (byId) {
+      byId.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
     }
+    const byQuery = document.querySelector(`#${sectionId}, [data-section="${sectionId}"], a[href="#${sectionId}"]`);
+    if (byQuery) {
+      byQuery.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
