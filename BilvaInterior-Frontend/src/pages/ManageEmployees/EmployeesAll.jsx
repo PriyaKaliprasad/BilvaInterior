@@ -747,7 +747,7 @@
 // export default EmployeeAll;
 
 import React, { useState, useEffect, useCallback } from "react";
-import EmployeesNew from "./ManageEmployees/EmployeesNew";
+import EmployeesNew from "./EmployeesNew";
 import { Grid, GridColumn } from "@progress/kendo-react-grid";
 import { Button } from "@progress/kendo-react-buttons";
 import { orderBy } from "@progress/kendo-data-query";
