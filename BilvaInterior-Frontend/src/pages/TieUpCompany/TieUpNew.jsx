@@ -11,6 +11,10 @@ import CustomFormFieldSet from '../../components/Form/CustomFormFieldSet';
 import { indiaStatesCities } from '../../utils/indiaStatesCities';
 import Avatar from '../../components/Avatar/CustomAvatar';
 
+// ✅ SAFE BASE URL (fixes undefined/api/... when .env isn't loaded)
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.replace(/\/+$/,'')) ||
+  'https://localhost:7142';
 
 const responsiveBreakpoints = [
   { minWidth: 0, maxWidth: 499, value: 1 },
@@ -28,14 +32,20 @@ const nameValidator = (value) => {
 
 const phoneValidator = (value) => {
   if (!value) return 'Phone number is required';
-  const phoneRegex = /^[6-9]\d{9}$/;
-  return phoneRegex.test(value) ? '' : 'Invalid Indian phone number (start with 6,7,8,9)';
+  const phoneRegex = /^[1-9]\d{9}$/; // ✅ accepts 1–9 start, still 10 digits
+  return phoneRegex.test(value) ? '' : 'Enter valid 10-digit phone number';
 };
 
 const emailValidator = (value) => {
   if (!value) return 'Email is required';
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(value) ? '' : 'Invalid email address';
+};
+
+// Address Line 2 specific validator
+const addressLine2Validator = (value) => {
+  if (!value || !String(value).trim()) return 'Address Line 2 is required';
+  return '';
 };
 
 const pincodeValidator = (value) => {
@@ -63,7 +73,7 @@ const imageValidator = (files) => {
 
 // ------------------- Component -------------------
 
-const TieUpNew = ({ onCancel }) => {
+const TieUpNew = ({ onCancel, onSuccess }) => {
   const [avatarSrc, setAvatarSrc] = useState(null);
   const [excelFile, setExcelFile] = useState(null);
   const [excelData, setExcelData] = useState(null);
@@ -108,14 +118,9 @@ const TieUpNew = ({ onCancel }) => {
 
   const handleImageUpload = (file) => {
     if (!file) return; // ✅ safeguard
-
     // ✅ revoke old preview if it exists
-    if (avatarSrc) {
-      URL.revokeObjectURL(avatarSrc);
-    }
-
+    if (avatarSrc) URL.revokeObjectURL(avatarSrc);
     const newUrl = URL.createObjectURL(file);
-    console.log("1. Uploaded image src:", newUrl);
     setAvatarSrc(newUrl);
   };
 
@@ -156,17 +161,25 @@ const TieUpNew = ({ onCancel }) => {
     setShowGlobalError(false);
     setUniqueError('');
     setIsSubmitting(true);
+      // Hard guard for Address Line 2 (frontend)
+  if (!dataItem.addressLine2 || !String(dataItem.addressLine2).trim()) {
+    setToast({ visible: true, message: 'Address Line 2 is required', type: 'error' });
+    setIsSubmitting(false);
+    return;
+  }
 
     try {
       // HARD-CODED URL
-      const checkResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany/checkUnique/0`, {
+      const checkResponse = await fetch(`${API_BASE_URL}/api/TieUpCompany/checkUnique/0`, {
         method: 'POST',
         body: JSON.stringify({
           companyName: dataItem.companyName,
           email: dataItem.email,
-          phone: dataItem.phone
+          phone: dataItem.phone,
+          gstin: dataItem.gstin
         }),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
       });
 
       let checkResult = { isUnique: true };
@@ -175,12 +188,16 @@ const TieUpNew = ({ onCancel }) => {
         if (contentType && contentType.includes('application/json')) {
           checkResult = await checkResponse.json();
         }
-      } catch (err) {
-        console.warn('Could not parse JSON from uniqueness check, assuming unique.', err);
+      } catch (_) {
+        // ignore parse errors; assume unique
       }
 
       if (!checkResult.isUnique) {
-        setToast({ visible: true, message: 'Company Name, Email, or Phone already exists.', type: 'error' });
+        setToast({
+          visible: true,
+          message: checkResult.message || 'Duplicate entry: Company Name, Email, Phone, or GSTIN already exists.',
+          type: 'error'
+        });
         setTimeout(() => setToast({ visible: false, message: '', type: 'success' }), 2500);
         setIsSubmitting(false);
         return;
@@ -194,7 +211,7 @@ const TieUpNew = ({ onCancel }) => {
       formData.append('storeCode', dataItem.storeCode || '');
       formData.append('sapCode', dataItem.sapCode || '');
       formData.append('addressLine1', dataItem.addressLine1);
-      formData.append('addressLine2', dataItem.addressLine2);
+      formData.append('addressLine2', dataItem.addressLine2 || '');
       formData.append('state', selectedState);
       formData.append('city', selectedCity);
       formData.append('pincode', dataItem.pincode);
@@ -207,20 +224,28 @@ const TieUpNew = ({ onCancel }) => {
 
       if (dataItem.profilePic?.length > 0) {
         const file = dataItem.profilePic[0].getRawFile?.() || dataItem.profilePic[0];
-        console.log('2. Uploading profile pic:', file);
         formData.append('profilePic', file);
       }
 
       // HARD-CODED URL
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/TieUpCompany`, {
+      const response = await fetch(`${API_BASE_URL}/api/TieUpCompany`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: 'include'
       });
 
       if (response.ok) {
         await response.json();
         setToast({ visible: true, message: 'Form submitted successfully!', type: 'success' });
+
         // Reset form after success
+        if (typeof onSuccess === 'function') {
+          onSuccess();
+        } else if (typeof onCancel === 'function') {
+          onCancel();
+        }
+
+        // reset form state (kept same as your code)
         setFormKey(prev => prev + 1);
         setAvatarSrc(null);
         setExcelFile(null);
@@ -229,9 +254,23 @@ const TieUpNew = ({ onCancel }) => {
         setCities(indiaStatesCities.find((s) => s.state === 'Karnataka')?.cities || []);
         setSelectedCity('Bengaluru');
       } else {
-        const error = await response.text();
-        setToast({ visible: true, message: 'Failed to submit form: ' + error, type: 'error' });
-      }
+  const raw = await response.text();
+  let msg = 'Failed to submit form';
+  try {
+    const j = JSON.parse(raw);
+    // ASP.NET ModelState style
+    if (j?.errors) {
+      const firstKey = Object.keys(j.errors)[0];
+      const firstMsg = Array.isArray(j.errors[firstKey]) ? j.errors[firstKey][0] : j.errors[firstKey];
+      msg = firstMsg || j.title || msg;
+    } else if (j?.message || j?.error) {
+      msg = j.message || j.error;
+    }
+  } catch {
+    // not JSON, keep default
+  }
+  setToast({ visible: true, message: msg, type: 'error' });
+}
 
       setTimeout(() => setToast({ visible: false, message: '', type: 'success' }), 2500);
     } catch (err) {
@@ -340,16 +379,10 @@ const TieUpNew = ({ onCancel }) => {
                 accept=".jpg,.jpeg,.png"
                 allowedFormatsArray={[".jpg", ".jpeg", ".png"]}
                 validator={imageValidator}
-                onChange={(e, fieldRenderProps) => {
-                  if (e.value && e.value.length > 0) {
+                onChange={(e) => {
+                  if (e?.value && e.value.length > 0) {
                     const rawFile = e.value[0].getRawFile?.() || e.value[0];
-                    if (avatarSrc) {
-                      URL.revokeObjectURL(avatarSrc);
-                    }
-                    const previewUrl = URL.createObjectURL(rawFile);
-                    setAvatarSrc(previewUrl);
-                    fieldRenderProps.formApi.setValue("profilePic", [rawFile]);
-                    fieldRenderProps.formApi.setError("profilePic", undefined);
+                    handleImageUpload(rawFile); // ✅ only preview; FormUpload already holds value
                   }
                 }}
               />
@@ -362,7 +395,7 @@ const TieUpNew = ({ onCancel }) => {
               <Field
                 name="companyName"
                 component={FormInput}
-                label="Company Name"
+                label="Company Name *"
                 validator={nameValidator}
                 inputProps={(fieldProps) =>
                   getFieldStyle(fieldProps.validationMessage, fieldProps.touched)
@@ -371,7 +404,7 @@ const TieUpNew = ({ onCancel }) => {
               <Field
                 name="contactPerson"
                 component={FormInput}
-                label="Contact Person"
+                label="Contact Person *"
                 validator={nameValidator}
                 inputProps={(fieldProps) =>
                   getFieldStyle(fieldProps.validationMessage, fieldProps.touched)
@@ -382,7 +415,7 @@ const TieUpNew = ({ onCancel }) => {
               <Field
                 name="phone"
                 component={FormMaskedInput}
-                label="Phone"
+                label="Phone *"
                 mask="0000000000"
                 validator={phoneValidator}
                 inputProps={(fieldProps) =>
@@ -392,7 +425,7 @@ const TieUpNew = ({ onCancel }) => {
               <Field
                 name="email"
                 component={FormInput}
-                label="Email"
+                label="Email *"
                 validator={emailValidator}
                 inputProps={(fieldProps) =>
                   getFieldStyle(fieldProps.validationMessage, fieldProps.touched)
@@ -411,13 +444,21 @@ const TieUpNew = ({ onCancel }) => {
               <Field
                 name="addressLine1"
                 component={FormInput}
-                label="Address Line 1"
+                label="Address Line 1 *"
                 validator={requiredValidator}
                 inputProps={(fieldProps) =>
                   getFieldStyle(fieldProps.validationMessage, fieldProps.touched)
                 }
               />
-              <Field name="addressLine2" component={FormInput} label="Address Line 2" />
+              <Field
+  name="addressLine2"
+  component={FormInput}
+  label="Address Line 2 *"
+  validator={addressLine2Validator}
+  inputProps={(fieldProps) =>
+    getFieldStyle(fieldProps.validationMessage, fieldProps.touched)
+  }
+/>
             </div>
             <div className="form-row">
               <div style={{ flex: 1 }}>
@@ -467,7 +508,7 @@ const TieUpNew = ({ onCancel }) => {
                 name="pincode"
                 component={FormMaskedInput}
                 mask="000000"
-                label="Pincode"
+                label="Pincode *"
                 validator={pincodeValidator}
                 inputProps={(fieldProps) =>
                   getFieldStyle(fieldProps.validationMessage, fieldProps.touched)
@@ -481,7 +522,7 @@ const TieUpNew = ({ onCancel }) => {
             <Field
               name="gstin"
               component={FormInput}
-              label="GSTIN"
+              label="GSTIN *"
               validator={gstinValidator}
               style={{ maxWidth: 350 }}
               inputProps={(fieldProps) =>
@@ -498,11 +539,9 @@ const TieUpNew = ({ onCancel }) => {
               label="Upload Excel File"
               accept=".xlsx,.xls"
               allowedFormatsArray={['.xlsx', '.xls']}
-              onChange={(e, fieldRenderProps) => {
-                if (e.value && e.value.length > 0) {
+              onChange={(e) => {
+                if (e?.value && e.value.length > 0) {
                   const file = e.value[0].getRawFile?.() || e.value[0];
-                  fieldRenderProps.formApi.setValue('billingTemplate', [file]);
-                  fieldRenderProps.formApi.setError('billingTemplate', undefined); // clear previous error
                   handleExcelUpload([file]); // your existing preview logic
                 }
               }}

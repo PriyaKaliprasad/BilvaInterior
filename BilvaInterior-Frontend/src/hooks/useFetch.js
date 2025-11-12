@@ -8,11 +8,12 @@ export const useFetch = (url) => {
 
   const fetchData = async () => {
     if (!url) return;
-    
+
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get(url); // cookies auto-sent
+      
+      const res = await api.get(url, { withCredentials: true }); // cookies auto-sent
       setData(res.data);
     } catch (err) {
       console.log(err);
