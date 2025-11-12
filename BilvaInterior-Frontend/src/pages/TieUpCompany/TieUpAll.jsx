@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { ListView } from "@progress/kendo-react-listview";
+import { Grid, GridColumn } from "@progress/kendo-react-grid";
 import CustomAvatar from "../../components/Avatar/CustomAvatar";
 import { Button } from "@progress/kendo-react-buttons";
 import "./TieUpAll.css";
 // import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import TieUpEdit from "./TieUpEdit";
+import TieUpNew from "./TieUpNew";
 
 // ------------------ Styles for Fixed Action Bar ------------------
 const actionBarStyle = {
@@ -15,7 +17,7 @@ const actionBarStyle = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  padding: "0.5rem 0.5rem 0.5rem 0.5rem",
+  padding: "0.5rem",
   borderBottom: "1px solid #eee",
   minHeight: 48,
 };
@@ -26,76 +28,22 @@ const actionBarBtnGroup = {
 };
 
 // ------------------ Set API Base URL ------------------
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = "https://localhost:7142";
 
 // ------------------ Avatar URL ------------------
 const getAvatarUrl = (dataItem) => {
   if (dataItem.profilePicPath) {
-    // backend already returns like: /uploads/profile/logo_xxx.png
-    return `${API_BASE_URL}${dataItem.profilePicPath}`;
+    // backend already returns like: /uploads/profile/logo_xxx.png
+    const path = dataItem.profilePicPath.startsWith("/uploads")
+      ? dataItem.profilePicPath
+      : `/uploads/profile/${dataItem.profilePicPath}`;
+    return `${API_BASE_URL}${path}`;
   }
   // fallback avatar
-  return `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(dataItem.id)}`;
+  return `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(
+    dataItem.id
+  )}`;
 };
-
-// ------------------ List Item ------------------
-const ListViewItem = (props) => {
-  const { dataItem, onEdit } = props;
-  return (
-    <div className="tieup-list-row">
-      <div className="tieup-list-logo tieup-list-cell">
-        <CustomAvatar src={getAvatarUrl(dataItem)} height={40} />
-      </div>
-      <div className="tieup-list-code tieup-list-cell">{dataItem.id}</div>
-      <div className="tieup-list-contact tieup-list-cell">{dataItem.companyName}</div>
-      <div className="tieup-list-phone tieup-list-cell">{dataItem.phone}</div>
-      <div className="tieup-list-city tieup-list-cell">{dataItem.city}</div>
-      <div className="tieup-list-state tieup-list-cell">{dataItem.state}</div>
-      <div className="tieup-list-gstin tieup-list-cell">{dataItem.gstin}</div>
-      <div className="tieup-list-template tieup-list-cell">
-        {dataItem.billingTemplatePath ? (
-          <a
-            href={`${API_BASE_URL}/uploads/${dataItem.billingTemplatePath}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View
-          </a>
-        ) : (
-          "N/A"
-        )}
-      </div>
-      <div className="tieup-list-status tieup-list-cell">
-        {dataItem.isActive === false ? "Inactive" : "Active"}
-      </div>
-      <div className="tieup-list-actions tieup-list-cell">
-        <Button
-          size="small"
-          themeColor="primary"
-          onClick={() => onEdit(dataItem)}
-        >
-          Edit
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-// ------------------ Header ------------------
-const ListViewHeader = () => (
-  <div className="tieup-list-header">
-    <div className="tieup-list-header-logo tieup-list-header-cell"></div>
-    <div className="tieup-list-header-code tieup-list-header-cell">ID</div>
-    <div className="tieup-list-header-contact tieup-list-header-cell">Company Name</div>
-    <div className="tieup-list-header-phone tieup-list-header-cell">Phone</div>
-    <div className="tieup-list-header-city tieup-list-header-cell">City</div>
-    <div className="tieup-list-header-state tieup-list-header-cell">State</div>
-    <div className="tieup-list-header-gstin tieup-list-header-cell">GSTIN</div>
-    <div className="tieup-list-header-template tieup-list-header-cell">Template</div>
-    <div className="tieup-list-header-status tieup-list-header-cell">Status</div>
-    <div className="tieup-list-header-actions tieup-list-header-cell">Actions</div>
-  </div>
-);
 
 // ------------------ Error Boundary ------------------
 class ErrorBoundary extends React.Component {
@@ -112,78 +60,59 @@ class ErrorBoundary extends React.Component {
 }
 
 // ------------------ Main Component ------------------
-import TieUpEdit from "./TieUpEdit";
-import TieUpNew from "./TieUpNew";
-
 const TieUpAll = () => {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [showAddNew, setShowAddNew] = useState(false);
 
-  // Refresh handler
+  // Refresh handler    
   const refreshCompanies = () => {
     setLoading(true);
     axios
-      .get(`${API_BASE_URL}/api/TieUpCompany`)
+      .get(`${API_BASE_URL}/api/TieUpCompany?t=${Date.now()}`, { withCredentials: true })
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
         setCompanies(data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Error fetching companies:", err);
         // alert("Failed to load companies");
+        setCompanies([]);
         setLoading(false);
       });
   };
 
   // Add new company handler
-  const handleAdd = () => {
-    setShowAddNew(true);
-  };
-
+  const handleAdd = () => setShowAddNew(true);
   // Cancel add new company
-  const handleCancelAdd = () => {
-    setShowAddNew(false);
-  };
+  const handleCancelAdd = () => setShowAddNew(false);
 
   useEffect(() => {
     refreshCompanies();
     // eslint-disable-next-line
   }, []);
 
-  const handleEdit = (company) => {
-    setSelectedCompany(company);
-  };
-
-  const handleCloseEdit = () => {
-    setSelectedCompany(null);
-  };
-
+  const handleEdit = (company) => setSelectedCompany(company);
+  const handleCloseEdit = () => setSelectedCompany(null);
   // Refetch companies from backend after edit success
   const handleEditSuccess = () => {
     refreshCompanies();
     setSelectedCompany(null);
   };
 
-
   if (loading) return <div>Loading companies...</div>;
   if (!showAddNew && companies.length === 0) return <div>No companies found.</div>;
 
   return (
     <>
-      {/* Action Bar: Always visible, sticky */}
+      {/* Action Bar: Always visible, sticky */}
       {!selectedCompany && !showAddNew && (
         <div style={actionBarStyle} className="tieup-action-bar">
           <div style={actionBarBtnGroup}>
-            <Button
-              size="small"
-              icon="refresh"
-              onClick={refreshCompanies}
-              className="action-btn refresh-btn"
-            >
-              <span className="tieup-action-btn-text">Refresh</span>
+            <Button size="small" icon="refresh" onClick={refreshCompanies}>
+              Refresh
             </Button>
           </div>
           <div style={actionBarBtnGroup}>
@@ -192,41 +121,47 @@ const TieUpAll = () => {
               icon="plus"
               onClick={handleAdd}
               themeColor="primary"
-              className="action-btn add-btn"
             >
-              <span className="tieup-action-btn-text">Add New Company</span>
+              Add New Company
             </Button>
           </div>
         </div>
       )}
 
-      
+      {/* ------------------ Add New Company Section ------------------ */}
       {showAddNew ? (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
             <Button
               icon="arrow-left"
               size="small"
               onClick={handleCancelAdd}
-              className="action-btn back-btn"
               style={{ marginRight: 8 }}
             >
-              <span className="tieup-action-btn-text">Back</span>
+              Back
             </Button>
           </div>
-          <TieUpNew onCancel={handleCancelAdd} />
+
+          {/* ✅ Pass success callback to refresh & auto-close */}
+          <TieUpNew
+            onCancel={handleCancelAdd}
+            onSuccess={() => {
+              setShowAddNew(false);
+              refreshCompanies();
+            }}
+          />
         </>
       ) : selectedCompany ? (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+          {/* ------------------ Edit Company Section ------------------ */}
+          <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
             <Button
               icon="arrow-left"
               size="small"
               onClick={handleCloseEdit}
-              className="action-btn back-btn"
               style={{ marginRight: 8 }}
             >
-              <span className="tieup-action-btn-text">Back</span>
+              Back
             </Button>
           </div>
           <TieUpEdit
@@ -236,24 +171,94 @@ const TieUpAll = () => {
           />
         </>
       ) : (
-        <div className="tieup-list-container">
-          <div className="tieup-list-inner">
-            <>
-              <ListViewHeader />
-              <ErrorBoundary>
-                <ListView
-                  data={companies}
-                  item={(props) => (
-                    <ListViewItem
-                      key={props.dataItem.id}
-                      {...props}
-                      onEdit={handleEdit}
-                    />
-                  )}
-                />
-              </ErrorBoundary>
-            </>
-          </div>
+        <div className="tieup-grid-wrapper">
+          <ErrorBoundary>
+            <Grid
+              data={companies}
+              style={{ minWidth: "1300px" }}
+              resizable={true}
+              scrollable="scrollable"
+            >
+              {/* ------------------ Avatar Column ------------------ */}
+              <GridColumn
+                title=""
+                width="70px"
+                cell={(props) => (
+                  <td style={{ textAlign: "center" }}>
+                    <CustomAvatar src={getAvatarUrl(props.dataItem)} height={40} />
+                  </td>
+                )}
+              />
+
+              {/* ------------------ Basic Info Columns ------------------ */}
+              <GridColumn field="id" title="ID" width="80px" />
+              <GridColumn field="companyName" title="Company Name" width="180px" />
+              <GridColumn field="phone" title="Phone" width="130px" />
+              <GridColumn field="city" title="City" width="120px" />
+              <GridColumn field="state" title="State" width="120px" />
+              <GridColumn field="gstin" title="GSTIN" width="160px" />
+
+              {/* ✅ Template Column (Download Button Restored) */}
+              <GridColumn
+                title="Template"
+                width="150px"
+                cell={(props) => (
+                  <td style={{ textAlign: "center" }}>
+                    {props.dataItem.billingTemplatePath ? (
+                      <a
+                        href={
+                          props.dataItem.billingTemplatePath.startsWith("/uploads")
+                            ? `${API_BASE_URL}${props.dataItem.billingTemplatePath}`
+                            : `${API_BASE_URL}/uploads/${props.dataItem.billingTemplatePath}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="tieup-download-link"
+                      >
+                        Download
+                      </a>
+                    ) : (
+                      "N/A"
+                    )}
+                  </td>
+                )}
+              />
+
+              {/* ✅ Status Column */}
+              <GridColumn
+                title="Status"
+                width="120px"
+                cell={(props) => (
+                  <td
+                    style={{
+                      color: props.dataItem.isActive === false ? "#a94442" : "#2b7a0b",
+                      fontWeight: 500,
+                      textAlign: "center",
+                    }}
+                  >
+                    {props.dataItem.isActive === false ? "Inactive" : "Active"}
+                  </td>
+                )}
+              />
+
+              {/* ✅ Actions Column */}
+              <GridColumn
+                title="Actions"
+                width="130px"
+                cell={(props) => (
+                  <td style={{ textAlign: "center" }}>
+                    <Button
+                      size="small"
+                      themeColor="primary"
+                      onClick={() => handleEdit(props.dataItem)}
+                    >
+                      Edit
+                    </Button>
+                  </td>
+                )}
+              />
+            </Grid>
+          </ErrorBoundary>
         </div>
       )}
     </>

@@ -1,7 +1,13 @@
 import axios from "axios";
 
+// ✅ Safe base URL fallback (in case .env is not loaded)
+const baseURL =
+  (import.meta.env.VITE_API_BASE_URL &&
+    import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, "")) ||
+  "https://localhost:7142";
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: baseURL, // ✅ always valid now
   headers: {
     "Content-Type": "application/json",
   },

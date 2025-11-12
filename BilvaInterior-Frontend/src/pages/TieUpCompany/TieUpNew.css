@@ -57,3 +57,40 @@
     min-width: 240px;
   }
 }
+/* Red * for required labels */
+.k-label {
+  position: relative;
+}
+
+.k-label::after {
+  content: attr(data-required);
+}
+
+label.k-label:has(*),
+.k-label:contains("*") {
+  color: #000;
+}
+
+.k-text-error {
+  color: red;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.toast-message {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  width: fit-content;
+}
+
+.toast-message.success {
+  background: #e7f9ed;
+  color: #027a48;
+}
+
+.toast-message.error {
+  background: #fde8e8;
+  color: #b91c1c;
+}
