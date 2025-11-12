@@ -1,153 +1,315 @@
-/* Responsive Action Bar Button Text */
-.tieup-action-btn-text {
-    display: inline;
-}
-@media (max-width: 600px) {
-    .tieup-action-btn-text {
-        display: none;
-    }
-}
-.tieup-list-row,
-.tieup-list-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.tieup-list-row {
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.tieup-list-header {
-    font-weight: 600;
-    font-size: 0.875rem;
-    background: #fff;
-    padding: 8px 0;
-    border-bottom: 1px solid #e9ebec;
-    color: #495057;
-}
-
-.tieup-list-cell,
-.tieup-list-header-cell {
-    padding: 0;
-}
-
-.tieup-list-logo,
-.tieup-list-header-logo {
-    width: 40px;
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    padding: 0 10px;
-}
-
-.tieup-list-code,
-.tieup-list-header-code {
-    width: 90px;
-}
-
-.tieup-list-contact,
-.tieup-list-header-contact {
-    width: 120px;
-}
-
-.tieup-list-phone,
-.tieup-list-header-phone {
-    width: 110px;
-}
-
-.tieup-list-city,
-.tieup-list-header-city {
-    width: 90px;
-}
-
-.tieup-list-state,
-.tieup-list-header-state {
-    width: 90px;
-}
-
-.tieup-list-gstin,
-.tieup-list-header-gstin {
-    width: 150px;
-}
-
-.tieup-list-template,
-.tieup-list-header-template {
-    width: 100px;
-}
-
-.tieup-list-status,
-.tieup-list-header-status {
-    width: 80px;
-}
-
-.tieup-list-actions,
-.tieup-list-header-actions {
-    width: 90px;
-    display: flex;
-    gap: 4px;
-}
-
+/* ---------------- Existing ListView Layout (unchanged) ---------------- */
 .tieup-list-container {
-    overflow-x: auto;
+  width: 100%;
+  overflow-x: auto;
+  background-color: #fff;
 }
 
 .tieup-list-inner {
-    min-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 8px 12px;
 }
 
-/* Tablet: show fewer columns than desktop */
+.tieup-list-header {
+  display: grid;
+  grid-template-columns: 60px 80px 200px 130px 150px 150px 180px 160px 120px 130px;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f7f9fb;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 0.9rem;
+}
+
+.tieup-list-header-cell {
+  padding: 4px 8px;
+  text-align: left;
+  color: #333;
+}
+
+.tieup-list-row {
+  display: grid;
+  grid-template-columns: 60px 80px 200px 130px 150px 150px 180px 160px 120px 130px;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.tieup-list-cell {
+  padding: 4px 8px;
+  color: #444;
+  vertical-align: middle;
+}
+
+.tieup-list-row:hover {
+  background-color: #f9fbff;
+}
+
+.tieup-list-logo img {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Status colors */
+.tieup-list-status {
+  font-weight: 500;
+  color: #2b7a0b;
+}
+
+.tieup-list-status:has(span:contains("Inactive")) {
+  color: #a94442;
+}
+
+/* Action bar styles */
+.tieup-action-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #eee;
+  min-height: 48px;
+}
+
+.tieup-action-btn-text {
+  font-size: 0.9rem;
+}
+
+/* Responsive tweaks for old layout */
+@media (max-width: 1024px) {
+  .tieup-list-header,
+  .tieup-list-row {
+    grid-template-columns: 60px 80px 180px 120px 140px 140px 160px 140px 100px 120px;
+  }
+}
+
 @media (max-width: 768px) {
-
-    .tieup-list-code,
-    .tieup-list-header-code,
-    .tieup-list-gstin,
-    .tieup-list-header-gstin,
-    .tieup-list-template,
-    .tieup-list-header-template {
-        display: none !important;
-    }
-
-    .tieup-list-inner {
-        min-width: 768px;
-        /* exactly fits tablets */
-    }
+  .tieup-list-header,
+  .tieup-list-row {
+    grid-template-columns: 60px 100px 200px 120px 120px;
+  }
+  .tieup-list-cell:nth-child(n + 6),
+  .tieup-list-header-cell:nth-child(n + 6) {
+    display: none;
+  }
 }
 
-/* Hide columns on small screens */
-@media (max-width: 576px) {
+/* ------------------- Added Grid-Based Enhancements (Kendo UI) ------------------- */
 
-    .tieup-list-code,
-    .tieup-list-header-code,
-    .tieup-list-city,
-    .tieup-list-header-city,
-    .tieup-list-state,
-    .tieup-list-header-state,
-    .tieup-list-gstin,
-    .tieup-list-header-gstin,
-    .tieup-list-template,
-    .tieup-list-header-template {
-        display: none !important;
-    }
+.tieup-grid-container {
+  padding: 1rem;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* Very small screens (<=425px) → keep only essentials */
-@media (max-width: 425px) {
+.k-grid {
+  font-family: inherit;
+  font-size: 0.9rem;
+  border-radius: 6px;
+}
 
-    .tieup-list-city,
-    .tieup-list-header-city,
-    .tieup-list-state,
-    .tieup-list-header-state,
-    .tieup-list-gstin,
-    .tieup-list-header-gstin,
-    .tieup-list-template,
-    .tieup-list-header-template {
-        display: none !important;
-    }
+.k-grid .k-grid-header {
+  background: #f7f9fb;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+}
 
-    .tieup-list-inner {
-        min-width: 425px;
-        /* exactly fits narrow devices */
-    }
+.k-grid-header th {
+  text-align: left;
+  padding: 0.75rem 0.5rem;
+}
+
+.k-grid td {
+  vertical-align: middle;
+  font-size: 0.9rem;
+  color: #333;
+  padding: 0.6rem 0.5rem;
+}
+
+.k-grid tr:hover td {
+  background: #f9fbff;
+}
+
+.k-grid-pager {
+  border-top: 1px solid #eee;
+  padding-top: 0.5rem;
+  background: #fff;
+}
+
+/* Action button column alignment */
+.k-grid td:last-child {
+  text-align: center;
+}
+
+/* Avatar cell alignment */
+.k-grid td:first-child {
+  text-align: center;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .k-grid-header th:nth-child(4),
+  .k-grid td:nth-child(4),
+  .k-grid-header th:nth-child(5),
+  .k-grid td:nth-child(5),
+  .k-grid-header th:nth-child(6),
+  .k-grid td:nth-child(6) {
+    display: none; /* Hide less important columns */
+  }
+}
+/* ---------------- Fix for Grid Overflow & Column Visibility ---------------- */
+.tieup-grid-container {
+  width: 100%;
+  overflow-x: auto;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.k-grid {
+  min-width: 1100px;
+  border: none;
+  font-size: 0.9rem;
+}
+
+.k-grid td,
+.k-grid th {
+  white-space: nowrap;
+  text-align: left;
+}
+
+.k-grid td:last-child {
+  text-align: center;
+}
+
+.k-grid-header {
+  background: #f7f9fb;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.k-grid tr:hover td {
+  background: #f9fbff;
+}
+
+.k-grid a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.k-grid a:hover {
+  text-decoration: underline;
+}
+/* Ensure last columns visible + blue link for Download */
+.tieup-grid-container {
+  width: 100%;
+  overflow-x: auto;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.k-grid {
+  min-width: 1150px;
+  border: none;
+  font-size: 0.9rem;
+}
+
+.k-grid-header {
+  background: #f7f9fb;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.k-grid td,
+.k-grid th {
+  white-space: nowrap;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.k-grid td:last-child {
+  text-align: center;
+}
+
+/* Blue download link, like All Employees */
+.download-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.download-link:hover {
+  text-decoration: underline;
+  color: #0056b3;
+}
+
+/* Subtle hover for table rows */
+.k-grid tr:hover td {
+  background: #f9fbff;
+}
+/* Fix grid alignment and ensure scroll if needed */
+.tieup-grid-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Ensure grid header and rows line up cleanly */
+.k-grid-header th,
+.k-grid td {
+  text-align: left;
+  white-space: nowrap;
+  vertical-align: middle;
+  padding: 0.6rem 0.75rem !important;
+}
+
+.k-grid td:last-child {
+  text-align: center;
+}
+
+/* Blue 'Download' like All Employees */
+.tieup-download-link,
+.k-grid td .tieup-download-link {
+  color: #007bff !important;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.tieup-download-link:hover {
+  color: #0056b3 !important;
+  text-decoration: underline;
+}
+
+/* Hover and header look */
+.k-grid tr:hover td {
+  background: #f9fbff;
+}
+
+.k-grid-header {
+  background: #f7f9fb;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.k-grid {
+  border: none;
+  font-family: inherit;
+  font-size: 0.9rem;
 }
