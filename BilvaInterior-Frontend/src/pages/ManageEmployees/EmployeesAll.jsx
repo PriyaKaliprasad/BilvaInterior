@@ -968,88 +968,88 @@ const EmployeeAll = () => {
 
   // Save (Edit)
   const handleSave = async () => {
-  const firstName = selectedEmployee?.firstName?.trim() || "";
-  const lastName = selectedEmployee?.lastName?.trim() || "";
-  const email = selectedEmployee?.email?.trim() || "";
-  const mobile = selectedEmployee?.mobile?.trim() || "";
+    const firstName = selectedEmployee?.firstName?.trim() || "";
+    const lastName = selectedEmployee?.lastName?.trim() || "";
+    const email = selectedEmployee?.email?.trim() || "";
+    const mobile = selectedEmployee?.mobile?.trim() || "";
 
-  const cleanFirst = firstName.replace(/[^A-Za-z\s]/g, "");
-  const cleanLast = lastName.replace(/[^A-Za-z\s]/g, "");
+    const cleanFirst = firstName.replace(/[^A-Za-z\s]/g, "");
+    const cleanLast = lastName.replace(/[^A-Za-z\s]/g, "");
 
-  // ✅ Step 1: basic validations
-  if (!cleanFirst || !NAME_REGEX.test(cleanFirst)) {
-    setSaveMessage("❌ First name is invalid. Only alphabets allowed.");
-    setIsSuccess(false);
-    return;
-  }
-  if (!cleanLast || !NAME_REGEX.test(cleanLast)) {
-    setSaveMessage("❌ Last name is invalid. Only alphabets allowed.");
-    setIsSuccess(false);
-    return;
-  }
+    // ✅ Step 1: basic validations
+    if (!cleanFirst || !NAME_REGEX.test(cleanFirst)) {
+      setSaveMessage("❌ First name is invalid. Only alphabets allowed.");
+      setIsSuccess(false);
+      return;
+    }
+    if (!cleanLast || !NAME_REGEX.test(cleanLast)) {
+      setSaveMessage("❌ Last name is invalid. Only alphabets allowed.");
+      setIsSuccess(false);
+      return;
+    }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    setSaveMessage("❌ Invalid email format.");
-    setIsSuccess(false);
-    return;
-  }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setSaveMessage("❌ Invalid email format.");
+      setIsSuccess(false);
+      return;
+    }
 
-  if (!MOBILE_REGEX.test(mobile)) {
-    setSaveMessage("❌ Mobile number must be 10 digits.");
-    setIsSuccess(false);
-    return;
-  }
+    if (!MOBILE_REGEX.test(mobile)) {
+      setSaveMessage("❌ Mobile number must be 10 digits.");
+      setIsSuccess(false);
+      return;
+    }
 
-  // ✅ Step 2: check if mobile number already exists (unique validation)
-  const duplicate = employees.find(
-    (emp) => emp.mobile === mobile && emp.id !== selectedEmployee.id
-  );
+    // ✅ Step 2: check if mobile number already exists (unique validation)
+    const duplicate = employees.find(
+      (emp) => emp.mobile === mobile && emp.id !== selectedEmployee.id
+    );
 
-  if (duplicate) {
-    setSaveMessage("❌ This mobile number is already used by another employee.");
-    setIsSuccess(false);
-    return;
-  }
+    if (duplicate) {
+      setSaveMessage("❌ This mobile number is already used by another employee.");
+      setIsSuccess(false);
+      return;
+    }
 
-  // ✅ Step 3: clean payload
-  const payload = {
-    ...selectedEmployee,
-    firstName: cleanFirst.charAt(0).toUpperCase() + cleanFirst.slice(1).toLowerCase(),
-    lastName: cleanLast.charAt(0).toUpperCase() + cleanLast.slice(1).toLowerCase(),
-    email,
-    mobile,
-  };
+    // ✅ Step 3: clean payload
+    const payload = {
+      ...selectedEmployee,
+      firstName: cleanFirst.charAt(0).toUpperCase() + cleanFirst.slice(1).toLowerCase(),
+      lastName: cleanLast.charAt(0).toUpperCase() + cleanLast.slice(1).toLowerCase(),
+      email,
+      mobile,
+    };
 
-  // ✅ Step 4: send to API
-  try {
-    const response = await fetch(`${API_BASE}/${selectedEmployee.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    // ✅ Step 4: send to API
+    try {
+      const response = await fetch(`${API_BASE}/${selectedEmployee.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (response.ok) {
-      setSaveMessage("✅ Employee saved successfully!");
-      setIsSuccess(true);
+      if (response.ok) {
+        setSaveMessage("✅ Employee saved successfully!");
+        setIsSuccess(true);
 
-      // ✅ Step 5: Wait a bit, then go back to list with refresh
-      setTimeout(() => {
-        fetchEmployees();              // refresh data
-        setSelectedEmployee(null);     // go back to list
-        try {
-          window.history.replaceState({}, ""); // reset history
-        } catch {}
-      }, 1000); // 1 second delay to show success message briefly
-    } else {
-      setSaveMessage("❌ Error saving employee.");
+        // ✅ Step 5: Wait a bit, then go back to list with refresh
+        setTimeout(() => {
+          fetchEmployees();              // refresh data
+          setSelectedEmployee(null);     // go back to list
+          try {
+            window.history.replaceState({}, ""); // reset history
+          } catch { }
+        }, 1000); // 1 second delay to show success message briefly
+      } else {
+        setSaveMessage("❌ Error saving employee.");
+        setIsSuccess(false);
+      }
+    } catch (error) {
+      console.error(error);
+      setSaveMessage("❌ Network error.");
       setIsSuccess(false);
     }
-  } catch (error) {
-    console.error(error);
-    setSaveMessage("❌ Network error.");
-    setIsSuccess(false);
-  }
-};
+  };
 
 
 

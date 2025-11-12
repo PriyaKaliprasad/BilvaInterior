@@ -261,7 +261,7 @@ const AllBillings_Simple = () => {
                         {/* Billing From */}
                         <div className="col-md-6">
                             <div className="border rounded p-3 h-100">
-                                <h6 className="fw-bold mb-2">Billing From (Bilva Interiors)</h6>
+                                <h6 className="fw-bold mb-2">Billing From - Bilva Interiors</h6>
                                 <textarea
                                     name="billingFromAddress"
                                     value={formData.billingFromAddress || ""}
@@ -319,8 +319,8 @@ const AllBillings_Simple = () => {
                                         <label className="form-label">Contact Email / Phone (Optional)</label>
 
                                         <input
-                                            name="billingFromContactEmailOrPhone"
-                                            value={formData.billingFromContactEmailOrPhone || ""}
+                                            name="billingFromContact"
+                                            value={formData.billingFromContact || ""}
                                             onChange={handleChange}
                                             className="form-control"
                                             placeholder="ContactEmailorPhone"
@@ -392,8 +392,8 @@ const AllBillings_Simple = () => {
                                         <label className="form-label">Contact Email / Phone (Optional)</label>
 
                                         <input
-                                            name="shippingContactEmailOrPhone"
-                                            value={formData.shippingContactEmailOrPhone || ""}
+                                            name="shippingContact"
+                                            value={formData.shippingContact || ""}
                                             onChange={handleChange}
                                             className="form-control"
                                             placeholder="ContactEmailorPhone"
@@ -534,7 +534,7 @@ const AllBillings_Simple = () => {
 
                         {/* Estimate No */}
                         <div className="col-md-3 col-sm-6">
-                            <label className="form-label">Estimate No</label>
+                            <label className="form-label">Invoice No</label>
                             <input
                                 name="estimateNo"
                                 value={formData.estimateNo || ""}
@@ -546,7 +546,7 @@ const AllBillings_Simple = () => {
 
                         {/* Date of Estimate */}
                         <div className="col-md-3 col-sm-6">
-                            <label className="form-label">Date of Estimate</label>
+                            <label className="form-label">Date of Invoice</label>
                             <input
                                 name="dateOfEstimate"
                                 value={formData.dateOfEstimate || toDateInputValue(formData.dateOfEstimate)}
@@ -817,23 +817,16 @@ const AllBillings_Simple = () => {
                 {/* Tax & Totals */}
                 <div className="mt-4 row">
                     <div className="col-md-6">
-                        <h6 className="fw-bold mb-2">Tax Options</h6>
-                        <div className="d-flex gap-2 mb-2 align-items-center">
-                            <select
-                                className="form-select"
-                                name="taxOption1"
-                                value={formData.taxOption1 || ""}
-                                onChange={handleChange}
-                                style={{ maxWidth: 220 }}
-                            >
-                                <option value="">Select Option</option>
-                                <option>IGST</option>
-                                <option>CGST</option>
-                                <option>SGST</option>
-                            </select>
+                        <h6 className="fw-bold mb-2">Tax</h6>
+
+                        {/* IGST */}
+                        <div className="d-flex gap-2 align-items-center mb-2">
+                            <label className="fw-semibold" style={{ minWidth: 80 }}>
+                                IGST
+                            </label>
                             <input
-                                name="taxPercent1"
-                                value={formData.taxPercent1 ?? ""}
+                                name="igstPercent"
+                                value={formData.igstPercent ?? ""}
                                 onChange={handleNumberChange}
                                 className="form-control"
                                 placeholder="%"
@@ -842,22 +835,30 @@ const AllBillings_Simple = () => {
                             />
                         </div>
 
-                        <div className="d-flex gap-2 align-items-center">
-                            <select
-                                className="form-select"
-                                name="taxOption2"
-                                value={formData.taxOption2 || ""}
-                                onChange={handleChange}
-                                style={{ maxWidth: 220 }}
-                            >
-                                <option value="">Select Option</option>
-                                <option>IGST</option>
-                                <option>CGST</option>
-                                <option>SGST</option>
-                            </select>
+                        {/* CGST */}
+                        <div className="d-flex gap-2 align-items-center mb-2">
+                            <label className="fw-semibold" style={{ minWidth: 80 }}>
+                                CGST
+                            </label>
                             <input
-                                name="taxPercent2"
-                                value={formData.taxPercent2 ?? ""}
+                                name="cgstPercent"
+                                value={formData.cgstPercent ?? ""}
+                                onChange={handleNumberChange}
+                                className="form-control"
+                                placeholder="%"
+                                style={{ width: 100 }}
+                                type="number"
+                            />
+                        </div>
+
+                        {/* SGST */}
+                        <div className="d-flex gap-2 align-items-center">
+                            <label className="fw-semibold" style={{ minWidth: 80 }}>
+                                SGST
+                            </label>
+                            <input
+                                name="sgstPercent"
+                                value={formData.sgstPercent ?? ""}
                                 onChange={handleNumberChange}
                                 className="form-control"
                                 placeholder="%"
@@ -866,6 +867,7 @@ const AllBillings_Simple = () => {
                             />
                         </div>
                     </div>
+
 
                     <div className="col-md-6">
                         <h6 className="fw-bold mb-2">Total</h6>
@@ -880,7 +882,7 @@ const AllBillings_Simple = () => {
                             />
                         </div>
                         <div className="d-flex justify-content-between mb-2">
-                            <span>IGST:</span>
+                            <span>Tax Total:</span>
                             <input
                                 type="number"
                                 name="igst"
