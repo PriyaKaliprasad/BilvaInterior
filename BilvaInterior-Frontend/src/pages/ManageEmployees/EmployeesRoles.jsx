@@ -1168,35 +1168,35 @@ export default function ManageRoles() {
       </>
     );
   }
-  if (showAdd) {
-    return (
-      <>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: 16,
-          }}
-        >
-          <Button
-            icon="arrow-left"
-            size="small"
-            onClick={() => setShowAdd(false)} // ✅ only go back to Manage Roles list
-            className="action-btn back-btn"
-            style={{ marginRight: 8 }}
-          >
-            <span className="tieup-action-btn-text">Back</span>
-          </Button>
-        </div>
+  // if (showAdd) {
+  //   return (
+  //     <>
+  //       <div
+  //         style={{
+  //           display: "flex",
+  //           alignItems: "center",
+  //           marginBottom: 16,
+  //         }}
+  //       >
+  //         <Button
+  //           icon="arrow-left"
+  //           size="small"
+  //           onClick={() => setShowAdd(false)} // ✅ only go back to Manage Roles list
+  //           className="action-btn back-btn"
+  //           style={{ marginRight: 8 }}
+  //         >
+  //           <span className="tieup-action-btn-text">Back</span>
+  //         </Button>
+  //       </div>
 
-        <AddNewRole
-          features={features}
-          onCancel={() => setShowAdd(false)} // ✅ same logic here
-          onAdded={handleAddSuccess}
-        />
-      </>
-    );
-  }
+  //       <AddNewRole
+  //         features={features}
+  //         onCancel={() => setShowAdd(false)} // ✅ same logic here
+  //         onAdded={handleAddSuccess}
+  //       />
+  //     </>
+  //   );
+  // }
 
   if (editItem) {
     return (
