@@ -217,7 +217,7 @@ import "./ManageRoles.css";
 import { Form, Field, FormElement } from "@progress/kendo-react-form";
 import { Button } from "@progress/kendo-react-buttons";
 import { Switch, Checkbox } from "@progress/kendo-react-inputs";
-import FormInput from "../components/Form/FormInput";
+import FormInput from "../../components/Form/FormInput";
 
 const AddRole = () => {
   const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;

@@ -1625,7 +1625,18 @@ const AllQuotations_Simple = () => {
                 onPageChange={handlePageChange}
               >
                 <GridColumn field="projectName" title="Project Name" width="100px" />
-
+                <GridColumn
+                  field="lastModifiedAt"
+                  title="Last Modified At"
+                  width="180px"
+                  cell={(props) => (
+                    <td>
+                      {props.dataItem.lastModifiedAt
+                        ? new Date(props.dataItem.lastModifiedAt).toLocaleString()
+                        : "-"}
+                    </td>
+                  )}
+                />
                 <GridColumn
                   title="Actions"
                   width="100px"
@@ -1646,18 +1657,6 @@ const AllQuotations_Simple = () => {
                   )}
                 />
 
-                <GridColumn
-                  field="lastModifiedAt"
-                  title="Last Modified At"
-                  width="180px"
-                  cell={(props) => (
-                    <td>
-                      {props.dataItem.lastModifiedAt
-                        ? new Date(props.dataItem.lastModifiedAt).toLocaleString()
-                        : "-"}
-                    </td>
-                  )}
-                />
 
               </Grid>
             </div>
@@ -1700,7 +1699,7 @@ const AllQuotations_Simple = () => {
             {/* Billing From */}
             <div className="col-md-6">
               <div className="border rounded p-3 h-100">
-                <h6 className="fw-bold mb-2">Billing From (Bilva Interiors)</h6>
+                <h6 className="fw-bold mb-2">Billing From - Bilva Interiors</h6>
                 <textarea
                   name="billingFromAddress"
                   value={formData.billingFromAddress || ""}
@@ -1732,6 +1731,7 @@ const AllQuotations_Simple = () => {
                       placeholder="GSTIN"
                     />
                   </div>
+
                 </div>
               </div>
             </div>
@@ -1912,7 +1912,7 @@ const AllQuotations_Simple = () => {
             </div>
 
             <div className="col-md-3 col-sm-6">
-              <label className="form-label">Estimate No</label>
+              <label className="form-label">Invoice No</label>
               <input
                 name="estimateNo"
                 value={formData.estimateNo || formData.EstimateNo || ""}
@@ -1923,7 +1923,7 @@ const AllQuotations_Simple = () => {
             </div>
 
             <div className="col-md-3 col-sm-6">
-              <label className="form-label">Date of Estimate</label>
+              <label className="form-label">Date of Invoice</label>
               <input
                 name="dateOfEstimate"
                 value={formData.dateOfEstimate || toDateInputValue(formData.dateOfEstimate)}
@@ -2002,181 +2002,174 @@ const AllQuotations_Simple = () => {
         </div>
 
         {/* ✅ Line Items Section with Add & Delete buttons */}
-<div className="mt-4 border rounded p-3 position-relative">
-  <div className="d-flex justify-content-between align-items-center mb-2">
-    <h6 className="fw-bold mb-0">Line Items</h6>
+        <div className="mt-4 border rounded p-3 position-relative">
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <h6 className="fw-bold mb-0">Line Items</h6>
 
-    {/* ✅ Add Line Item Button (top-right) */}
-    <Button
-      size="small"
-      themeColor="primary"
-      onClick={() => {
-        setFormData((prev) => ({
-          ...prev,
-          lineItems: [
-            ...(prev.lineItems || []),
-            {
-              materialCode: "",
-              hsnCode: "",
-              description: "",
-              uom: "",
-              quantity: "",
-              rate: "",
-              amount: "",
-            },
-          ],
-        }));
-      }}
-    >
-      + Add Line Item
-    </Button>
-  </div>
+            {/* ✅ Add Line Item Button (top-right) */}
+            <Button
+              size="small"
+              themeColor="primary"
+              onClick={() => {
+                setFormData((prev) => ({
+                  ...prev,
+                  lineItems: [
+                    ...(prev.lineItems || []),
+                    {
+                      materialCode: "",
+                      hsnCode: "",
+                      description: "",
+                      uom: "",
+                      quantity: "",
+                      rate: "",
+                      amount: "",
+                    },
+                  ],
+                }));
+              }}
+            >
+              + Add Line Item
+            </Button>
+          </div>
 
-  {Array.isArray(formData.lineItems) && formData.lineItems.length > 0 ? (
-    <div className="table-responsive">
-      <table className="table table-sm table-bordered align-middle">
-        <thead className="table-light">
-          <tr>
-            <th>Material Code</th>
-            <th>HSN Code</th>
-            <th>Description</th>
-            <th>UOM</th>
-            <th>Quantity</th>
-            <th>Rate</th>
-            <th>Amount</th>
-            <th style={{ width: "80px", textAlign: "center" }}>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {formData.lineItems.map((li, idx) => (
-            <tr key={idx}>
-              <td>
-                <input
-                  className="form-control form-control-sm"
-                  value={li.materialCode || ""}
-                  onChange={(e) => {
-                    const copy = { ...formData };
-                    copy.lineItems[idx].materialCode = e.target.value;
-                    setFormData(copy);
-                  }}
-                />
-              </td>
-              <td>
-                <input
-                  className="form-control form-control-sm"
-                  value={li.hsnCode || ""}
-                  onChange={(e) => {
-                    const copy = { ...formData };
-                    copy.lineItems[idx].hsnCode = e.target.value;
-                    setFormData(copy);
-                  }}
-                />
-              </td>
-              <td>
-                <input
-                  className="form-control form-control-sm"
-                  value={li.description || ""}
-                  onChange={(e) => {
-                    const copy = { ...formData };
-                    copy.lineItems[idx].description = e.target.value;
-                    setFormData(copy);
-                  }}
-                />
-              </td>
-              <td>
-                <input
-                  className="form-control form-control-sm"
-                  value={li.uom || ""}
-                  onChange={(e) => {
-                    const copy = { ...formData };
-                    copy.lineItems[idx].uom = e.target.value;
-                    setFormData(copy);
-                  }}
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  className="form-control form-control-sm"
-                  value={li.quantity || ""}
-                  onChange={(e) => {
-                    const copy = { ...formData };
-                    copy.lineItems[idx].quantity = e.target.value;
-                    setFormData(copy);
-                  }}
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  className="form-control form-control-sm"
-                  value={li.rate || ""}
-                  onChange={(e) => {
-                    const copy = { ...formData };
-                    copy.lineItems[idx].rate = e.target.value;
-                    setFormData(copy);
-                  }}
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  className="form-control form-control-sm"
-                  value={li.amount || ""}
-                  onChange={(e) => {
-                    const copy = { ...formData };
-                    copy.lineItems[idx].amount = e.target.value;
-                    setFormData(copy);
-                  }}
-                />
-              </td>
+          {Array.isArray(formData.lineItems) && formData.lineItems.length > 0 ? (
+            <div className="table-responsive">
+              <table className="table table-sm table-bordered align-middle">
+                <thead className="table-light">
+                  <tr>
+                    <th>Material Code</th>
+                    <th>HSN Code</th>
+                    <th>Description</th>
+                    <th>UOM</th>
+                    <th>Quantity</th>
+                    <th>Rate</th>
+                    <th>Amount</th>
+                    <th style={{ width: "80px", textAlign: "center" }}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formData.lineItems.map((li, idx) => (
+                    <tr key={idx}>
+                      <td>
+                        <input
+                          className="form-control form-control-sm"
+                          value={li.materialCode || ""}
+                          onChange={(e) => {
+                            const copy = { ...formData };
+                            copy.lineItems[idx].materialCode = e.target.value;
+                            setFormData(copy);
+                          }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className="form-control form-control-sm"
+                          value={li.hsnCode || ""}
+                          onChange={(e) => {
+                            const copy = { ...formData };
+                            copy.lineItems[idx].hsnCode = e.target.value;
+                            setFormData(copy);
+                          }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className="form-control form-control-sm"
+                          value={li.description || ""}
+                          onChange={(e) => {
+                            const copy = { ...formData };
+                            copy.lineItems[idx].description = e.target.value;
+                            setFormData(copy);
+                          }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className="form-control form-control-sm"
+                          value={li.uom || ""}
+                          onChange={(e) => {
+                            const copy = { ...formData };
+                            copy.lineItems[idx].uom = e.target.value;
+                            setFormData(copy);
+                          }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          className="form-control form-control-sm"
+                          value={li.quantity || ""}
+                          onChange={(e) => {
+                            const copy = { ...formData };
+                            copy.lineItems[idx].quantity = e.target.value;
+                            setFormData(copy);
+                          }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          className="form-control form-control-sm"
+                          value={li.rate || ""}
+                          onChange={(e) => {
+                            const copy = { ...formData };
+                            copy.lineItems[idx].rate = e.target.value;
+                            setFormData(copy);
+                          }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          className="form-control form-control-sm"
+                          value={li.amount || ""}
+                          onChange={(e) => {
+                            const copy = { ...formData };
+                            copy.lineItems[idx].amount = e.target.value;
+                            setFormData(copy);
+                          }}
+                        />
+                      </td>
 
-              {/* ✅ Delete Button (after Amount column) */}
-              <td style={{ textAlign: "center" }}>
-                <Button
-                  size="small"
-                  themeColor="error"
-                  fillMode="outline"
-                  onClick={() => {
-                    const copy = { ...formData };
-                    copy.lineItems = copy.lineItems.filter((_, i) => i !== idx);
-                    setFormData(copy);
-                  }}
-                >
-                  🗑️
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  ) : (
-    <div className="text-muted">No line items</div>
-  )}
-</div>
+                      {/* ✅ Delete Button (after Amount column) */}
+                      <td style={{ textAlign: "center" }}>
+                        <Button
+                          size="small"
+                          themeColor="error"
+                          fillMode="outline"
+                          onClick={() => {
+                            const copy = { ...formData };
+                            copy.lineItems = copy.lineItems.filter((_, i) => i !== idx);
+                            setFormData(copy);
+                          }}
+                        >
+                          🗑️
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-muted">No line items</div>
+          )}
+        </div>
 
 
         {/* Tax & Totals */}
         <div className="mt-4 row">
           <div className="col-md-6">
-            <h6 className="fw-bold mb-2">Tax Options</h6>
+            <h6 className="fw-bold mb-2">Tax</h6>
+
+            {/* IGST */}
             <div className="d-flex gap-2 mb-2 align-items-center">
-              <select
-                className="form-select"
-                name="taxOption1"
-                value={formData.taxOption1 || ""}
-                onChange={handleChange}
-                style={{ maxWidth: 220 }}
-              >
-                <option value="">Select Option</option>
-                <option>IGST</option>
-                <option>CGST</option>
-                <option>SGST</option>
-              </select>
+              <label className="fw-semibold" style={{ minWidth: 80 }}>
+                IGST
+              </label>
               <input
-                name="taxPercent1"
-                value={formData.taxPercent1 ?? ""}
+                name="igstPercent"
+                value={formData.igstPercent ?? ""}
                 onChange={handleNumberChange}
                 className="form-control"
                 placeholder="%"
@@ -2185,22 +2178,30 @@ const AllQuotations_Simple = () => {
               />
             </div>
 
-            <div className="d-flex gap-2 align-items-center">
-              <select
-                className="form-select"
-                name="taxOption2"
-                value={formData.taxOption2 || ""}
-                onChange={handleChange}
-                style={{ maxWidth: 220 }}
-              >
-                <option value="">Select Option</option>
-                <option>IGST</option>
-                <option>CGST</option>
-                <option>SGST</option>
-              </select>
+            {/* CGST */}
+            <div className="d-flex gap-2 mb-2 align-items-center">
+              <label className="fw-semibold" style={{ minWidth: 80 }}>
+                CGST
+              </label>
               <input
-                name="taxPercent2"
-                value={formData.taxPercent2 ?? ""}
+                name="cgstPercent"
+                value={formData.cgstPercent ?? ""}
+                onChange={handleNumberChange}
+                className="form-control"
+                placeholder="%"
+                style={{ width: 100 }}
+                type="number"
+              />
+            </div>
+
+            {/* SGST */}
+            <div className="d-flex gap-2 align-items-center">
+              <label className="fw-semibold" style={{ minWidth: 80 }}>
+                SGST
+              </label>
+              <input
+                name="sgstPercent"
+                value={formData.sgstPercent ?? ""}
                 onChange={handleNumberChange}
                 className="form-control"
                 placeholder="%"
@@ -2209,6 +2210,7 @@ const AllQuotations_Simple = () => {
               />
             </div>
           </div>
+
 
           <div className="col-md-6">
             <h6 className="fw-bold mb-2">Total</h6>
@@ -2223,7 +2225,7 @@ const AllQuotations_Simple = () => {
               />
             </div>
             <div className="d-flex justify-content-between mb-2">
-              <span>IGST:</span>
+              <span>Tax Total:</span>
               <input
                 type="number"
                 name="igst"
