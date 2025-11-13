@@ -313,3 +313,58 @@
   font-family: inherit;
   font-size: 0.9rem;
 }
+
+/* 🚫 Disable ALL mobile column hiding (Fix missing columns issue) */
+@media (max-width: 768px) {
+  .tieup-list-cell:nth-child(n + 6),
+  .tieup-list-header-cell:nth-child(n + 6),
+  .k-grid-header th:nth-child(4),
+  .k-grid td:nth-child(4),
+  .k-grid-header th:nth-child(5),
+  .k-grid td:nth-child(5),
+  .k-grid-header th:nth-child(6),
+  .k-grid td:nth-child(6) {
+    display: table-cell !important;
+  }
+}
+
+/* 📱 Force horizontal scroll on mobile */
+@media (max-width: 768px) {
+  .tieup-grid-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .k-grid {
+    min-width: 1300px !important;
+  }
+}
+
+/* 📱 Show Company Name on mobile (Fix order between ID & Phone) */
+@media (max-width: 768px) {
+  /* Force show Company Name (column #3) */
+  .k-grid-header th:nth-child(3),
+  .k-grid td:nth-child(3) {
+    display: table-cell !important;
+  }
+
+  /* Keep Phone (#4), City (#5), State (#6) also visible */
+  .k-grid-header th:nth-child(4),
+  .k-grid td:nth-child(4),
+  .k-grid-header th:nth-child(5),
+  .k-grid td:nth-child(5),
+  .k-grid-header th:nth-child(6),
+  .k-grid td:nth-child(6) {
+    display: table-cell !important;
+  }
+
+  /* Ensure horizontal scroll available */
+  .tieup-grid-wrapper {
+    overflow-x: auto !important;
+  }
+
+  /* Table full width for mobile */
+  .k-grid {
+    min-width: 1300px !important;
+  }
+}
