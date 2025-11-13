@@ -26,6 +26,7 @@ import AddNewRole from '../../pages/AddNewRole.jsx';
 import AuditTrail from '../../pages/AuditTrail.jsx';
 import MyAccount from '../../pages/MyAccount.jsx';
 import ManageVendorsAll from "../../pages/Manage Vendor/ManageVendorsAll.jsx";
+import MeasurementSheet from "../../pages/Measurement/MeasurementSheet.jsx";
 
 
 // Sidebar groups with navMeta, icons, tab IDs, and page components
@@ -69,6 +70,14 @@ export const sidebarLinks = [
         content: ProjectsTypes,
       }
     ]
+  },
+  {
+    id: "measurementsheet",
+    label: "Measurement Sheet",
+    icon: chartPieIcon,
+    navMeta: { title: "Measurement Sheet", breadcrumb: ["Measurement Sheet"] },
+    content: MeasurementSheet,
+    isGroup: false
   },
   {
     id: "site-visit",
