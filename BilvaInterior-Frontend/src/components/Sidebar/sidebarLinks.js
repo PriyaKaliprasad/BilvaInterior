@@ -15,14 +15,15 @@ import TieUpAll from '../../pages/TieUpCompany/TieUpAll.jsx';
 import TieUpNew from '../../pages/TieUpCompany/TieUpNew.jsx';
 import TieUpEdit from '../../pages/TieUpCompany/TieUpEdit.jsx';
 import ManageVendors from '../../pages/Manage Vendor/ManageVendors.jsx';
-import Quotations from '../../pages/Quotations.jsx';
-import AllQuotations from '../../pages/AllQuotations.jsx';
+import Quotations from '../../pages/Quotation/Quotations.jsx';
+import AllQuotations from '../../pages/Quotation/AllQuotations.jsx';
 import ExpenseTracker from '../../pages/Expense Tracker/ExpenseTracker.jsx';
-import Billing from '../../pages/Billing.jsx';
-import EmployeesAll from '../../pages/EmployeesAll.jsx';
+import Billing from '../../pages/Billing/Billing.jsx';
+import BillingList from '../../pages/Billing/BillingList.jsx';
+import EmployeesAll from '../../pages/ManageEmployees/EmployeesAll.jsx';
 import EmployeesNew from '../../pages/ManageEmployees/EmployeesNew.jsx';
-import EmployeesRoles from '../../pages/EmployeesRoles.jsx';
-import AddNewRole from '../../pages/AddNewRole.jsx';
+import EmployeesRoles from '../../pages/ManageEmployees/EmployeesRoles.jsx';
+import AddNewRole from '../../pages/ManageEmployees/AddNewRole.jsx';
 import AuditTrail from '../../pages/AuditTrail.jsx';
 import MyAccount from '../../pages/MyAccount.jsx';
 import ManageVendorsAll from "../../pages/Manage Vendor/ManageVendorsAll.jsx";
@@ -151,7 +152,7 @@ export const sidebarLinks = [
     icon: dollarIcon,
     navMeta: { title: "Expense Tracker", breadcrumb: ["Expense Tracker"] },
     content: ExpenseTracker,
-    isGroup: false
+    isGroup: false,  
   },
   {
     id: "billing",
@@ -159,7 +160,21 @@ export const sidebarLinks = [
     icon: moneyExchangeIcon,
     navMeta: { title: "Billing", breadcrumb: ["Billing"] },
     content: Billing,
-    isGroup: false
+    isGroup: true,
+    children: [
+      {
+        id: "billing list",
+        label: "Billing List",
+        navMeta: { title: "Billing List", breadcrumb: ["Billing", "Billing List"] },
+        content: BillingList,
+      },
+      {
+        id: "new billing",
+        label: "New Billing ",
+        navMeta: { title: "Billing ", breadcrumb: ["Billing", "New Billing"] },
+        content: Billing,
+      }
+    ]
   },
   {
     id: "employees",

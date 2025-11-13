@@ -4,6 +4,9 @@ import api from "../api/axios";
 
 const AuthContext = createContext(null);
 
+// ✅ Added BASE URL (from backend)
+const API_BASE_URL = "https://localhost:7142";
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [signOutMessage, setSignOutMessage] = useState('');
@@ -16,7 +19,8 @@ export function AuthProvider({ children }) {
       setUser(null);
     }
   }, [data, error]);
-// flush browser cached page so that auth is re-verified on back/forward navigation
+
+  // flush browser cached page so that auth is re-verified on back/forward navigation
   useEffect(() => {
     const handlePopState = () => {
       refetch();   // verify auth again when user navigates with browser buttons
@@ -28,7 +32,8 @@ export function AuthProvider({ children }) {
 
   const login = async (credentials) => {
     try {
-      const response = await api.post("/api/auth/login", credentials);
+      // ✅ Fixed URL: prepend backend base path
+      const response = await api.post(`${API_BASE_URL}/api/auth/login`, credentials);
       // After successful login, refetch user data
       await refetch();
       return { success: true, data: response.data };
@@ -44,7 +49,8 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      await api.post("/api/auth/logout");
+      // ✅ Fixed URL: prepend backend base path
+      await api.post(`${API_BASE_URL}/api/auth/logout`);
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
