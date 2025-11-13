@@ -90,21 +90,3 @@
   }
 }
 
-/* Default: keep desktop as-is */
-.responsive-button {
-  min-width: auto; /* desktop keeps default width */
-}
-
-/* Mobile: make buttons wider */
-@media (max-width: 768px) {
-  .responsive-button {
-    flex: 1; /* buttons take equal available space */
-    min-width: 120px; /* optional: ensure a minimum width */
-  }
-
-  /* Optional: add spacing between buttons on mobile */
-  .button-row {
-    width: 100%;
-    gap: 10px;
-  }
-}

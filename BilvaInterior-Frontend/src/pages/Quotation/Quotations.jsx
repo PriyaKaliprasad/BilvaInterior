@@ -1667,6 +1667,7 @@ const Quotation = () => {
   };
 
   // Auto-calculate totals
+
   useEffect(() => {
     if (lineItems.length === 0) return;
 
@@ -1676,18 +1677,23 @@ const Quotation = () => {
       return sum + qty * rate;
     }, 0);
 
+    // Calculate each tax
     const tax1Amount = (netTotal * (parseFloat(tax1.percent) || 0)) / 100;
     const tax2Amount = (netTotal * (parseFloat(tax2.percent) || 0)) / 100;
-    const roundOff = parseFloat(totals.roundOff) || 0;
-    const grandTotal = netTotal + tax1Amount + tax2Amount + roundOff;
+    const tax3Amount = (netTotal * (parseFloat(tax3?.percent) || 0)) / 100;
 
-    setTotals({
+    const totalTax = tax1Amount + tax2Amount + tax3Amount;
+    const roundOff = parseFloat(totals.roundOff) || 0;
+    const grandTotal = netTotal + totalTax + roundOff;
+
+    setTotals((prev) => ({
+      ...prev,
       netTotal: parseFloat(netTotal.toFixed(2)),
-      igst: parseFloat((tax1Amount + tax2Amount).toFixed(2)),
-      roundOff: roundOff,
+      igst: parseFloat(totalTax.toFixed(2)), // Tax Total now includes tax3
       grandTotal: parseFloat(grandTotal.toFixed(2)),
-    });
-  }, [lineItems, tax1, tax2, totals.roundOff]);
+    }));
+  }, [lineItems, tax1, tax2, tax3, totals.roundOff]);
+
 
   // Validation used before PDF
   const validateForPDF = (formValues) => {
@@ -2176,116 +2182,70 @@ const Quotation = () => {
 
               {/* Tax & Totals */}
               <div className="mt-4">
-                <div className="row align-items-start">
+                <div className="row align-items-start g-4">
+                  {/* Tax Section */}
                   <div className="col-md-6">
                     <h6 className="fw-bold mb-3">Tax</h6>
                     <div className="container-fluid px-0">
-                      <div className="row g-3 mb-2">
-                        <div className="col-md-6 d-flex gap-2 align-items-center">
-                          <label className="fw-semibold" style={{ minWidth: "60px" }}>
-                            IGST
-                          </label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            placeholder="%"
-                            value={tax1.percent}
-                            onChange={(e) => setTax1({ ...tax1, percent: e.target.value })}
-                            style={{ width: "100px" }}
-                            name="tax1_percent"
-                          />
+                      {[
+                        { label: "IGST", value: tax1.percent, setter: setTax1, name: "tax1_percent" },
+                        { label: "CGST", value: tax2.percent, setter: setTax2, name: "tax2_percent" },
+                        { label: "SGST", value: tax3?.percent || "", setter: setTax3, name: "tax3_percent" },
+                      ].map((tax, index) => (
+                        <div className="row g-2 mb-2" key={index}>
+                          <div className="col-6 col-sm-5 col-md-6 d-flex align-items-center gap-2">
+                            <label className="fw-semibold mb-0" style={{ minWidth: "60px" }}>
+                              {tax.label}
+                            </label>
+                            <input
+                              type="number"
+                              className="form-control flex-grow-1"
+                              placeholder="0"
+                              value={tax.value}
+                              onChange={(e) => tax.setter({ percent: e.target.value })}
+                              name={tax.name}
+                            />
+                          </div>
                         </div>
-                      </div>
-
-                      <div className="row g-3 mb-2">
-                        <div className="col-md-6 d-flex gap-2 align-items-center">
-                          <label className="fw-semibold" style={{ minWidth: "60px" }}>
-                            CGST
-                          </label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            placeholder="%"
-                            value={tax2.percent}
-                            onChange={(e) => setTax2({ ...tax2, percent: e.target.value })}
-                            style={{ width: "100px" }}
-                            name="tax2_percent"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="row g-3">
-                        <div className="col-md-6 d-flex gap-2 align-items-center">
-                          <label className="fw-semibold" style={{ minWidth: "60px" }}>
-                            SGST
-                          </label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            placeholder="%"
-                            value={tax3?.percent || ""}
-                            onChange={(e) => setTax3({ ...tax3, percent: e.target.value })}
-                            style={{ width: "100px" }}
-                            name="tax3_percent"
-                          />
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
 
+                  {/* Total Section */}
                   <div className="col-md-6">
                     <h6 className="fw-bold mb-3">Total</h6>
-                    <div className="d-flex justify-content-between mb-2">
-                      <span>Net Total:</span>
-                      <input
-                        type="number"
-                        className="form-control w-25"
-                        value={totals.netTotal}
-                        onChange={(e) =>
-                          setTotals({ ...totals, netTotal: parseFloat(e.target.value) })
-                        }
-                        name="netTotal"
-                      />
-                    </div>
-                    <div className="d-flex justify-content-between mb-2">
-                      <span>Tax Total:</span>
-                      <input
-                        type="number"
-                        className="form-control w-25"
-                        value={totals.igst}
-                        onChange={(e) =>
-                          setTotals({ ...totals, igst: parseFloat(e.target.value) })
-                        }
-                        name="taxTotal"
-                      />
-                    </div>
-                    <div className="d-flex justify-content-between mb-2">
-                      <span>Round Off:</span>
-                      <input
-                        type="number"
-                        className="form-control w-25"
-                        value={totals.roundOff}
-                        onChange={(e) =>
-                          setTotals({ ...totals, roundOff: parseFloat(e.target.value) })
-                        }
-                        name="roundOff"
-                      />
-                    </div>
-                    <div className="d-flex justify-content-between fw-bold border-top pt-2 mb-3">
-                      <span>Grand Total:</span>
-                      <input
-                        type="number"
-                        className="form-control w-25"
-                        value={totals.grandTotal}
-                        onChange={(e) =>
-                          setTotals({ ...totals, grandTotal: parseFloat(e.target.value) })
-                        }
-                        name="grandTotal"
-                      />
-                    </div>
+                    {[
+                      { label: "Net Total", value: totals.netTotal, key: "netTotal" },
+                      { label: "Tax Total", value: totals.igst, key: "igst" },
+                      { label: "Round Off", value: totals.roundOff, key: "roundOff" },
+                      { label: "Grand Total", value: totals.grandTotal, key: "grandTotal", bold: true },
+                    ].map((item, index) => (
+                      <div
+                        key={index}
+                        className={`d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-2 ${item.bold ? "fw-bold border-top pt-2 mt-2" : ""
+                          }`}
+                      >
+                        {/* Label */}
+                        <span className="mb-1 mb-sm-0">{item.label}:</span>
+
+                        {/* Input */}
+                        <input
+                          type="number"
+                          className="form-control"
+                          style={{ width: "120px" }}
+                          value={item.value}
+                          onChange={(e) =>
+                            setTotals({ ...totals, [item.key]: parseFloat(e.target.value) })
+                          }
+                          name={item.key}
+                        />
+                      </div>
+                    ))}
                   </div>
+
                 </div>
               </div>
+
 
               {/* Message */}
 
@@ -2303,119 +2263,98 @@ const Quotation = () => {
                 </div>
               )}
 
-              <div className="d-flex flex-wrap justify-content-between align-items-center mt-3 mb-4">
-                {/* Left side: Save + Cancel */}
-                <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mt-3 mb-4 gap-2">
-                  {/* Left side: Save + Cancel */}
-                  <div className="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
-                    <Button themeColor="primary" type="submit" className="w-100 w-sm-auto responsive-button">
-                      Save
-                    </Button>
-                    <Button type="button" onClick={() => window.location.reload()} className="w-100 w-sm-auto responsive-button">
-                      Cancel
-                    </Button>
-                  </div>
+              {/* <div className="d-flex flex-wrap justify-content-between align-items-center mt-3 mb-4"> */}
+              {/* Left side: Save + Cancel */}
+              <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mt-3 mb-4">
+                {/* Left: Save + Cancel */}
+                <div className="d-flex flex-row flex-wrap flex-md-nowrap justify-content-center justify-content-md-start gap-2 w-100 w-md-auto">
+                  <Button
+                    themeColor="primary"
+                    type="submit"
+                    className="flex-grow-1 flex-md-grow-0"
+                    style={{ minWidth: "100px" }}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => window.location.reload()}
+                    className="flex-grow-1 flex-md-grow-0"
+                    style={{ minWidth: "100px" }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
 
-                  <div className="mt-2 mt-md-0 w-100 w-md-auto">
-                    <Button
-                      themeColor="primary"
-                      type="button"
-                      className="w-100 w-md-auto responsive-button"
-                      onClick={async () => {
-                        // Combine all possible sources of data
-                        let values = formRenderProps.value || {};
-                        const domValues = readFormValuesFromDom(); // in case Kendo misses anything
+                {/* Right: Download PDF */}
+                <div className="mt-2 mt-md-0 d-flex justify-content-center justify-content-md-end w-100 w-md-auto">
+                  <Button
+                    themeColor="primary"
+                    type="button"
+                    className="flex-grow-1 flex-md-grow-0"
+                    style={{ minWidth: "120px" }}
+                    onClick={async () => {
+                      let values = formRenderProps.value || {};
+                      const domValues = readFormValuesFromDom();
+                      values = { ...domValues, ...values };
 
-                        // Merge them
-                        values = { ...domValues, ...values };
+                      if (!values.projectId && selectedProject)
+                        values.projectId = selectedProject;
 
-                        // Add project selection if missing
-                        if (!values.projectId && selectedProject) {
-                          values.projectId = selectedProject;
-                        }
+                      if (!values.projectId) {
+                        setMessage({
+                          text: "❌ Please select a project before downloading PDF.",
+                          type: "error",
+                        });
+                        return;
+                      }
 
-                        if (!values.projectId) {
-                          setMessage({
-                            text: "❌ Please select a project before downloading PDF.",
-                            type: "error",
-                          });
-                          return;
-                        }
-
-                        // Validate everything
-                        if (validateForPDF(values)) {
-                          const cleanedLineItems = getNonEmptyLineItems();
-
-                          // 🔥 Build COMPLETE PDF data with all controlled states
-                          const pdfData = {
-                            // Project Information
-                            projectName: selectedProject || values.projectId || "",
-                            projectID: values.projectid || "",
-
-                            // Codes
-                            storeCode: values.storeCode || "",
-                            sapCode: values.sapCode || "",
-                            vendorCode: values.vendorCode || "",
-
-                            // Billing From Details
-                            billingFromAddress: addresses.billingFromAddress || "",
-                            billingFromGSTIN: values.billingFromGSTIN || "",
-                            billingFromStateCode: values.billingFromStateCode || "",
-
-                            // Billing To / Buyer Details
-                            billingToAddress: addresses.billingToAddress || "",
-                            gstinBuyer: values.billingToBuyerGSTIN || "",
-                            gstinConsignee: values.billingToConsigneeGSTIN || "",
-
-                            // Shipping & Delivery
-                            shippingAddress: addresses.shippingAddress || "",
-                            shippingGSTIN: values.shippingGSTIN || "",
-                            deliveryAddress: addresses.deliveryAddress || "",
-
-                            // Bill / Estimate Details
-                            billNumber: values.billnumber || "",
-                            billDate: values.billdate || "",
-                            estimateNo: values.estimateno || "",
-                            dateOfEstimate: values.dateofestimate || "",
-
-                            // PO Details
-                            poNumber: values.ponumber || "",
-                            poDate: values.podate || "",
-                            poType: values.potype || "",
-
-                            // Tax / Financial Details
-                            taxPercent1: tax1.percent || 0,
-                            taxPercent2: tax2.percent || 0,
-                            taxPercent3: tax3.percent || 0,
-                            netTotal: totals.netTotal || 0,
-                            igst: totals.igst || 0,
-                            roundOff: totals.roundOff || 0,
-                            grandTotal: totals.grandTotal || 0,
-
-                            // Identifiers
-                            gstNumber: values.gstnumber || "",
-                            pan: values.pan || "",
-
-                            // Brand & Description
-                            brandNameSubBrand: values.brandNameSubBrand || "",
-                            subWorkDescription: values.subWorkDescription || "",
-
-
-                            // Line Items
-                            lineItems: cleanedLineItems || [],
-                          };
-
-
-                          console.log("📄 Sending full data to PDF:", pdfData);
-                          await generateQuotationPDF(pdfData);
-                        }
-                      }}
-                    >
-                      Download PDF
-                    </Button>
-                  </div>
+                      if (validateForPDF(values)) {
+                        const cleanedLineItems = getNonEmptyLineItems();
+                        const pdfData = {
+                          projectName: selectedProject || values.projectId || "",
+                          projectID: values.projectid || "",
+                          storeCode: values.storeCode || "",
+                          sapCode: values.sapCode || "",
+                          vendorCode: values.vendorCode || "",
+                          billingFromAddress: addresses.billingFromAddress || "",
+                          billingFromGSTIN: values.billingFromGSTIN || "",
+                          billingFromStateCode: values.billingFromStateCode || "",
+                          billingToAddress: addresses.billingToAddress || "",
+                          gstinBuyer: values.billingToBuyerGSTIN || "",
+                          gstinConsignee: values.billingToConsigneeGSTIN || "",
+                          shippingAddress: addresses.shippingAddress || "",
+                          shippingGSTIN: values.shippingGSTIN || "",
+                          deliveryAddress: addresses.deliveryAddress || "",
+                          billNumber: values.billnumber || "",
+                          billDate: values.billdate || "",
+                          estimateNo: values.estimateno || "",
+                          dateOfEstimate: values.dateofestimate || "",
+                          poNumber: values.ponumber || "",
+                          poDate: values.podate || "",
+                          poType: values.potype || "",
+                          taxPercent1: tax1.percent || 0,
+                          taxPercent2: tax2.percent || 0,
+                          taxPercent3: tax3.percent || 0,
+                          netTotal: totals.netTotal || 0,
+                          igst: totals.igst || 0,
+                          roundOff: totals.roundOff || 0,
+                          grandTotal: totals.grandTotal || 0,
+                          gstNumber: values.gstnumber || "",
+                          pan: values.pan || "",
+                          brandNameSubBrand: values.brandNameSubBrand || "",
+                          subWorkDescription: values.subWorkDescription || "",
+                          lineItems: cleanedLineItems || [],
+                        };
+                        await generateQuotationPDF(pdfData);
+                      }
+                    }}
+                  >
+                    Download PDF
+                  </Button>
                 </div>
               </div>
+
             </FormElement>
           </div>
         )}

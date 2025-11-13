@@ -1059,9 +1059,9 @@ const Billing = () => {
                     hsnCode: "",
                     description: "",
                     uom: "",
-                    quantity: 1,
-                    rate: 1,
-                    amount: 1,
+                    quantity: "",
+                    rate: "",
+                    amount: "",
                 },
             ]);
         }
@@ -1759,7 +1759,7 @@ const Billing = () => {
                         {/* Tax & Totals */}
                         <div className="mt-4">
                             <div className="row align-items-start">
-                                {/* Tax Options */}
+                                {/* Tax Options - Left Side */}
                                 <div className="col-md-6">
                                     <h6 className="fw-bold mb-3">Tax</h6>
                                     <div className="container-fluid px-0">
@@ -1782,15 +1782,13 @@ const Billing = () => {
                                                             item.setData({ ...item.data, percent: e.target.value })
                                                         }
                                                     />
-
                                                 </div>
                                             </div>
                                         ))}
-
                                     </div>
                                 </div>
 
-                                {/* Totals */}
+                                {/* Totals - Right Side */}
                                 <div className="col-md-6">
                                     <h6 className="fw-bold mb-3">Total</h6>
                                     {[
@@ -1801,23 +1799,26 @@ const Billing = () => {
                                     ].map((item, idx) => (
                                         <div
                                             key={idx}
-                                            className={`d-flex justify-content-between mb-2 ${item.label === "Grand Total" ? "fw-bold border-top pt-2 mb-3" : ""
-                                                }`}
+                                            className={`d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-2 ${item.label === "Grand Total" ? "fw-bold border-top pt-2 mb-3" : ""}`}
                                         >
-                                            <span>{item.label}:</span>
+                                            {/* Label */}
+                                            <span className="mb-1 mb-sm-0">{item.label}:</span>
+
+                                            {/* Input */}
                                             <input
                                                 type="number"
-                                                className="form-control responsive-numeric-input"
+                                                className="form-control"
+                                                style={{ width: "120px" }}
                                                 value={item.value}
                                                 onChange={(e) => item.setter(parseFloat(e.target.value))}
                                             />
-
                                         </div>
                                     ))}
-
                                 </div>
                             </div>
                         </div>
+
+                        {/* </div> */}
 
 
                         {message.text && (
@@ -1834,7 +1835,7 @@ const Billing = () => {
                             </div>
                         )}
 
-                        <div className="d-flex justify-content-start gap-2 mt-3 mb-4 button-row">
+                        {/* <div className="d-flex justify-content-start gap-2 mt-3 mb-4 button-row">
                             <Button themeColor="primary" type="submit" className="responsive-button">
                                 Save
                             </Button>
@@ -1853,12 +1854,39 @@ const Billing = () => {
                             >
                                 Download PDF
                             </Button>
+                        </div> */}
+
+                        <div className="d-flex justify-content-between align-items-center mt-3 mb-4 button-row">
+                            {/* Left Side: Save and Cancel */}
+                            <div className="d-flex gap-2">
+                                <Button themeColor="primary" type="submit" className="responsive-button">
+                                    Save
+                                </Button>
+
+                                <Button type="button" onClick={() => window.location.reload()} className="responsive-button">
+                                    Cancel
+                                </Button>
+                            </div>
+
+                            {/* Right Side: Download PDF */}
+                            <div>
+                                <Button
+                                    themeColor="primary"
+                                    type="button"
+                                    onClick={handleDownloadPDF}
+                                    className="responsive-button"
+                                >
+                                    Download PDF
+                                </Button>
+                            </div>
                         </div>
 
+
                     </FormElement>
-                )}
+                )
+                }
             />
-        </div>
+        </div >
     );
 };
 
