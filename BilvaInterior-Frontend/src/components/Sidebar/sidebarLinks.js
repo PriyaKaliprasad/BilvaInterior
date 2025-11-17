@@ -18,7 +18,6 @@ import ManageVendors from '../../pages/Manage Vendor/ManageVendors.jsx';
 import Quotations from '../../pages/Quotation/Quotations.jsx';
 import AllQuotations from '../../pages/Quotation/AllQuotations.jsx';
 import ExpenseTracker from '../../pages/Expense Tracker/ExpenseTracker.jsx';
-import Billing from '../../pages/Billing/Billing.jsx';
 import BillingList from '../../pages/Billing/BillingList.jsx';
 import EmployeesAll from '../../pages/ManageEmployees/EmployeesAll.jsx';
 import EmployeesNew from '../../pages/ManageEmployees/EmployeesNew.jsx';
@@ -120,22 +119,22 @@ export const sidebarLinks = [
     label: "Quotations",
     icon: stickyNoteIcon,
     navMeta: { title: "Quotations", breadcrumb: ["Quotations"] },
-    content: Quotations,
-    isGroup: true,
-    children: [
-      {
-        id: "all-quotations",
-        label: "All Quotations",
-        navMeta: { title: "All Quotations", breadcrumb: ["Quotations", "All Quotations"] },
-        content: AllQuotations,
-      },
-      {
-        id: "new-quotation",
-        label: "New Quotation",
-        navMeta: { title: "New Quotation", breadcrumb: ["Quotations", "New Quotation"] },
-        content: Quotations,
-      }
-    ]
+    content: AllQuotations,
+    isGroup: false,
+    // children: [
+    //   {
+    //     id: "all-quotations",
+    //     label: "All Quotations",
+    //     navMeta: { title: "All Quotations", breadcrumb: ["Quotations", "All Quotations"] },
+    //     content: AllQuotations,
+    //   },
+    //   // {
+    //   //   id: "new-quotation",
+    //   //   label: "New Quotation",
+    //   //   navMeta: { title: "New Quotation", breadcrumb: ["Quotations", "New Quotation"] },
+    //   //   content: Quotations,
+    //   // }
+    // ]
   },
   {
     id: "expense-tracker",
@@ -150,22 +149,22 @@ export const sidebarLinks = [
     label: "Billing",
     icon: moneyExchangeIcon,
     navMeta: { title: "Billing", breadcrumb: ["Billing"] },
-    content: Billing,
-    isGroup: true,
-    children: [
-      {
-        id: "billing list",
-        label: "Billing List",
-        navMeta: { title: "Billing List", breadcrumb: ["Billing", "Billing List"] },
-        content: BillingList,
-      },
-      {
-        id: "new billing",
-        label: "New Billing ",
-        navMeta: { title: "Billing ", breadcrumb: ["Billing", "New Billing"] },
-        content: Billing,
-      }
-    ]
+    content: BillingList,
+    isGroup: false,
+    // // children: [
+    // //   {
+    // //     id: "billing list",
+    // //     label: "Billing List",
+    // //     navMeta: { title: "Billing List", breadcrumb: ["Billing", "Billing List"] },
+    // //     content: BillingList,
+    // //   },
+    //   // {
+    //   //   id: "new billing",
+    //   //   label: "New Billing ",
+    //   //   navMeta: { title: "Billing ", breadcrumb: ["Billing", "New Billing"] },
+    //   //   content: Billing,
+    //   // }
+    // ]
   },
   {
     id: "employees",
