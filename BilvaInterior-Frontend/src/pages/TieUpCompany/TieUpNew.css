@@ -94,3 +94,61 @@ label.k-label:has(*),
   background: #fde8e8;
   color: #b91c1c;
 }
+
+/* Excel Preview Fix */
+.excel-dialog {
+  max-width: 95vw !important;
+}
+
+.excel-preview-content {
+  max-height: 400px;
+  overflow: auto;
+  padding: 10px;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.preview-table td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  font-size: 12px;
+}
+
+/* ========== DESKTOP (BIG SCREEN) — Large Excel Preview ========== */
+.excel-dialog .k-dialog {
+  max-width: 900px !important;
+  width: 90vw !important;
+  max-height: 80vh !important;
+}
+
+/* Content scroll area */
+.excel-preview-content {
+  max-height: 70vh;
+  overflow: auto;
+  padding: 10px;
+}
+
+/* Table styling */
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.preview-table td {
+  border: 1px solid #e2e8f0;
+  padding: 6px 8px;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+/* ========== MOBILE SCREEN (under 768px) — Small Modal ========== */
+@media (max-width: 767px) {
+  .excel-dialog .k-dialog {
+    max-width: 350px !important;
+    width: 92vw !important;
+    max-height: 80vh !important;
+  }
+}

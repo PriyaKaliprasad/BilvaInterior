@@ -461,25 +461,38 @@ if (checkData && checkData.isUnique === false) {
           )}
 
           {previewOpen && excelData && (
-            <Dialog title="Billing Template Preview" onClose={() => setPreviewOpen(false)}>
-              <div style={{ maxHeight: '60vh', overflow: 'auto' }}>
-                {excelData.map((sheet, index) => (
-                  <div key={index} style={{ marginBottom: '1rem' }}>
-                    <h5>{sheet.name}</h5>
-                    <table border="1" cellPadding="5" style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <tbody>
-                        {sheet.data.map((row, rIndex) => (
-                          <tr key={rIndex}>
-                            {row.map((cell, cIndex) => <td key={cIndex}>{cell}</td>)}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
-              </div>
-            </Dialog>
-          )}
+  <Dialog
+    title="Billing Template Preview"
+    width={350}
+    height={500}
+    closeIcon={true}
+    modal={true}
+    onClose={() => setPreviewOpen(false)}
+    className="excel-dialog"
+  >
+    <div className="excel-preview-content">
+
+      {excelData.map((sheet, index) => (
+        <div key={index} style={{ marginBottom: "1rem" }}>
+          <h5 style={{ marginBottom: "6px" }}>{sheet.name}</h5>
+
+          <table className="preview-table">
+            <tbody>
+              {sheet.data.map((row, rIndex) => (
+                <tr key={rIndex}>
+                  {row.map((cell, cIndex) => (
+                    <td key={cIndex}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+
+    </div>
+  </Dialog>
+)}
 
           {uniqueError && <div style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>{uniqueError}</div>}
           {toast.visible && (
