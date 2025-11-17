@@ -3315,36 +3315,41 @@ const AllQuotations_Simple = () => {
   if (!editingQuotation) {
     return (
       <div className="container py-4">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          {/* Refresh Button (Left Side) */}
-          <Button
-            icon="refresh"
-            size="small"
-            onClick={() => {
-              fetch(`${API_BASE}/quotations`)
-                .then((res) => res.json())
-                .then((data) => setQuotations(data))
-                .catch(() =>
-                  setMessage({
-                    text: "❌ Failed to refresh quotations",
-                    type: "error",
-                  })
-                );
-            }}
-            className="action-btn refresh-btn"
-          >
-            <span className="tieup-action-btn-text">Refresh</span>
-          </Button>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }} className="quotation-action-bar">
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <Button
+              icon="refresh"
+              size="small"
+              onClick={() => {
+                fetch(`${API_BASE}/quotations`)
+                  .then((res) => res.json())
+                  .then((data) => setQuotations(data))
+                  .catch(() =>
+                    setMessage({
+                      text: "❌ Failed to refresh quotations",
+                      type: "error",
+                    })
+                  );
+              }}
+              className="action-btn refresh-btn"
+            >
+              <span className="tieup-action-btn-text">Refresh</span>
+            </Button>
+          </div>
 
-          {/* Add Quotation Button (Right Side) */}
-          <Button
-            themeColor="primary"
-            onClick={() => setShowNew(true)}
-            size="small"
-          >
-            + New Quotation
-          </Button>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <Button
+              icon="plus"
+              size="small"
+              onClick={() => setShowNew(true)}
+              themeColor="primary"
+              className="action-btn add-btn"
+            >
+              <span className="tieup-action-btn-text">New Quotation</span>
+            </Button>
+          </div>
         </div>
+
 
         {/* <-- ADDED: This will show the error message on the list page if one exists --> */}
         {message.text && message.type === 'error' && (
@@ -3428,8 +3433,17 @@ const AllQuotations_Simple = () => {
   // ✅ EDIT VIEW
   return (
     <div className="container-fluid py-3">
-      <Button fillMode="flat" onClick={handleCancel} className="mb-3">
+      {/* <Button fillMode="flat" onClick={handleCancel} className="mb-3">
         ← Back
+      </Button> */}
+      <Button
+        icon="arrow-left"
+        size="small"
+        onClick={handleCancel}
+        className="action-btn back-btn"
+        style={{ marginRight: 8 }}
+      >
+        <span className="tieup-action-btn-text">Back</span>
       </Button>
 
       {/* ✅ Edit Page UI remains unchanged */}

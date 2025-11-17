@@ -1904,6 +1904,7 @@ import EditableLineItemsGrid from "../../components/EditableLineItemsGrid";
 import { pdf } from "@react-pdf/renderer";
 import { BillingPDFDocument } from "./BillingPdf";
 import BillingPDF from "./BillingPdf";
+import api from "../../api/axios";
 
 
 // -------------------- Responsive buttons CSS --------------------
@@ -2012,7 +2013,7 @@ const Billing = ({ onBack }) => {
             return () => clearTimeout(timer); // Cleanup timer on unmount
         }
         else if (message.type === "error") {
-             // Keep the original 5-second clear for error messages
+            // Keep the original 5-second clear for error messages
             const timer = setTimeout(() => setMessage({ text: "", type: "" }), 5000);
             return () => clearTimeout(timer);
         }
@@ -2211,6 +2212,7 @@ const Billing = ({ onBack }) => {
 
         const billingData = {
             projectName: selectedProject?.projectName || "Untitled Project",
+            projectId: projectId,
             billingFromAddress: addresses.billingFromAddress,
             billingFromState,
             billingFromStateCode,
@@ -2255,27 +2257,50 @@ const Billing = ({ onBack }) => {
             lineItems: validItems,
         };
 
-        try {
-            const res = await fetch(`${API_BASE}/billing`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(billingData),
-            });
+        // try {
+        //     // const res = await fetch(`${API_BASE}/billing`, {
+        //     //     method: "POST",
+        //     //     headers: { "Content-Type": "application/json" },
+        //     //     body: JSON.stringify(billingData),
+        //     // });
+        //     const { data } = await api.post("/api/billing", billingData);
 
-            if (res.ok) {
-                // <-- MODIFIED: Updated success message text
+        //     if (res.ok) {
+        //         // <-- MODIFIED: Updated success message text
+        //         setMessage({
+        //             text: "✅ Billing information saved! Returning to list...",
+        //             type: "success",
+        //         });
+        //     } else {
+        //         const err = await res.text();
+        //         setMessage({ text: "❌ Failed to save: " + err, type: "error" });
+        //     }
+        // } catch (err) {
+        //     console.error("Error:", err);
+        //     setMessage({ text: "❌ Error saving billing info.", type: "error" });
+        // }
+        try {
+            const response = await api.post("/api/billing", billingData);
+
+            if (response.status === 200 || response.status === 201) {
                 setMessage({
                     text: "✅ Billing information saved! Returning to list...",
                     type: "success",
                 });
             } else {
-                const err = await res.text();
-                setMessage({ text: "❌ Failed to save: " + err, type: "error" });
+                setMessage({
+                    text: "❌ Failed to save billing information.",
+                    type: "error",
+                });
             }
         } catch (err) {
             console.error("Error:", err);
-            setMessage({ text: "❌ Error saving billing info.", type: "error" });
+            setMessage({
+                text: "❌ Error saving billing info.",
+                type: "error",
+            });
         }
+
     };
 
     // ---- Download PDF (with validations + clean tax data) ----
@@ -2429,13 +2454,19 @@ const Billing = ({ onBack }) => {
                                 Projects <span className="text-danger">*</span>
                             </label>
                             <div style={{ maxWidth: "320px" }}>
-                                <Field
+                                {/* <Field
                                     name="project"
                                     component={DropDownField}
                                     data={projects}
                                     textField="projectName"
                                     value={selectedProject}          // Pass current selectedProject object
                                     onChange={setSelectedProject}    // Update selectedProject on change
+                                /> */}
+                                <DropDownField
+                                    data={projects}
+                                    textField="projectName"
+                                    value={selectedProject}
+                                    onChange={setSelectedProject}
                                 />
 
                             </div>
@@ -2825,25 +2856,43 @@ const Billing = ({ onBack }) => {
                             </Button>
                         </div> */}
 
-                        <div className="d-flex justify-content-between align-items-center mt-3 mb-4 button-row">
-                            {/* Left Side: Save and Cancel */}
-                            <div className="d-flex gap-2">
-                                <Button themeColor="primary" type="submit" className="responsive-button">
+                        {/* Mobile (default): Stacks the two inner <div>s vertically (default "block" behavior).
+  Desktop (md+): Becomes a "d-flex" row, spacing items apart.
+*/}
+                        <div className="mt-3 mb-4 d-md-flex justify-content-md-between align-items-md-center">
+
+                            {/* --- ROW 1 (Mobile) / LEFT SIDE (Desktop) --- */}
+                            {/* Mobile: "d-flex" (buttons side-by-side). "mb-2" adds space below.
+    Desktop: "mb-md-0" removes the mobile-only margin.
+  */}
+                            <div className="d-flex gap-2 mb-2 mb-md-0">
+                                <Button
+                                    themeColor="primary"
+                                    type="submit"
+                                    className="flex-grow-1 flex-md-grow-0" // Mobile: grow wide. Desktop: normal width.
+                                >
                                     Save
                                 </Button>
 
-                                <Button type="button" onClick={() => window.location.reload()} className="responsive-button">
+                                <Button
+                                    type="button"
+                                    onClick={() => window.location.reload()}
+                                    className="flex-grow-1 flex-md-grow-0" // Mobile: grow wide. Desktop: normal width.
+                                >
                                     Cancel
                                 </Button>
                             </div>
 
-                            {/* Right Side: Download PDF */}
-                            <div>
+                            {/* --- ROW 2 (Mobile) / RIGHT SIDE (Desktop) --- */}
+                            {/* Mobile: "d-grid" makes the button full-width.
+    Desktop: "d-md-block" resets it to a normal div for flex alignment.
+  */}
+                            <div className="d-grid d-md-block">
                                 <Button
                                     themeColor="primary"
                                     type="button"
-                                    onClick={handleDownloadPDF}
-                                    className="responsive-button"
+                                    onClick={handleDownloadPDF} // Make sure this function exists in your component
+                                    className="responsive-button" // Kept your class in case it has other styles
                                 >
                                     Download PDF
                                 </Button>

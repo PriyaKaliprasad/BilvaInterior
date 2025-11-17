@@ -1129,7 +1129,7 @@ const AllBillings_Simple = () => {
             );
 
             setFormData((prev) => ({ ...prev, updatedDate: currentTime }));
-            
+
             // <-- MODIFIED: Updated message text
             setMessage({ text: "✅ Billing updated! Returning to list...", type: "success" });
 
@@ -1180,7 +1180,7 @@ const AllBillings_Simple = () => {
     if (!editingBilling) {
         return (
             <div className="container py-4">
-                <div className="d-flex justify-content-between align-items-center mb-3">
+                {/* <div className="d-flex justify-content-between align-items-center mb-3">
                     <Button
                         icon="refresh"
                         size="small"
@@ -1215,8 +1215,49 @@ const AllBillings_Simple = () => {
                         <span className="tieup-action-btn-text">New Billing</span>
                     </Button>
 
+                </div> */}
+
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }} className="billing-action-bar">
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <Button
+                            icon="refresh"
+                            size="small"
+                            onClick={() => {
+                                fetch(`${API_BASE}/Billing`)
+                                    .then((res) => res.json())
+                                    .then((data) => setBillings(data))
+                                    .catch(() =>
+                                        setMessage({
+                                            text: "❌ Failed to refresh billings",
+                                            type: "error",
+                                        })
+                                    );
+                            }}
+                            className="action-btn refresh-btn"
+                        >
+                            <span className="tieup-action-btn-text">Refresh</span>
+                        </Button>
+                    </div>
+
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <Button
+                            icon="plus"
+                            size="small"
+                            onClick={() => {
+                                setShowAdd(true);
+                                try {
+                                    window.history.pushState({ view: "addBilling" }, "");
+                                } catch { }
+                            }}
+                            themeColor="primary"
+                            className="action-btn add-btn"
+                        >
+                            <span className="tieup-action-btn-text">New Billing</span>
+                        </Button>
+                    </div>
                 </div>
-                
+
+
                 {/* This will show error messages on the list page if they exist */}
                 {message.text && message.type === 'error' && (
                     <div className={`mt-3 mb-3 text-center fw-semibold text-danger`}>
@@ -1279,9 +1320,18 @@ const AllBillings_Simple = () => {
     // ✅ EDIT VIEW (same structure reused)
     return (
         <div className="container-fluid py-3">
-            <Button fillMode="flat" onClick={handleCancel} className="mb-3">
+            {/* <Button fillMode="flat" onClick={handleCancel} className="mb-3">
                 ← Back
-            </Button>
+            </Button> */}
+            <Button
+                    icon="arrow-left"
+                    size="small"
+                    onClick={handleCancel}
+                    className="action-btn back-btn"
+                    style={{ marginRight: 8 }}
+                  >
+                    <span className="tieup-action-btn-text">Back</span>
+                  </Button>
 
             {/* ✅ Edit Page UI remains unchanged */}
             <div className="card p-4 shadow-sm">
@@ -1965,8 +2015,13 @@ const AllBillings_Simple = () => {
                 {/* Message */}
                 {message.text && (
                     <div
-                        className={`mt-3 text-center fw-semibold ${message.type === "success" ? "text-success" : "text-danger"
-                            }`}
+                        className={`alert ${message.type === "success" ? "alert-success" : "alert-danger"} mt-3`}
+                        style={{
+                            fontWeight: 600,
+                            borderRadius: "8px",
+                            padding: "10px 15px",
+                            alignContent: "center",
+                        }}
                     >
                         {message.text}
                     </div>

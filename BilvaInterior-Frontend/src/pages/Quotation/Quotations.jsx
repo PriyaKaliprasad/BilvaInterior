@@ -2380,6 +2380,7 @@ import FloatingLabelWrapper from "../../components/Form/FloatingLabelWrapper/Flo
 import EditableLineItemsGrid from "../../components/EditableLineItemsGrid";
 import { generateQuotationPDF } from "./QuotationPdf";
 import "./Quotation.css";
+import api from "../../api/axios";
 
 const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
   const [projects, setProjects] = useState([]);
@@ -2426,12 +2427,19 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
   const billNumberRegex = /^[0-9]+$/;
 
   // Fetch projects
+  // useEffect(() => {
+  //   fetch(`${API_BASE}/projects`)
+  //     .then((res) => res.json())
+  //     .then((data) => setProjects(data))
+  //     .catch((err) => console.error("Error fetching projects:", err));
+  // }, []);
+
   useEffect(() => {
-    fetch(`${API_BASE}/projects`)
-      .then((res) => res.json())
-      .then((data) => setProjects(data))
+    api.get("/api/projects")
+      .then((res) => setProjects(res.data))
       .catch((err) => console.error("Error fetching projects:", err));
   }, []);
+
 
   // <-- MODIFIED: This timer now navigates back instead of just clearing the message.
   // Auto-navigate on success
@@ -2440,7 +2448,7 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
       const timer = setTimeout(() => {
         onBack(); // Call the onBack prop to return to the list
       }, 5000);
-      
+
       // Cleanup the timer if the component unmounts (e.g., user clicks "Back" manually)
       return () => clearTimeout(timer);
     }
@@ -2615,20 +2623,37 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/quotations`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(quotationData),
-      });
+      // const res = await fetch(`${API_BASE}/quotations`, {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(quotationData),
+      // });
 
-      if (res.ok) {
-        // <-- MODIFIED: Updated the success message text
-        setMessage({ text: "✅ Quotation saved", type: "success" });
-        console.log("Saved Quotation:", quotationData);
-      } else {
-        const err = await res.text();
-        setMessage({ text: "❌ Failed to save: " + err, type: "error" });
+      // if (res.ok) {
+      //   // <-- MODIFIED: Updated the success message text
+      //   setMessage({ text: "✅ Quotation saved! Returning to list...", type: "success" });
+      //   console.log("Saved Quotation:", quotationData);
+      // } else {
+      //   const err = await res.text();
+      //   setMessage({ text: "❌ Failed to save: " + err, type: "error" });
+      // }
+      try {
+        const res = await api.post("/quotations", quotationData);
+
+        if (res.status === 200 || res.status === 201) {
+          setMessage({ text: "✅ Quotation saved", type: "success" });
+          console.log("Saved Quotation:", quotationData);
+        } else {
+          setMessage({ text: "❌ Failed to save quotation.", type: "error" });
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        setMessage({
+          text: `❌ Error saving quotation: ${err.response?.data || err.message}`,
+          type: "error",
+        });
       }
+
     } catch (err) {
       console.error("Error:", err);
       setMessage({ text: "❌ Error saving quotation.", type: "error" });
@@ -2772,110 +2797,19 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
           <div ref={formDomRef}>
             <FormElement>
               <div className="d-flex justify-content-end align-items-center mb-3">
-                {/* <Button
-                  type="button"
-                  themeColor="primary"
-                  className="ms-2"
-                  onClick={async () => {
-                    // Combine all possible sources of data
-                    let values = formRenderProps.value || {};
-                    const domValues = readFormValuesFromDom(); // in case Kendo misses anything
-
-                    // Merge them
-                    values = { ...domValues, ...values };
-
-                    // Add project selection if missing
-                    if (!values.projectId && selectedProject) {
-                      values.projectId = selectedProject;
-                    }
-
-                    if (!values.projectId) {
-                      setMessage({
-                        text: "❌ Please select a project before downloading PDF.",
-                        type: "error",
-                      });
-                      return;
-                    }
-
-                    // Validate everything
-                    if (validateForPDF(values)) {
-                      const cleanedLineItems = getNonEmptyLineItems();
-
-                      // 🔥 Build COMPLETE PDF data with all controlled states
-                      const pdfData = {
-                        // Project Information
-                        projectName: selectedProject || values.projectId || "",
-                        projectID: values.projectid || "",
-
-                        // Codes
-                        storeCode: values.storeCode || "",
-                        sapCode: values.sapCode || "",
-                        vendorCode: values.vendorCode || "",
-
-                        // Billing From Details
-                        billingFromAddress: addresses.billingFromAddress || "",
-                        billingFromGSTIN: values.billingFromGSTIN || "",
-                        billingFromStateCode: values.billingFromStateCode || "",
-
-                        // Billing To / Buyer Details
-                        billingToAddress: addresses.billingToAddress || "",
-                        gstinBuyer: values.billingToBuyerGSTIN || "",
-                        gstinConsignee: values.billingToConsigneeGSTIN || "",
-
-                        // Shipping & Delivery
-                        shippingAddress: addresses.shippingAddress || "",
-                        shippingGSTIN: values.shippingGSTIN || "",
-                        deliveryAddress: addresses.deliveryAddress || "",
-
-                        // Bill / Estimate Details
-                        billNumber: values.billnumber || "",
-                        billDate: values.billdate || "",
-                        estimateNo: values.estimateno || "",
-                        dateOfEstimate: values.dateofestimate || "",
-
-                        // PO Details
-                        poNumber: values.ponumber || "",
-                        poDate: values.podate || "",
-                        poType: values.potype || "",
-
-                        // Tax / Financial Details
-                        taxPercent1: tax1.percent || 0,
-                        taxPercent2: tax2.percent || 0,
-                        taxPercent3: tax3.percent || 0,
-                        netTotal: totals.netTotal || 0,
-                        igst: totals.igst || 0,
-                        roundOff: totals.roundOff || 0,
-                        grandTotal: totals.grandTotal || 0,
-
-                        // Identifiers
-                        gstNumber: values.gstnumber || "",
-                        pan: values.pan || "",
-
-                        // Brand & Description
-                        brandNameSubBrand: values.brandNameSubBrand || "",
-                        subWorkDescription: values.subWorkDescription || "",
-
-
-                        // Line Items
-                        lineItems: cleanedLineItems || [],
-                      };
-
-
-                      console.log("📄 Sending full data to PDF:", pdfData);
-                      await generateQuotationPDF(pdfData);
-                    }
-                  }}
-                >
-                  Download PDF
-                </Button> */}
-
-
 
               </div>
 
-              <Button onClick={onBack} themeColor="base" fillMode="flat">
-                ← Back
+              <Button
+                icon="arrow-left"
+                size="small"
+                onClick={onBack}
+                className="action-btn back-btn"
+                style={{ marginRight: 8 }}
+              >
+                <span className="tieup-action-btn-text">Back</span>
               </Button>
+
               {/* Project Dropdown */}
               <div className="mb-4">
                 <label className="form-label fw-bold">
@@ -2887,11 +2821,17 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
                     component={DropDownField}
                     data={projects.map((p) => p.projectName)}
                   /> */}
-                  <Field
+                  {/* <Field
                     name="projectId"
                     label="Project"
                     component={DropDownList}
                     data={projects.map(p => p.projectName)}
+                    value={selectedProject}
+                    onChange={(e) => setSelectedProject(e.value)}
+                  /> */}
+                  <DropDownField
+                    data={projects.map(p => p.projectName)}
+                    textField="projectName"
                     value={selectedProject}
                     onChange={(e) => setSelectedProject(e.value)}
                   />
