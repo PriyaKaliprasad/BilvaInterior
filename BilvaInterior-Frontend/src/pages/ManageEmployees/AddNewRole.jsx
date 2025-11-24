@@ -218,6 +218,8 @@ import { Form, Field, FormElement } from "@progress/kendo-react-form";
 import { Button } from "@progress/kendo-react-buttons";
 import { Switch, Checkbox } from "@progress/kendo-react-inputs";
 import FormInput from "../../components/Form/FormInput";
+import api from "../../api/axios";
+
 
 const AddRole = () => {
   const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Role`;
@@ -227,15 +229,23 @@ const AddRole = () => {
   const [formKey, setFormKey] = useState(0);
   const [availableFeatures, setAvailableFeatures] = useState([]);
 
+  // useEffect(() => {
+  //   fetch(`${API_BASE}/features`)
+  //     .then((res) => {
+  //       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+  //       return res.json();
+  //     })
+  //     .then((data) => setAvailableFeatures(data))
+  //     .catch((err) => console.error("Error fetching features:", err));
+  // }, []);
+
   useEffect(() => {
-    fetch(`${API_BASE}/features`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-        return res.json();
-      })
-      .then((data) => setAvailableFeatures(data))
+    api
+      .get(`/api/Role/features`)
+      .then((res) => setAvailableFeatures(res.data))
       .catch((err) => console.error("Error fetching features:", err));
   }, []);
+
 
   const handleSubmit = async (dataItem) => {
     // ✅ Step 1: Manual validation before saving
@@ -274,37 +284,33 @@ const AddRole = () => {
     };
 
     try {
-      const response = await fetch(API_BASE, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newRole),
-      });
+      const response = await api.post(`/api/Role`, newRole);
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         setPopupMessage("✅ Role added successfully!");
         setIsSuccess(true);
-        setFormKey((prevKey) => prevKey + 1); // reset form
+        setFormKey((prevKey) => prevKey + 1);
 
-        // Hide message after few seconds
         setTimeout(() => {
           setPopupMessage("");
           setIsSuccess(false);
         }, 3000);
-      } else if (response.status === 409) {
-        const errorData = await response.json();
-        setPopupMessage(
-          `⚠️ ${errorData.message || "This role already exists!"}`
-        );
-        setIsSuccess(false);
       } else {
         setPopupMessage("❌ Failed to save role");
         setIsSuccess(false);
       }
-    } catch (error) {
-      console.error("Error saving role:", error);
+    } catch (err) {
+      if (err.response?.status === 409) {
+        setPopupMessage(err.response.data?.message || "⚠️ This role already exists!");
+        setIsSuccess(false);
+        return;
+      }
+
+      console.error("Error saving role:", err);
       setPopupMessage("❌ Error saving role");
       setIsSuccess(false);
     }
+
   };
 
   // ✅ SwitchField with default ON

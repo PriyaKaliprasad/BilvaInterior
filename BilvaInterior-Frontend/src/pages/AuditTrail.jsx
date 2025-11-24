@@ -189,6 +189,19 @@ const AuditTrail = () => {
     setPage({ skip: 0, take: 15 }); // Reset to first page
   };
 
+  // Left align cell content for OldValue and NewValue
+  const LeftAlignCell = (props) => (
+    <td style={{
+      whiteSpace: "pre-line",
+      textAlign: "left",
+      verticalAlign: "top",
+      padding: "8px"
+    }}>
+      {props.dataItem[props.field]}
+    </td>
+  );
+
+
 
 
   return (
@@ -303,7 +316,10 @@ const AuditTrail = () => {
           onPageChange={(e) => setPage(e.page)}
           loading={loading}
           dataItemKey="id"
-          style={{ height: "550px" }}
+          // style={{ height: "550px" }}
+          scrollable="scrollable"
+style={{ maxHeight: "600px", overflow: "auto" }}
+
         >
           <GridColumn
             field="date"
@@ -328,15 +344,17 @@ const AuditTrail = () => {
           <GridColumn
             field="oldValue"
             title="Old Value"
-            width="200px"
-            cell={(props) => <td style={{ whiteSpace: "pre-line" }}>{props.dataItem.oldValue}</td>}
+            width="250px"
+            cell={LeftAlignCell}
           />
+
           <GridColumn
             field="newValue"
             title="New Value"
-            width="200px"
-            cell={(props) => <td style={{ whiteSpace: "pre-line" }}>{props.dataItem.newValue}</td>}
+            width="250px"
+            cell={LeftAlignCell}
           />
+
         </Grid>
       </div>
     </div>
