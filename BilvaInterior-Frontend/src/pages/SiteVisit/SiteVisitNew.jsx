@@ -18,6 +18,43 @@ import api from '../../api/axios';
 import FloatingLabelWrapper from '../../components/Form/FloatingLabelWrapper/FloatingLabelWrapper';
 import { DropDownList } from '@progress/kendo-react-dropdowns';
 
+const validateLineItem = (item) => {
+    const errors = {};
+
+    // UOM → only alphabets
+    if (item.uom && !/^[A-Za-z ]+$/.test(item.uom)) {
+        errors.uom = "Only alphabets allowed in UOM.";
+    }
+
+    // BOQ → no negative
+    if (item.boqQty && Number(item.boqQty) < 0) {
+        errors.boqQty = "BOQ cannot be negative.";
+    }
+
+    // Onsite → no negative
+    if (item.onsiteQty && Number(item.onsiteQty) < 0) {
+        errors.onsiteQty = "On-site quantity cannot be negative.";
+    }
+
+    return errors;
+};
+
+const reportDateValidator = (value) => {
+    if (!value) return "Report date is required.";
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Compare only date, not time
+
+    const selected = new Date(value);
+    selected.setHours(0, 0, 0, 0);
+
+    return selected > today ? "Report date cannot be in the future." : "";
+};
+
+const projectRequired = (value) => {
+    return value ? "" : "Please select a project from above.";
+};
+
 const reportTypes = [
 	{ text: 'Site Visit', value: 0 },
 	{ text: 'Work Completion', value: 1 },
@@ -25,7 +62,8 @@ const reportTypes = [
 	{ text: 'Delivery Challan', value: 3 },
 ];
 
-const SiteVisitNew = () => {
+const SiteVisitNew = ({ onCancel }) => {
+	const [lineItemErrors, setLineItemErrors] = useState([]);
 	// Employee state for dropdown
 	const [employees, setEmployees] = useState([]);
 	const [employeesLoading, setEmployeesLoading] = useState(false);
@@ -34,8 +72,8 @@ const SiteVisitNew = () => {
 	const lineItemColumns = [
 		{ field: 'description', title: 'Description' },
 		{ field: 'uom', title: 'UOM' },
-		{ field: 'boqQty', title: 'BOQ quantity', type: 'numeric' },
-		{ field: 'onsiteQty', title: 'On-site work quantity', type: 'numeric' },
+		{ field: 'boqQty', title: 'BOQ quantity', type: 'numeric', min: 0 },
+        { field: 'onsiteQty', title: 'On-site work quantity', type: 'numeric', min: 0 },
 		{ field: 'finalReview', title: 'Final Review' },
 		{ field: 'remarks', title: 'Remarks' },
 	];
@@ -126,6 +164,19 @@ const SiteVisitNew = () => {
 	const handleLineItemChange = (event) => {
 		const inEditID = event.dataItem.id;
 		const field = event.field || '';
+		let value = event.value;
+
+    // 🛑 FIX: Block negative values
+    if ((field === 'boqQty' || field === 'onsiteQty') && value < 0) {
+        value = 0;
+    }
+	// 🛑 FIX: UOM should accept ONLY alphabets
+    if (field === 'uom') {
+        const onlyLetters = /^[A-Za-z\s]*$/;  // letters + space allowed
+        if (!onlyLetters.test(value)) {
+            return;   // ❌ ignore change if invalid
+        }
+    }
 		let updated = lineItems.map(item =>
 			item.id === inEditID ? { ...item, [field]: event.value } : item
 		);
@@ -213,6 +264,20 @@ const SiteVisitNew = () => {
 	};
 
 	const handleSubmit = async (dataItem) => {
+		// LINE ITEM VALIDATION
+const newErrors = [];
+lineItems.forEach((item, index) => {
+    newErrors[index] = validateLineItem(item);
+});
+
+// ANY error?
+const hasErrors = newErrors.some(err => Object.keys(err).length > 0);
+
+if (hasErrors) {
+    setLineItemErrors(newErrors);
+    setErrorMessage("❌ Please fix errors in Visiting Line Items.");
+    return; // STOP submit
+}
 		// Create FormData
 		const formData = new FormData();
 
@@ -292,6 +357,12 @@ const SiteVisitNew = () => {
 			setSuccessMessage('✅ Site visit submitted successfully!');
 			setErrorMessage('');
 			setTimeout(() => setSuccessMessage(''), 5000);
+			if (onCancel) {
+    onCancel({
+        success: true,
+        message: "Site visit submitted successfully!"
+    });
+}
 		} catch (error) {
 			if (error.response) {
 				console.error('Submission failed:', error.response.status, error.response.data);
@@ -316,56 +387,72 @@ const SiteVisitNew = () => {
 				<FormElement className="container py-4">
 
 					{/* Project Dropdown */}
-					<FieldWrapper>
-						<div className="k-form-field-wrap mb-4 col-12 col-md-6">
-							<FloatingLabelWrapper label={'Project'} >
-								<Field
-									name="projectId"
-									validator={requiredValidator}
-									required={true}
-									component={props => (
-										<DropDownList
-											{...props}
-											data={projects}
-											textField="projectName"
-											dataItemKey="id"
-											value={projects.find(p => p.id === props.value) || null}
-											onChange={e => props.onChange({ value: e.value ? e.value.id : null })}
-											// filterable={true}
-											loading={projectsLoading}
-											disabled={projectsLoading || !!projectsError}
-											style={{ width: "100%" }}
-											size={'large'}
-											placeholder={projectsLoading ? 'Loading...' : (projectsError ? 'Failed to load' : 'Select Project')}
-										/>
-									)}
-								/>
-							</FloatingLabelWrapper>
-							{projectsError && <div className="text-danger small mt-1">{projectsError}</div>}
-						</div>
-					</FieldWrapper>
+<FieldWrapper>
+    <div className="k-form-field-wrap mb-4 col-12 col-md-6">
+        <FloatingLabelWrapper label={'Project'}>
+            <Field
+                name="projectId"
+                validator={projectRequired}   // <-- CUSTOM VALIDATOR
+                component={(props) => (
+                    <>
+                        <DropDownList
+                            {...props}
+                            data={projects}
+                            textField="projectName"
+                            dataItemKey="id"
+                            value={projects.find(p => p.id === props.value) || null}
+
+                            onChange={(e) =>
+                                props.onChange({
+                                    value: e.value ? e.value.id : null
+                                })
+                            }
+
+                            loading={projectsLoading}
+                            disabled={projectsLoading || !!projectsError}
+                            style={{ width: "100%" }}
+                            size={'large'}
+                            placeholder={
+                                projectsLoading
+                                    ? "Loading..."
+                                    : projectsError
+                                        ? "Failed to load"
+                                        : "Select Project"
+                            }
+                        />
+                    </>
+                )}
+            />
+        </FloatingLabelWrapper>
+
+        {projectsError && (
+            <div className="text-danger small mt-1">{projectsError}</div>
+        )}
+    </div>
+</FieldWrapper>
 
 					{/* Report Info */}
 					<CustomFormFieldSet legend="Report Info">
 						<div className="row g-3">
-							<div className="col-md-6">
-								<Field
-									name="reportType"
-									label="Report Type"
-									component={FormDropDown}
-									data={reportTypes}
-									textField="text"
-									dataItemKey="value"
+									<div className="col-md-6">
+										<Field
+											name="reportType"
+											label="Report Type"
+											component={FormDropDown}
+											data={reportTypes}
+											textField="text"
+											dataItemKey="value"
 								/>
 							</div>
 							<div className="col-md-6">
-								<Field
-									name="reportDate"
-									label="Report Date"
-									component={FormDatePicker}
-								/>
-							</div>
-						</div>
+    <Field
+        name="reportDate"
+        label="Report Date"
+        validator={reportDateValidator}
+        component={FormDatePicker}
+    />
+</div>
+</div>
 					</CustomFormFieldSet>
 
 					{/* Store/Project Details */}
@@ -472,7 +559,7 @@ const SiteVisitNew = () => {
 									component={FormUpload}
 									label="Upload Document"
 									accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-									allowedFormatsArray={[".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"]}
+									allowedFormatsArray={[".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png", ".xls", ".xlsx"]}
 									colSpan={1}
 									multiple
 								/>
@@ -485,10 +572,14 @@ const SiteVisitNew = () => {
 						<div className="row">
 							<div className="col-12">
 								<EditableLineItemsGrid
-									value={lineItems}
-									onChange={setLineItems}
-									columns={lineItemColumns}
-								/>
+    value={lineItems}
+    onChange={(items) => {
+        setLineItems(items);
+        setLineItemErrors([]); // clear errors on typing
+    }}
+    errors={lineItemErrors}
+    columns={lineItemColumns}
+/>
 							</div>
 						</div>
 					</CustomFormFieldSet>
@@ -524,11 +615,17 @@ const SiteVisitNew = () => {
 							<Button themeColor="primary" type="submit" disabled={!formRenderProps.allowSubmit}>
 								Save
 							</Button>
-							<Button onClick={formRenderProps.onFormReset} style={{ marginLeft: 12 }}>
+							<Button onClick={onCancel} style={{ marginLeft: 12 }}>
 								Cancel
 							</Button>
 						</div>
 					</div>
+{/* GLOBAL VALIDATION MESSAGE (BOTTOM OF PAGE) */}
+{formRenderProps.visited && formRenderProps.errors && formRenderProps.errors.projectId && (
+    <div className="text-danger mt-3" style={{ fontSize: "14px", fontWeight: "500" }}>
+        {formRenderProps.errors.projectId}
+    </div>
+)}
 				</FormElement>
 			)}
 		/>

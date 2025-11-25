@@ -23,9 +23,24 @@ const reportTypes = [
 	{ text: 'Delivery Challan', value: 3 },
 ];
 
+
+const noSpecialCharsValidator = (value) => {
+    if (!value) return false;  
+    return /[^a-zA-Z0-9 ]/.test(value); 
+};
+
+const noSpecialCharsWarning = (value) => {
+    if (!value) return "";
+    return noSpecialCharsValidator(value)
+        ? "Special characters are not allowed."
+        : "";
+};
+
 const SiteVisitEdit = ({ siteVisitId, onBack }) => {
 	// State for form fields
+	const [lineItemErrors, setLineItemErrors] = useState([]);
 	const [form, setForm] = useState({});
+	const [isSaving, setIsSaving] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [errorMessage, setErrorMessage] = useState('');
 	const [successMessage, setSuccessMessage] = useState('');
@@ -558,19 +573,60 @@ const SiteVisitEdit = ({ siteVisitId, onBack }) => {
 		setForm(prev => ({ ...prev, [name]: value }));
 	};
 
+	const validateLineItem = (item) => {
+    const errors = {};
+
+    // UOM → only alphabets
+    if (item.uom && !/^[A-Za-z ]+$/.test(item.uom)) {
+        errors.uom = "Only alphabets allowed in UOM.";
+    }
+
+    // BOQ → no negative
+    if (item.boqQty && Number(item.boqQty) < 0) {
+        errors.boqQty = "BOQ cannot be negative.";
+    }
+
+    // Onsite → no negative
+    if (item.onsiteQty && Number(item.onsiteQty) < 0) {
+        errors.onsiteQty = "On-site quantity cannot be negative.";
+    }
+
+    return errors;
+};
+
 	// Submit handler
 	const handleSubmit = async (e) => {
-		e.preventDefault();
+		e.preventDefault();	
+
+		if (isSaving) return;  // prevent double submit
+    setIsSaving(true);
+
+		// LINE ITEM VALIDATION
+const newErrors = [];
+
+lineItems.forEach((item, index) => {
+    newErrors[index] = validateLineItem(item);
+});
+
+// ANY error inside array?
+const hasErrors = newErrors.some(err => Object.keys(err).length > 0);
+
+if (hasErrors) {
+    setLineItemErrors(newErrors);
+    setErrorMessage("❌ Please fix errors in Visiting Line Items.");
+    return;   // STOP submit
+}
+		
+if (noSpecialCharsValidator(form.storeName)) {
+    setErrorMessage("❌ Store Name contains invalid characters.");
+    return;  
+}
 		// Validate required fields
 		let hasError = false;
 		Object.entries(form).forEach(([key, value]) => {
 			const err = validateField(key, value);
 			if (err) hasError = true;
 		});
-		if (hasError) {
-			setErrorMessage('Please fix validation errors.');
-			return;
-		}
 
 		// Prepare FormData
 		const formData = new FormData();
@@ -633,6 +689,10 @@ const SiteVisitEdit = ({ siteVisitId, onBack }) => {
 		     response = await api.put(`/api/sitevisit/${siteVisitId}`, formData, {
 		         headers: { 'Content-Type': 'multipart/form-data' },
 		     });
+			 const updated = await api.get(`/api/sitevisit/${siteVisitId}`);
+        if (updated.data?.lastModifiedUtc) {
+            setLastModifiedAt(updated.data.lastModifiedUtc);
+        }
 		 } else {
 		     response = await api.post('/api/sitevisit', formData, {
 		         headers: { 'Content-Type': 'multipart/form-data' },
@@ -640,12 +700,19 @@ const SiteVisitEdit = ({ siteVisitId, onBack }) => {
 		 }
 		 setSuccessMessage('✅ Site visit submitted successfully!');
 		 setErrorMessage('');
-		 setTimeout(() => setSuccessMessage(''), 5000);
+
+		 setTimeout(() => {
+    setSuccessMessage("");
+    if (onBack) onBack();   
+}, 1500);
+
 		} catch (error) {
 		 setErrorMessage('❌ Submission failed.');
 		 setSuccessMessage('');
 		 setTimeout(() => setErrorMessage(''), 5000);
-		}
+		}  finally {
+    setIsSaving(false); 
+}
 	};
 
 
@@ -790,6 +857,11 @@ const SiteVisitEdit = ({ siteVisitId, onBack }) => {
 									className="mb-3"
 								/>
 							</FloatingLabelWrapper>
+							{noSpecialCharsWarning(form.storeName) && (
+    <div className="text-danger small mt-1">
+        {noSpecialCharsWarning(form.storeName)}
+    </div>
+)}
 							{minMaxLengthWarning(form.storeName) && (
 								<div className="text-warning small mt-1">{minMaxLengthWarning(form.storeName)}</div>
 							)}
@@ -967,7 +1039,11 @@ const SiteVisitEdit = ({ siteVisitId, onBack }) => {
 					<div className="col-12">
 						<EditableLineItemsGrid
 							value={lineItems}
-							onChange={setLineItems}
+							 onChange={(items) => {
+        setLineItems(items);
+        setLineItemErrors([]); 
+    }}
+    errors={lineItemErrors}
 							columns={[{ field: 'description', title: 'Description' }, { field: 'uom', title: 'UOM' }, { field: 'boqQty', title: 'BOQ quantity', type: 'numeric' }, { field: 'onsiteQty', title: 'On-site work quantity', type: 'numeric' }, { field: 'finalReview', title: 'Final Review' }, { field: 'remarks', title: 'Remarks' }]}
 						/>
 					</div>
@@ -999,11 +1075,16 @@ const SiteVisitEdit = ({ siteVisitId, onBack }) => {
 			)}
 			<div className="row mt-4">
 				<div className="col-12 text-end">
-					<Button themeColor="primary" type="submit">
-						Save
-					</Button>
-					<Button type="reset" style={{ marginLeft: 12 }}>
-						Cancel
+					<Button 
+    themeColor="primary" 
+    type="submit"
+    disabled={isSaving}
+>
+    {isSaving ? "Saving..." : "Save"}
+</Button>
+
+<Button  type="button" style={{ marginLeft: 12 }} onClick={onBack}>						
+	                    Cancel
 					</Button>
 				</div>
 			</div>

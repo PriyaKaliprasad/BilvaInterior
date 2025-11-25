@@ -1,3 +1,4 @@
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import React, { useState, useEffect } from "react";
 import { Loader } from '@progress/kendo-react-indicators';
 import { Grid, GridColumn } from '@progress/kendo-react-grid';
@@ -8,9 +9,12 @@ import api from '../../api/axios';
 
 
 const SiteVisitAll = () => {
+	const [deleteId, setDeleteId] = useState(null);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [siteVisits, setSiteVisits] = useState([]);
 	const [skip, setSkip] = useState(0);
 	const [take, setTake] = useState(10);
+	const [successMessage, setSuccessMessage] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 	const [isMobile, setIsMobile] = useState(
@@ -36,6 +40,25 @@ const SiteVisitAll = () => {
 	useEffect(() => {
 		fetchData();
 	}, []);
+	useEffect(() => {
+    if (successMessage) {
+        const t = setTimeout(() => setSuccessMessage(""), 3000);
+        return () => clearTimeout(t);
+    }
+}, [successMessage]);
+
+	const handleDelete = async () => {
+    try {
+        await api.delete(`/api/sitevisit/${deleteId}`);
+        setShowDeleteDialog(false);
+        setDeleteId(null);
+        fetchData();   // reload list
+    } catch (err) {
+        console.error("Delete failed:", err);
+        alert("Failed to delete site visit.");
+    }
+};
+
 	useEffect(() => {
 		const onResize = () => setIsMobile(window.innerWidth <= 600);
 		window.addEventListener('resize', onResize);
@@ -64,11 +87,25 @@ const SiteVisitAll = () => {
 
 	// Actions cell
 	const ActionCell = (props) => (
-		<td>
-			<Button icon="edit" size="small" style={{ marginRight: 8 }} onClick={() => setEditId(props.dataItem.id)} />
-			<Button icon="delete" size="small" themeColor="error" onClick={() => alert('Delete ' + props.dataItem.id)} />
-		</td>
-	);
+    <td>
+        <Button 
+            icon="edit" 
+            size="small" 
+            style={{ marginRight: 8 }} 
+            onClick={() => setEditId(props.dataItem.id)} 
+        />
+
+        <Button 
+            icon="delete" 
+            size="small" 
+            themeColor="error"
+            onClick={() => {
+                setDeleteId(props.dataItem.id);
+                setShowDeleteDialog(true);
+            }} 
+        />
+    </td>
+);
 
 
 			// Responsive action bar style
@@ -106,18 +143,36 @@ const SiteVisitAll = () => {
 						<span className="tieup-action-btn-text">Back</span>
 					</Button>
 				</div>
-				<SiteVisitNew />
+				<SiteVisitNew 
+    onCancel={(response) => {
+        setShowAdd(false);
+
+        if (response?.success) {
+            setSuccessMessage(response.message);    // ⭐ show toast
+            fetchData();                            // ⭐ refresh list instantly
+        }
+    }} 
+/>
+
 			</>
 		);
 	}
 
 	if (editId) {
-		return (
-			<>
-				<SiteVisitEdit siteVisitId={editId} onBack={() => setEditId(null)} />
-			</>
-		);
-	}
+    return (
+        <SiteVisitEdit 
+    siteVisitId={editId} 
+    onBack={(response) => {
+        setEditId(null);
+
+        if (response?.success) {
+            setSuccessMessage(response.message);
+            fetchData();  // refresh list instantly
+        }
+    }} 
+/>
+    );
+}
 
 	return (
 		<main className="page-container">
@@ -146,6 +201,12 @@ const SiteVisitAll = () => {
 				</div>
 			</div>
 
+{/* GLOBAL SUCCESS TOAST MESSAGE */}
+{successMessage && (
+    <div className="success-box" style={{ marginBottom: 12 }}>
+        {successMessage}
+    </div>
+)}
 			{/* Desktop / Tablet: Kendo Grid. Mobile: card list (not implemented, fallback to grid) */}
 			<div className="card grid-wrapper">
 				{error && <div className="error-box">{error}</div>}
@@ -179,13 +240,30 @@ const SiteVisitAll = () => {
 						resizable={true}
 						noRecords={<div style={{ textAlign: 'center', padding: 24 }}>No records available</div>}
 					>
-						<GridColumn field="projectName" title="Project Name" width="160px" cell={props => <td>{props.dataItem.project?.name || ''}</td>} />
+						<GridColumn field="projectName" title="Project Name" width="160px" cell={props => <td>{props.dataItem.project?.name || props.dataItem.projectName || ''}</td>} />
 						<GridColumn field="lastModifiedUtc" title="Last Modified At" width="220px" cell={props => <td>{formatDate(props.dataItem.lastModifiedUtc)}</td>} />
 						<GridColumn field="lastModifiedBy" title="Last Modified By" width="220px" cell={props => <td>{getUserName(props.dataItem.lastModifiedBy)}</td>} />
 						<GridColumn title="Actions" width="160px" cell={ActionCell} />
 					</Grid>
 				</div>
 			</div>
+			{/* DELETE CONFIRMATION DIALOG */}
+{showDeleteDialog && (
+    <Dialog onClose={() => setShowDeleteDialog(false)}>
+        <p style={{ marginBottom: 20 }}>
+            Are you sure you want to delete this site visit?
+        </p>
+
+        <DialogActionsBar>
+            <Button themeColor="primary" onClick={handleDelete}>
+                Yes, Delete
+            </Button>
+            <Button onClick={() => setShowDeleteDialog(false)}>
+                Cancel
+            </Button>
+        </DialogActionsBar>
+    </Dialog>
+)}
 		</main>
 	);
 }

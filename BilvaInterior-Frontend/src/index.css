@@ -6,3 +6,8 @@ body{
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
 }
+
+.input-error {
+    border: 1px solid red !important;
+    background-color: #ffecec !important;
+}
