@@ -17,9 +17,10 @@
 //     const [showAdd, setShowAdd] = useState(false);
 
 
-//     // ✅ Clear message
+//     // <-- MODIFIED: This now only auto-clears error messages.
+//     // The success message is "cleared" by the navigation itself.
 //     useEffect(() => {
-//         if (!message.text) return;
+//         if (!message.text || message.type === "success") return;
 //         const t = setTimeout(() => setMessage({ text: "", type: "" }), 5000);
 //         return () => clearTimeout(t);
 //     }, [message]);
@@ -93,12 +94,12 @@
 
 //             const currentTime = new Date().toISOString();
 //             // const payload = {
-//             //     ...formData,
-//             //     billDate: formData.billDate ? new Date(formData.billDate).toISOString() : null,
-//             //     dateOfEstimate: formData.dateOfEstimate ? new Date(formData.dateOfEstimate).toISOString() : null,
-//             //     poDate: formData.poDate ? new Date(formData.poDate).toISOString() : null,
-//             //     updatedDate: currentTime,
-//             //     lineItems: formData.lineItems || [], // ensure array
+//             //     ...formData,
+//             //     billDate: formData.billDate ? new Date(formData.billDate).toISOString() : null,
+//             //     dateOfEstimate: formData.dateOfEstimate ? new Date(formData.dateOfEstimate).toISOString() : null,
+//             //     poDate: formData.poDate ? new Date(formData.poDate).toISOString() : null,
+//             //     updatedDate: currentTime,
+//             //     lineItems: formData.lineItems || [], // ensure array
 //             // };
 //             const payload = {
 //                 ...formData,
@@ -142,7 +143,15 @@
 //             );
 
 //             setFormData((prev) => ({ ...prev, updatedDate: currentTime }));
-//             setMessage({ text: "✅ Billing updated successfully!", type: "success" });
+
+//             // <-- MODIFIED: Updated message text
+//             setMessage({ text: "✅ Billing updated! Returning to list...", type: "success" });
+
+//             // <-- ADDED: Automatically go back to the list after 5 seconds
+//             setTimeout(() => {
+//                 handleCancel(); // This function resets the view to the list
+//             }, 5000);
+
 //         } catch (err) {
 //             console.error(err);
 //             setMessage({ text: "❌ Failed to update billing", type: "error" });
@@ -173,7 +182,10 @@
 //                         <span className="tieup-action-btn-text">Back</span>
 //                     </Button>
 //                 </div>
-//                 <BillingNew onAdded={handleBack} />
+//                 {/* This component (BillingNew) will use its *own* 5-second timer 
+//                   and then call `onAdded` (which is `handleBack`) when done.
+//                 */}
+//                 <BillingNew onBack={handleBack} />
 //             </>
 //         );
 //     }
@@ -182,7 +194,7 @@
 //     if (!editingBilling) {
 //         return (
 //             <div className="container py-4">
-//                 <div className="d-flex justify-content-between align-items-center mb-3">
+//                 {/* <div className="d-flex justify-content-between align-items-center mb-3">
 //                     <Button
 //                         icon="refresh"
 //                         size="small"
@@ -217,7 +229,55 @@
 //                         <span className="tieup-action-btn-text">New Billing</span>
 //                     </Button>
 
+//                 </div> */}
+
+//                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }} className="billing-action-bar">
+//                     <div style={{ display: "flex", gap: "0.5rem" }}>
+//                         <Button
+//                             icon="refresh"
+//                             size="small"
+//                             onClick={() => {
+//                                 fetch(`${API_BASE}/Billing`)
+//                                     .then((res) => res.json())
+//                                     .then((data) => setBillings(data))
+//                                     .catch(() =>
+//                                         setMessage({
+//                                             text: "❌ Failed to refresh billings",
+//                                             type: "error",
+//                                         })
+//                                     );
+//                             }}
+//                             className="action-btn refresh-btn"
+//                         >
+//                             <span className="tieup-action-btn-text">Refresh</span>
+//                         </Button>
+//                     </div>
+
+//                     <div style={{ display: "flex", gap: "0.5rem" }}>
+//                         <Button
+//                             icon="plus"
+//                             size="small"
+//                             onClick={() => {
+//                                 setShowAdd(true);
+//                                 try {
+//                                     window.history.pushState({ view: "addBilling" }, "");
+//                                 } catch { }
+//                             }}
+//                             themeColor="primary"
+//                             className="action-btn add-btn"
+//                         >
+//                             <span className="tieup-action-btn-text">New Billing</span>
+//                         </Button>
+//                     </div>
 //                 </div>
+
+
+//                 {/* This will show error messages on the list page if they exist */}
+//                 {message.text && message.type === 'error' && (
+//                     <div className={`mt-3 mb-3 text-center fw-semibold text-danger`}>
+//                         {message.text}
+//                     </div>
+//                 )}
 
 //                 {billings.length === 0 ? (
 //                     <p className="text-muted text-center">No billings found.</p>
@@ -234,7 +294,7 @@
 //                             >
 //                                 <GridColumn field="projectName" title="Project Name" width="150px" />
 //                                 <GridColumn
-//                                     field="updatedDate"      // <-- change this
+//                                     field="updatedDate"      // <-- change this
 //                                     title="Last Modified At"
 //                                     width="180px"
 //                                     cell={(props) => (
@@ -274,9 +334,18 @@
 //     // ✅ EDIT VIEW (same structure reused)
 //     return (
 //         <div className="container-fluid py-3">
-//             <Button fillMode="flat" onClick={handleCancel} className="mb-3">
+//             {/* <Button fillMode="flat" onClick={handleCancel} className="mb-3">
 //                 ← Back
-//             </Button>
+//             </Button> */}
+//             <Button
+//                     icon="arrow-left"
+//                     size="small"
+//                     onClick={handleCancel}
+//                     className="action-btn back-btn"
+//                     style={{ marginRight: 8 }}
+//                   >
+//                     <span className="tieup-action-btn-text">Back</span>
+//                   </Button>
 
 //             {/* ✅ Edit Page UI remains unchanged */}
 //             <div className="card p-4 shadow-sm">
@@ -960,8 +1029,13 @@
 //                 {/* Message */}
 //                 {message.text && (
 //                     <div
-//                         className={`mt-3 text-center fw-semibold ${message.type === "success" ? "text-success" : "text-danger"
-//                             }`}
+//                         className={`alert ${message.type === "success" ? "alert-success" : "alert-danger"} mt-3`}
+//                         style={{
+//                             fontWeight: 600,
+//                             borderRadius: "8px",
+//                             padding: "10px 15px",
+//                             alignContent: "center",
+//                         }}
 //                     >
 //                         {message.text}
 //                     </div>
@@ -993,7 +1067,7 @@ import BillingNew from "./Billing";
 
 
 const AllBillings_Simple = () => {
-    const API_BASE = "https://localhost:7142/api";
+    const API_BASE = import.meta.env.VITE_API_BASE_URL;
     const [billings, setBillings] = useState([]);
     const [projects, setProjects] = useState([]);
     const [editingBilling, setEditingBilling] = useState(null);
@@ -1024,6 +1098,53 @@ const AllBillings_Simple = () => {
             .catch(console.error);
     }, []);
 
+    // --- ADDED ---
+    // This useEffect automatically calculates all totals whenever
+    // line items or tax percentages change.
+    useEffect(() => {
+        // Ensure formData and lineItems exist before calculating
+        if (!formData || !formData.lineItems) return;
+
+        const items = formData.lineItems || [];
+
+        // 1. Calculate Net Total (Subtotal)
+        const subtotal = items.reduce((acc, li) => {
+            return acc + (parseFloat(li.amount || 0));
+        }, 0);
+
+        // 2. Parse Tax Percentages
+        const igstPercent = parseFloat(formData.igstPercent || 0);
+        const cgstPercent = parseFloat(formData.cgstPercent || 0);
+        const sgstPercent = parseFloat(formData.sgstPercent || 0);
+
+        // 3. Calculate Tax Amounts
+        const igstAmount = subtotal * (igstPercent / 100);
+        const cgstAmount = subtotal * (cgstPercent / 100);
+        const sgstAmount = subtotal * (sgstPercent / 100);
+
+        // 4. Calculate Total Tax
+        // The 'igst' field in your form is used for "Total Tax"
+        const totalTax = igstAmount + cgstAmount + sgstAmount;
+
+        // 5. Parse Round Off
+        const roundOff = parseFloat(formData.roundOff || 0);
+
+        // 6. Calculate Grand Total
+        const grandTotal = subtotal + totalTax + roundOff;
+
+        // 7. Update state with all calculated values
+        // We use a functional update to avoid stale state
+        setFormData(prev => ({
+            ...prev,
+            netTotal: subtotal,
+            igst: totalTax, // 'igst' field is for Total Tax
+            grandTotal: grandTotal,
+        }));
+
+    }, [formData.lineItems, formData.igstPercent, formData.cgstPercent, formData.sgstPercent, formData.roundOff]);
+    // This effect re-runs when any of these dependencies change
+
+
     const toDateInputValue = (val) => {
         if (!val) return "";
         try {
@@ -1053,6 +1174,13 @@ const AllBillings_Simple = () => {
             createdDate: billing.createdDate || "",
             updatedDate: billing.updatedDate || "",
             lineItems: billing.lineItems || [],
+            igstPercent: billing.igst ?? 0,
+            cgstPercent: billing.cgst ?? 0,
+            sgstPercent: billing.sgst ?? 0,
+            igst: billing.igst ?? 0, // Total Tax
+            cgst: billing.cgst ?? 0,
+            sgst: billing.sgst ?? 0,
+
         });
     };
 
@@ -1070,7 +1198,38 @@ const AllBillings_Simple = () => {
     const handleProjectChange = (e) =>
         setFormData((prev) => ({ ...prev, projectName: e.value }));
 
+
+    // --- ADDED ---
+    // This function updates a specific line item and recalculates its amount
+    const handleLineItemChange = (index, field, value) => {
+        setFormData((prev) => {
+            // Create a deep copy of the line items array
+            const updatedLineItems = prev.lineItems.map((item, idx) => {
+                if (idx === index) {
+                    // Create a copy of the item and update the field
+                    const updatedItem = { ...item, [field]: value };
+
+                    // Now, recalculate the amount for this item
+                    const quantity = parseFloat(updatedItem.quantity || 0);
+                    const rate = parseFloat(updatedItem.rate || 0);
+                    updatedItem.amount = (quantity * rate).toFixed(2); // Auto-calculate amount
+
+                    return updatedItem;
+                }
+                return item; // Return unchanged item
+            });
+
+            // Return the new state with the updated line items
+            return {
+                ...prev,
+                lineItems: updatedLineItems,
+            };
+        });
+    };
+
+
     // ✅ SAVE handler (PUT)
+    // --- MODIFIED ---
     const handleSave = async () => {
         try {
             if (!formData || !formData.billingId) {
@@ -1079,14 +1238,10 @@ const AllBillings_Simple = () => {
             }
 
             const currentTime = new Date().toISOString();
-            // const payload = {
-            //     ...formData,
-            //     billDate: formData.billDate ? new Date(formData.billDate).toISOString() : null,
-            //     dateOfEstimate: formData.dateOfEstimate ? new Date(formData.dateOfEstimate).toISOString() : null,
-            //     poDate: formData.poDate ? new Date(formData.poDate).toISOString() : null,
-            //     updatedDate: currentTime,
-            //     lineItems: formData.lineItems || [], // ensure array
-            // };
+
+            // --- MODIFIED PAYLOAD ---
+            // Added all tax percentages and calculated totals
+            // to ensure they are saved to the database.
             const payload = {
                 ...formData,
                 billDate: formData.billDate ? new Date(formData.billDate).toISOString() : null,
@@ -1094,11 +1249,18 @@ const AllBillings_Simple = () => {
                 poDate: formData.poDate ? new Date(formData.poDate).toISOString() : null,
                 updatedDate: currentTime,
                 GSTNumber: formData.gstNumber,
-                IGST: formData.igst,
-                Tax1Option: formData.taxOption1,
-                Tax1Percent: formData.taxPercent1,
-                Tax2Option: formData.taxOption2,
-                Tax2Percent: formData.taxPercent2,
+
+                // Save Tax Percentages
+                igstPercent: formData.igstPercent ?? 0,
+                cgstPercent: formData.cgstPercent ?? 0,
+                sgstPercent: formData.sgstPercent ?? 0,
+
+                // Save Calculated Totals
+                netTotal: formData.netTotal ?? 0,
+                igst: formData.igst ?? 0, // This is the Total Tax Amount
+                roundOff: formData.roundOff ?? 0,
+                grandTotal: formData.grandTotal ?? 0,
+
                 LineItems: (formData.lineItems || []).map((li) => ({
                     LineItemId: li.lineItemId || 0,
                     MaterialCode: li.materialCode,
@@ -1110,7 +1272,7 @@ const AllBillings_Simple = () => {
                     Amount: parseFloat(li.amount || 0),
                 })),
             };
-
+            // --- END MODIFICATION ---
 
             const res = await fetch(`${API_BASE}/Billing/${formData.billingId}`, {
                 method: "PUT",
@@ -1169,7 +1331,7 @@ const AllBillings_Simple = () => {
                     </Button>
                 </div>
                 {/* This component (BillingNew) will use its *own* 5-second timer 
-                  and then call `onAdded` (which is `handleBack`) when done.
+                    and then call `onAdded` (which is `handleBack`) when done.
                 */}
                 <BillingNew onBack={handleBack} />
             </>
@@ -1180,43 +1342,6 @@ const AllBillings_Simple = () => {
     if (!editingBilling) {
         return (
             <div className="container py-4">
-                {/* <div className="d-flex justify-content-between align-items-center mb-3">
-                    <Button
-                        icon="refresh"
-                        size="small"
-                        onClick={() => {
-                            fetch(`${API_BASE}/Billing`)
-                                .then((res) => res.json())
-                                .then((data) => setBillings(data))
-                                .catch(() =>
-                                    setMessage({
-                                        text: "❌ Failed to refresh billings",
-                                        type: "error",
-                                    })
-                                );
-                        }}
-                        className="action-btn refresh-btn"
-                    >
-                        <span className="tieup-action-btn-text">Refresh</span>
-                    </Button>
-
-                    <Button
-                        icon="plus"
-                        size="small"
-                        onClick={() => {
-                            setShowAdd(true);
-                            try {
-                                window.history.pushState({ view: "addBilling" }, "");
-                            } catch { }
-                        }}
-                        themeColor="primary"
-                        className="action-btn add-btn"
-                    >
-                        <span className="tieup-action-btn-text">New Billing</span>
-                    </Button>
-
-                </div> */}
-
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }} className="billing-action-bar">
                     <div style={{ display: "flex", gap: "0.5rem" }}>
                         <Button
@@ -1278,9 +1403,13 @@ const AllBillings_Simple = () => {
                                 take={page.take}
                                 onPageChange={handlePageChange}
                             >
-                                <GridColumn field="projectName" title="Project Name" width="150px" />
+                                <GridColumn field="projectName" title="Project Name" width="150px" cell={(props) => (
+                                    <td style={{ textAlign: 'left' }}>
+                                        {props.dataItem[props.field]}
+                                    </td>
+                                )} />
                                 <GridColumn
-                                    field="updatedDate"      // <-- change this
+                                    field="updatedDate"      // <-- change this
                                     title="Last Modified At"
                                     width="180px"
                                     cell={(props) => (
@@ -1320,18 +1449,15 @@ const AllBillings_Simple = () => {
     // ✅ EDIT VIEW (same structure reused)
     return (
         <div className="container-fluid py-3">
-            {/* <Button fillMode="flat" onClick={handleCancel} className="mb-3">
-                ← Back
-            </Button> */}
             <Button
-                    icon="arrow-left"
-                    size="small"
-                    onClick={handleCancel}
-                    className="action-btn back-btn"
-                    style={{ marginRight: 8 }}
-                  >
-                    <span className="tieup-action-btn-text">Back</span>
-                  </Button>
+                icon="arrow-left"
+                size="small"
+                onClick={handleCancel}
+                className="action-btn back-btn"
+                style={{ marginRight: 8 }}
+            >
+                <span className="tieup-action-btn-text">Back</span>
+            </Button>
 
             {/* ✅ Edit Page UI remains unchanged */}
             <div className="card p-4 shadow-sm">
@@ -1803,50 +1929,35 @@ const AllBillings_Simple = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    {/* --- MODIFIED LINE ITEM INPUTS --- */}
                                     {formData.lineItems.map((li, idx) => (
                                         <tr key={idx}>
                                             <td>
                                                 <input
                                                     className="form-control form-control-sm"
                                                     value={li.materialCode || ""}
-                                                    onChange={(e) => {
-                                                        const copy = { ...formData };
-                                                        copy.lineItems[idx].materialCode = e.target.value;
-                                                        setFormData(copy);
-                                                    }}
+                                                    onChange={(e) => handleLineItemChange(idx, "materialCode", e.target.value)}
                                                 />
                                             </td>
                                             <td>
                                                 <input
                                                     className="form-control form-control-sm"
                                                     value={li.hsnCode || ""}
-                                                    onChange={(e) => {
-                                                        const copy = { ...formData };
-                                                        copy.lineItems[idx].hsnCode = e.target.value;
-                                                        setFormData(copy);
-                                                    }}
+                                                    onChange={(e) => handleLineItemChange(idx, "hsnCode", e.target.value)}
                                                 />
                                             </td>
                                             <td>
                                                 <input
                                                     className="form-control form-control-sm"
                                                     value={li.description || ""}
-                                                    onChange={(e) => {
-                                                        const copy = { ...formData };
-                                                        copy.lineItems[idx].description = e.target.value;
-                                                        setFormData(copy);
-                                                    }}
+                                                    onChange={(e) => handleLineItemChange(idx, "description", e.target.value)}
                                                 />
                                             </td>
                                             <td>
                                                 <input
                                                     className="form-control form-control-sm"
                                                     value={li.uom || ""}
-                                                    onChange={(e) => {
-                                                        const copy = { ...formData };
-                                                        copy.lineItems[idx].uom = e.target.value;
-                                                        setFormData(copy);
-                                                    }}
+                                                    onChange={(e) => handleLineItemChange(idx, "uom", e.target.value)}
                                                 />
                                             </td>
                                             <td>
@@ -1854,11 +1965,7 @@ const AllBillings_Simple = () => {
                                                     type="number"
                                                     className="form-control form-control-sm"
                                                     value={li.quantity || ""}
-                                                    onChange={(e) => {
-                                                        const copy = { ...formData };
-                                                        copy.lineItems[idx].quantity = e.target.value;
-                                                        setFormData(copy);
-                                                    }}
+                                                    onChange={(e) => handleLineItemChange(idx, "quantity", e.target.value)}
                                                 />
                                             </td>
                                             <td>
@@ -1866,11 +1973,7 @@ const AllBillings_Simple = () => {
                                                     type="number"
                                                     className="form-control form-control-sm"
                                                     value={li.rate || ""}
-                                                    onChange={(e) => {
-                                                        const copy = { ...formData };
-                                                        copy.lineItems[idx].rate = e.target.value;
-                                                        setFormData(copy);
-                                                    }}
+                                                    onChange={(e) => handleLineItemChange(idx, "rate", e.target.value)}
                                                 />
                                             </td>
                                             <td>
@@ -1878,11 +1981,8 @@ const AllBillings_Simple = () => {
                                                     type="number"
                                                     className="form-control form-control-sm"
                                                     value={li.amount || ""}
-                                                    onChange={(e) => {
-                                                        const copy = { ...formData };
-                                                        copy.lineItems[idx].amount = e.target.value;
-                                                        setFormData(copy);
-                                                    }}
+                                                    readOnly // Make this read-only
+                                                    style={{ backgroundColor: "#f8f9fa" }} // Optional: grey out
                                                 />
                                             </td>
 
@@ -1903,6 +2003,7 @@ const AllBillings_Simple = () => {
                                             </td>
                                         </tr>
                                     ))}
+                                    {/* --- END OF MODIFIED INPUTS --- */}
                                 </tbody>
                             </table>
                         </div>
@@ -1967,6 +2068,7 @@ const AllBillings_Simple = () => {
                     </div>
 
 
+                    {/* --- MODIFIED TOTALS SECTION --- */}
                     <div className="col-md-6">
                         <h6 className="fw-bold mb-2">Total</h6>
                         <div className="d-flex justify-content-between mb-2">
@@ -1976,7 +2078,8 @@ const AllBillings_Simple = () => {
                                 name="netTotal"
                                 className="form-control w-25"
                                 value={formData.netTotal ?? ""}
-                                onChange={handleNumberChange}
+                                readOnly // Make read-only
+                                style={{ backgroundColor: "#f8f9fa" }} // Optional: grey out
                             />
                         </div>
                         <div className="d-flex justify-content-between mb-2">
@@ -1986,7 +2089,8 @@ const AllBillings_Simple = () => {
                                 name="igst"
                                 className="form-control w-25"
                                 value={formData.igst ?? ""}
-                                onChange={handleNumberChange}
+                                readOnly // Make read-only
+                                style={{ backgroundColor: "#f8f9fa" }} // Optional: grey out
                             />
                         </div>
                         <div className="d-flex justify-content-between mb-2">
@@ -1996,7 +2100,7 @@ const AllBillings_Simple = () => {
                                 name="roundOff"
                                 className="form-control w-25"
                                 value={formData.roundOff ?? ""}
-                                onChange={handleNumberChange}
+                                onChange={handleNumberChange} // This remains editable
                             />
                         </div>
                         <div className="d-flex justify-content-between fw-bold border-top pt-2 mb-3">
@@ -2006,10 +2110,12 @@ const AllBillings_Simple = () => {
                                 name="grandTotal"
                                 className="form-control w-25"
                                 value={formData.grandTotal ?? ""}
-                                onChange={handleNumberChange}
+                                readOnly // Make read-only
+                                style={{ backgroundColor: "#f8f9fa" }} // Optional: grey out
                             />
                         </div>
                     </div>
+                    {/* --- END OF MODIFIED TOTALS --- */}
                 </div>
 
                 {/* Message */}
