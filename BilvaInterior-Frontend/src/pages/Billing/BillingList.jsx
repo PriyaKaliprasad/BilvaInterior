@@ -1087,7 +1087,7 @@ const AllBillings_Simple = () => {
 
     // ✅ Load billings + projects
     useEffect(() => {
-        fetch(`${API_BASE}/Billing`)
+        fetch(`${API_BASE}/api/Billing`)
             .then((res) => res.json())
             .then((data) => setBillings(data))
             .catch(() => setMessage({ text: "❌ Failed to load billings", type: "error" }));
@@ -1274,7 +1274,7 @@ const AllBillings_Simple = () => {
             };
             // --- END MODIFICATION ---
 
-            const res = await fetch(`${API_BASE}/Billing/${formData.billingId}`, {
+            const res = await fetch(`${API_BASE}/api/Billing/${formData.billingId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -1348,7 +1348,7 @@ const AllBillings_Simple = () => {
                             icon="refresh"
                             size="small"
                             onClick={() => {
-                                fetch(`${API_BASE}/Billing`)
+                                fetch(`${API_BASE}/api/Billing`)
                                     .then((res) => res.json())
                                     .then((data) => setBillings(data))
                                     .catch(() =>

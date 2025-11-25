@@ -2480,12 +2480,12 @@ const AllQuotations_Simple = () => {
 
   // ✅ Load quotations + projects
   useEffect(() => {
-    fetch(`${API_BASE}/quotations`)
+    fetch(`${API_BASE}/api/quotations`)
       .then((res) => res.json())
       .then((data) => setQuotations(data))
       .catch(() => setMessage({ text: "❌ Failed to load quotations", type: "error" }));
 
-    fetch(`${API_BASE}/projects`)
+    fetch(`${API_BASE}/api/projects`)
       .then((res) => res.json())
       .then((data) => setProjects(data))
       .catch(console.error);
@@ -2668,7 +2668,7 @@ const AllQuotations_Simple = () => {
       delete payload.sgstPercent;
       // === END OF FIX ===
 
-      const res = await fetch(`${API_BASE}/quotations/${formData.quotationId}`, {
+      const res = await fetch(`${API_BASE}/api/quotations/${formData.quotationId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload), // Send the corrected payload
@@ -2725,7 +2725,7 @@ const AllQuotations_Simple = () => {
               icon="refresh"
               size="small"
               onClick={() => {
-                fetch(`${API_BASE}/quotations`)
+                fetch(`${API_BASE}/api/quotations`)
                   .then((res) => res.json())
                   .then((data) => setQuotations(data))
                   .catch(() =>

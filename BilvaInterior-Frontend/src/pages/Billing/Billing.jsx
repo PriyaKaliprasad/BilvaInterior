@@ -1996,7 +1996,7 @@ const Billing = ({ onBack }) => {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
     useEffect(() => {
-        fetch(`${API_BASE}/projects`)
+        fetch(`${API_BASE}/api/projects`)
             .then((res) => res.json())
             .then((data) => setProjects(data))
             .catch((err) => console.error("Error fetching projects:", err));
