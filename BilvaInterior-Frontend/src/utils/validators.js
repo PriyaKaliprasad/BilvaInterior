@@ -77,3 +77,21 @@ const requiredValidator = (value) => {
   };
 
 export { nameValidator, emailValidator, emailWarning, passwordValidator, phoneValidator, phoneWarning, pincodeValidator, imageValidator, requiredValidator, minMaxLengthValidator, minMaxLengthWarning };
+
+export const noSpecialCharsValidator = (value) => {
+    if (!value) return;
+    const regex = /^[A-Za-z0-9\s]+$/;  
+    if (!regex.test(value)) {
+        return "Special characters are not allowed.";
+    }
+    return "";
+};
+
+export const noSpecialCharsWarning = (value) => {
+    if (!value) return "";
+    const regex = /^[A-Za-z0-9\s]+$/;  
+    if (!regex.test(value)) {
+        return "⚠ Invalid characters entered!";
+    }
+    return "";
+};
