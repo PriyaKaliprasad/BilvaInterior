@@ -26,6 +26,10 @@ import AddNewRole from '../../pages/ManageEmployees/AddNewRole.jsx';
 import AuditTrail from '../../pages/AuditTrail.jsx';
 import MyAccount from '../../pages/MyAccount.jsx';
 import ManageVendorsAll from "../../pages/Manage Vendor/ManageVendorsAll.jsx";
+import WorkList from "../../pages/WorkNotes/WorkList.jsx";
+import AddWorkItem from "../../pages/WorkNotes/AddWorkItem.jsx"; 
+import ReplyWorkItem from "../../pages/WorkNotes/ReplyWorkItem.jsx"; 
+
 
 
 // Sidebar groups with navMeta, icons, tab IDs, and page components
@@ -211,4 +215,31 @@ export const sidebarLinks = [
   //   content: MyAccount,
   //   isGroup: false
   // }
+
+  {
+    id: "work-notes",
+    label: "Work Items",
+    icon: usersSolidIcon, 
+    isGroup: true,
+    children: [
+      {
+        id: "work-list",
+        label: "Current Work List",
+        navMeta: { title: "Current Work List", breadcrumb: ["Work Notes", "Current Work List"] },
+        content: WorkList, // Maps to Image 2 (The Table View)
+      },
+      // {
+      //   id: "add-work-item",
+      //   label: "Add New Work Item",
+      //   navMeta: { title: "Add Work Item", breadcrumb: ["Work Notes", "Add New Work Item"] },
+      //   content: AddWorkItem, // Maps to Image 1 (The Form View)
+      // },
+      // {
+      //   id: "reply-work-item",
+      //   label: "Reply Work Item",
+      //   navMeta: { title: "Reply Work Item", breadcrumb: ["Work Notes", "Reply Work Item"] },
+      //   content: ReplyWorkItem, // Maps to Image 1 (The Form View)
+      // }
+    ]
+  },
 ];
