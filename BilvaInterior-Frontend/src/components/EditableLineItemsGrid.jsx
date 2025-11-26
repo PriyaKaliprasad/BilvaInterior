@@ -22,7 +22,7 @@ const isRowEmpty = (item, columns) => {
 };
 
 
-const EditableLineItemsGrid = ({ value, onChange, columns }) => {
+const EditableLineItemsGrid = ({ value, onChange, columns, errors = [] }) => {
   const [rows, setRows] = useState([]);
   // Track which cell is being edited: { rowIdx, field } or null
   const [editingCell, setEditingCell] = useState(null);
@@ -127,7 +127,7 @@ const EditableLineItemsGrid = ({ value, onChange, columns }) => {
                           onChange={e => handleCellChange(rowIdx, col.field, e.target.value === '' ? '' : Number(e.target.value))}
                           onBlur={handleCellBlur}
                           autoFocus
-                          className="form-control"
+                          className={`form-control ${errors[rowIdx]?.[col.field] ? "input-error" : ""}`}
                           disabled={col.readOnly}
                           style={{ minWidth: CELL_WIDTH - 10, maxWidth: CELL_WIDTH - 10 }}
                         />
@@ -138,7 +138,7 @@ const EditableLineItemsGrid = ({ value, onChange, columns }) => {
                           onChange={e => handleCellChange(rowIdx, col.field, e.target.value)}
                           onBlur={handleCellBlur}
                           autoFocus
-                          className="form-control"
+                          className={`form-control ${errors[rowIdx]?.[col.field] ? "input-error" : ""}`}
                           disabled={col.readOnly}
                           style={{ minWidth: CELL_WIDTH - 10, maxWidth: CELL_WIDTH - 10 }}
                         />
@@ -146,6 +146,13 @@ const EditableLineItemsGrid = ({ value, onChange, columns }) => {
                     ) : (
                       <span style={{ display: 'inline-block', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row[col.field]}</span>
                     )}
+
+                    {errors[rowIdx]?.[col.field] && (
+    <div className="text-danger small">
+        {errors[rowIdx][col.field]}
+    </div>
+)}
+
                   </td>
                 );
               })}

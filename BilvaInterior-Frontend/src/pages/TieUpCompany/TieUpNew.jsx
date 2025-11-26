@@ -605,38 +605,35 @@ const TieUpNew = ({ onCancel, onSuccess }) => {
 
           {/* Excel Preview Dialog */}
           {previewOpen && (
-            <Dialog
-              title={
-                excelFile?.name
-                  ? excelFile.name.length > 25
-                    ? excelFile.name.slice(0, 22) + '...'
-                    : excelFile.name
-                  : 'Excel Preview'
-              }
-              onClose={() => setPreviewOpen(false)}
-            >
-              <div className="excel-preview">
-                {excelData ? (
-                  <table
-                    className="k-table k-table-md k-table-bordered"
-                    style={{ width: '100%', minWidth: 400 }}
-                  >
-                    <tbody>
-                      {excelData.map((row, i) => (
-                        <tr key={i}>
-                          {row.map((cell, j) => (
-                            <td key={j}>{cell}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <div>No data to preview.</div>
-                )}
-              </div>
-            </Dialog>
-          )}
+  <Dialog
+    title={excelFile?.name || "Excel Preview"}
+    width={350}
+    height={500}
+    closeIcon={true}
+    modal={true}
+    onClose={() => setPreviewOpen(false)}
+    className="excel-dialog"
+  >
+    <div className="excel-preview-content">
+      {excelData ? (
+        <table className="preview-table">
+          <tbody>
+            {excelData.map((row, i) => (
+              <tr key={i}>
+                {row.map((cell, j) => (
+                  <td key={j}>{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div>No data to preview.</div>
+      )}
+    </div>
+  </Dialog>
+)}
+
         </FormElement>
       )}
     />

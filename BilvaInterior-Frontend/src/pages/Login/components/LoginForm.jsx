@@ -44,8 +44,12 @@ const LoginForm = ({
         const handleGlobalKeyEvent = (event) => {
             checkCapsLock(event);
         };
+
+        // Add global event listeners
         document.addEventListener('keydown', handleGlobalKeyEvent);
         document.addEventListener('keyup', handleGlobalKeyEvent);
+
+        // Cleanup event listeners on unmount
         return () => {
             document.removeEventListener('keydown', handleGlobalKeyEvent);
             document.removeEventListener('keyup', handleGlobalKeyEvent);

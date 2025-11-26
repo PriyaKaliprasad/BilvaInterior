@@ -5,6 +5,12 @@ import PropTypes from 'prop-types';
 export default function CapturePhotoButton({ onFiles }) {
   const ref = useRef();
 
+  // Detect mobile devices
+  const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
+
+  // If not mobile, hide the capture button
+  if (!isMobile) return null;
+
   const onChange = (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length && onFiles) onFiles(files);

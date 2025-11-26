@@ -97,7 +97,19 @@ const UploadPreviewDocuments = ({ initialFiles = [], onFilesChange }) => {
                                 showFileList={false}
                                 autoUpload={false}
                                 // accept any file type
-                                onAdd={onAdd}
+                               accept="
+        .pdf,
+        .doc,
+        .docx,
+        .jpg,
+        .jpeg,
+        .png,
+        .xls,
+        .xlsx,
+        application/vnd.ms-excel,
+        application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+    "
+    onAdd={onAdd}
                             >
                                 <button type="button" className="btn btn-outline-secondary w-100">Upload documents</button>
                             </Upload>
