@@ -217,17 +217,19 @@ export const sidebarLinks = [
   // }
 
   {
-    id: "work-notes",
+    id: "work-list",
     label: "Work Items",
     icon: usersSolidIcon, 
-    isGroup: true,
-    children: [
-      {
-        id: "work-list",
-        label: "Current Work List",
-        navMeta: { title: "Current Work List", breadcrumb: ["Work Notes", "Current Work List"] },
-        content: WorkList, // Maps to Image 2 (The Table View)
-      },
+    navMeta: { title: "Work Items", breadcrumb: ["Work Items"] },
+    content: WorkList,
+    isGroup: false,
+    // children: [
+    //   {
+    //     id: "work-list",
+    //     label: "Current Work List",
+    //     navMeta: { title: "Current Work List", breadcrumb: ["Work Notes", "Current Work List"] },
+    //     content: WorkList, // Maps to Image 2 (The Table View)
+    //   },
       // {
       //   id: "add-work-item",
       //   label: "Add New Work Item",
@@ -240,6 +242,6 @@ export const sidebarLinks = [
       //   navMeta: { title: "Reply Work Item", breadcrumb: ["Work Notes", "Reply Work Item"] },
       //   content: ReplyWorkItem, // Maps to Image 1 (The Form View)
       // }
-    ]
+    //]
   },
 ];

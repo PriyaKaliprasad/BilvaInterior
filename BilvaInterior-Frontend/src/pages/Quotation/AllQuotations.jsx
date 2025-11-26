@@ -2450,6 +2450,7 @@ import React, { useEffect, useState } from "react";
 import { Grid, GridColumn } from "@progress/kendo-react-grid";
 import { Button } from "@progress/kendo-react-buttons";
 import { DropDownList } from "@progress/kendo-react-dropdowns";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./AllQuotations.css";
 
@@ -2464,6 +2465,9 @@ const AllQuotations_Simple = () => {
   const [formData, setFormData] = useState({});
   const [message, setMessage] = useState({ text: "", type: "" });
   const [page, setPage] = useState({ skip: 0, take: 7 });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [quotationToDelete, setQuotationToDelete] = useState(null);
+
 
   // State to control showing the "New Quotation" page
   const [showNew, setShowNew] = useState(false);
@@ -2518,6 +2522,37 @@ const AllQuotations_Simple = () => {
 
     });
   };
+  // STEP 2 — DELETE CLICK HANDLER
+  const handleDelete = (quotation) => {
+    setQuotationToDelete(quotation);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!quotationToDelete) return;
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/quotations/${quotationToDelete.quotationId}`,
+        { method: "DELETE" }
+      );
+
+      if (!res.ok) throw new Error("Delete failed");
+
+      setQuotations(prev =>
+        prev.filter(q => q.quotationId !== quotationToDelete.quotationId)
+      );
+
+      setMessage({ text: "Deleted successfully!", type: "success" });
+      setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+
+    } catch (err) {
+      setMessage({ text: "Failed to delete", type: "error" });
+    }
+
+    setShowDeleteConfirm(false);
+  };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -2571,7 +2606,7 @@ const AllQuotations_Simple = () => {
         name === "taxTotal" // 👈 ADDED THIS
       ) {
         // 3. Calculate totals (Pass 'name' so we know what field triggered it)
-        const newTotals = calculateTotals(updated, name); 
+        const newTotals = calculateTotals(updated, name);
 
         // 4. Return the merged state
         return { ...updated, ...newTotals };
@@ -2811,29 +2846,45 @@ const AllQuotations_Simple = () => {
                 />
                 <GridColumn
                   title="Actions"
-                  width="100px"
+                  width="150px"
                   cell={(props) => (
-                    <td style={{ textAlign: "center" }}>
+                    <td style={{ textAlign: "center", whiteSpace: "nowrap" }}>
+                      {/* EDIT BUTTON */}
                       <Button
                         size="small"
                         themeColor="primary"
                         onClick={() => handleEdit(props.dataItem)}
-                        style={{
-                          whiteSpace: "nowrap",
-                          padding: "4px 12px",
-                        }}
+                        style={{ marginRight: "6px" }}
                       >
                         Edit
+                      </Button>
+
+                      {/* DELETE BUTTON */}
+                      <Button
+                        size="small"
+                        themeColor="secondary"
+                        onClick={() => handleDelete(props.dataItem)}
+                      >
+                        Delete
                       </Button>
                     </td>
                   )}
                 />
 
-
               </Grid>
             </div>
           </div>
         )}
+        {showDeleteConfirm && (
+        <Dialog title="Confirm Delete" onClose={() => setShowDeleteConfirm(false)}>
+            <p>Are you sure you want to delete this quotation?</p>
+
+            <DialogActionsBar>
+                <Button onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
+                <Button themeColor="error" onClick={confirmDelete}>Delete</Button>
+            </DialogActionsBar>
+        </Dialog>
+     )}
       </div>
     );
   }
@@ -3468,8 +3519,8 @@ const AllQuotations_Simple = () => {
                 className="form-control w-25"
                 value={formData.taxTotal ?? ""}
                 onChange={handleNumberChange}
-                // readOnly  
-                
+              // readOnly  
+
               />
             </div>
             <div className="d-flex justify-content-between mb-2">
@@ -3480,8 +3531,8 @@ const AllQuotations_Simple = () => {
                 className="form-control w-25"
                 value={formData.roundOff ?? ""}
                 onChange={handleNumberChange}
-                readOnly  
-                
+                readOnly
+
               />
             </div>
             <div className="d-flex justify-content-between fw-bold border-top pt-2 mb-3">
@@ -3492,7 +3543,7 @@ const AllQuotations_Simple = () => {
                 className="form-control w-25"
                 value={formData.grandTotal ?? ""}
                 onChange={handleNumberChange}
-                readOnly  
+                readOnly
               />
             </div>
           </div>
