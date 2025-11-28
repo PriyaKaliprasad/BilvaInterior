@@ -3,7 +3,7 @@ import { Spreadsheet } from "@progress/kendo-react-spreadsheet";
 import { Button } from "@progress/kendo-react-buttons";
 import * as XLSX from "xlsx";
 
-const ExcelLoader = ({ file = null, onApply = () => {}, onClose = () => {} }) => {
+const ExcelLoader = ({ file = null, onApply = () => { }, onClose = () => { }, showCancel = true }) => {
   const spreadsheetRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
@@ -59,7 +59,10 @@ const ExcelLoader = ({ file = null, onApply = () => {}, onClose = () => {} }) =>
 
       // Create a JSON file containing the Kendo workbook representation
       const blob = new Blob([JSON.stringify(json)], { type: 'application/json' });
-      const updatedFile = new File([blob], file.name, { type: 'application/json' });
+      // const updatedFile = new File([blob], file.name, { type: 'application/json' });
+      const updatedFile = new File([blob], file.name.replace('.xlsx', '.json'), {
+        type: "application/json"
+      });
       return updatedFile;
     } catch (err) {
       console.error("❌ Export failed:", err);
@@ -83,17 +86,39 @@ const ExcelLoader = ({ file = null, onApply = () => {}, onClose = () => {} }) =>
     }
   };
 
+  // --------------------------
+  // ⭐ NEW: Export as Excel
+  // --------------------------
+  const exportAsExcelFile = () => {
+    if (!spreadsheetRef.current) return;
+
+    spreadsheetRef.current.saveAsExcel({
+      fileName: file?.name?.replace('.json', '.xlsx') || "export.xlsx"
+    });
+  };
+  // --------------------------
+
   return (
     <div className="p-2 bg-white rounded shadow-sm" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
         <strong>{file?.name}</strong>
         <div style={{ display: "flex", gap: 8 }}>
+          {/* ⭐ NEW BUTTON */}
+          <Button
+            themeColor="info"
+            onClick={exportAsExcelFile}
+            disabled={loading}
+          >
+            Export as Excel
+          </Button>
           <Button themeColor="primary" onClick={handleApplyAndClose} disabled={loading}>
-            Apply & Close
+            Save
           </Button>
-          <Button themeColor="secondary" onClick={onClose} disabled={loading}>
-            Close Without Saving
-          </Button>
+          {showCancel && (
+            <Button themeColor="secondary" onClick={onClose} disabled={loading}>
+              Cancel
+            </Button>
+          )}
         </div>
       </div>
 

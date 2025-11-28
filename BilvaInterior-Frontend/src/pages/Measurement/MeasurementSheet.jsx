@@ -628,6 +628,7 @@ const MeasurementSheet = () => {
                                 }
                             }}
                             onClose={() => { /* Keep on edit page when closed without saving */ }}
+                            showCancel={false}
                         />
                     </div>
                     <div className="mt-3">
