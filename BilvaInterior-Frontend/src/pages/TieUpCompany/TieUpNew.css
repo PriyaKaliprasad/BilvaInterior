@@ -152,3 +152,33 @@ label.k-label:has(*),
     max-height: 80vh !important;
   }
 }
+.duplicate-error-border {
+  border: 1px solid red !important;
+  border-radius: 4px;
+}
+/* -----------------------------------------
+    GLOBAL FORM ROW SYSTEM (PERFECT ALIGNMENT)
+------------------------------------------*/
+
+/* 2-column desktop layout */
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* Each input gets equal width */
+.form-col {
+  flex: 1;
+}
+
+/* Mobile: Stack vertically */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+.k-form-field {
+  margin-bottom: 12px;
+}
