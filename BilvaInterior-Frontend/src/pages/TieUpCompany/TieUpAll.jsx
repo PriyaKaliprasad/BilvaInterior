@@ -103,7 +103,6 @@ const TieUpAll = () => {
   };
 
   if (loading) return <div>Loading companies...</div>;
-  if (!showAddNew && companies.length === 0) return <div>No companies found.</div>;
 
   return (
     <>
@@ -173,12 +172,15 @@ const TieUpAll = () => {
       ) : (
         <div className="tieup-grid-wrapper">
           <ErrorBoundary>
-            <Grid
-              data={companies}
-              style={{ minWidth: "1300px" }}
-              resizable={true}
-              scrollable="scrollable"
-            >
+            {companies.length === 0 ? (
+              <div style={{ padding: 16 }}>No companies found.</div>
+            ) : (
+              <Grid
+                data={companies}
+                style={{ minWidth: "1300px" }}
+                resizable={true}
+                scrollable="scrollable"
+              >
               {/* ------------------ Avatar Column ------------------ */}
               <GridColumn
                 title=""
@@ -257,7 +259,8 @@ const TieUpAll = () => {
                   </td>
                 )}
               />
-            </Grid>
+              </Grid>
+            )}
           </ErrorBoundary>
         </div>
       )}
