@@ -2419,8 +2419,7 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
     deliveryAddress: "",
   });
 
-  const API_BASE = "https://localhost:7142/api";
-
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
   // Regex for validation
   const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
   const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
@@ -2610,12 +2609,10 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
       poType: dataItem.potype || "",
       brandNameSubBrand: dataItem["brandname/sub-brand"] || "",
       subWorkDescription: dataItem.subworkdescription || "",
-      taxOption1: tax1.option || "",
-      taxPercent1: parseFloat(tax1.percent) || 0,
-      taxOption2: tax2.option || "",
-      taxPercent2: parseFloat(tax2.percent) || 0,
+      CGST: totals.cgst || 0,
+      SGST: totals.sgst || 0,
+      IGST: totals.igst || 0,
       netTotal: totals.netTotal || 0,
-      igst: totals.igst || 0,
       roundOff: totals.roundOff || 0,
       grandTotal: totals.grandTotal || 0,
       createdDate: new Date().toISOString(),
@@ -2638,7 +2635,7 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
       //   setMessage({ text: "❌ Failed to save: " + err, type: "error" });
       // }
       try {
-        const res = await api.post("/quotations", quotationData);
+        const res = await api.post("/api/quotations", quotationData);
 
         if (res.status === 200 || res.status === 201) {
           setMessage({ text: "✅ Quotation saved", type: "success" });
@@ -2683,9 +2680,12 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
     setTotals((prev) => ({
       ...prev,
       netTotal: parseFloat(netTotal.toFixed(2)),
-      igst: parseFloat(totalTax.toFixed(2)), // Tax Total now includes tax3
+      igst: parseFloat(tax1Amount.toFixed(2)), // ✅ Only IGST
+      cgst: parseFloat(tax2Amount.toFixed(2)), // ✅ Only CGST
+      sgst: parseFloat(tax3Amount.toFixed(2)), // ✅ Only SGST
       grandTotal: parseFloat(grandTotal.toFixed(2)),
     }));
+
   }, [lineItems, tax1, tax2, tax3, totals.roundOff]);
 
 
@@ -2811,31 +2811,21 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
               </Button>
 
               {/* Project Dropdown */}
+              {/* Project Dropdown */}
               <div className="mb-4">
                 <label className="form-label fw-bold">
                   Projects <span className="text-danger">*</span>
                 </label>
                 <div style={{ maxWidth: "320px" }}>
-                  {/* <Field
+
+                  {/* --- 2. UNCOMMENT AND USE THIS BLOCK --- */}
+                  <Field
                     name="projectId"
                     component={DropDownField}
                     data={projects.map((p) => p.projectName)}
-                  /> */}
-                  {/* <Field
-                    name="projectId"
-                    label="Project"
-                    component={DropDownList}
-                    data={projects.map(p => p.projectName)}
-                    value={selectedProject}
-                    onChange={(e) => setSelectedProject(e.value)}
-                  /> */}
-                  <DropDownField
-                    data={projects.map(p => p.projectName)}
-                    textField="projectName"
-                    value={selectedProject}
-                    onChange={(e) => setSelectedProject(e.value)}
                   />
 
+                  {/* The other commented-out fields can be deleted */}
                 </div>
               </div>
 
@@ -3128,7 +3118,7 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
                     <h6 className="fw-bold mb-3">Total</h6>
                     {[
                       { label: "Net Total", value: totals.netTotal, key: "netTotal" },
-                      { label: "Tax Total", value: totals.igst, key: "igst" },
+                      { label: "Tax Total", value: (totals.igst + totals.cgst + totals.sgst).toFixed(2), key: "taxTotal" },
                       { label: "Round Off", value: totals.roundOff, key: "roundOff" },
                       { label: "Grand Total", value: totals.grandTotal, key: "grandTotal", bold: true },
                     ].map((item, index) => (

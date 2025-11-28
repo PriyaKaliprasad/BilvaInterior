@@ -1,0 +1,7 @@
+/* Make Kendo inputs wider on mobile */
+@media (max-width: 767.98px) {
+    .mobile-input .k-input,
+    .mobile-input input {
+        width: 100% !important;
+    }
+}

@@ -1994,10 +1994,9 @@ const Billing = ({ onBack }) => {
     const [invoiceTitle, setInvoiceTitle] = useState("");
     const [projectId, setProjectId] = useState("");
 
-    const API_BASE = "https://localhost:7142/api";
-
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
     useEffect(() => {
-        fetch(`${API_BASE}/projects`)
+        fetch(`${API_BASE}/api/projects`)
             .then((res) => res.json())
             .then((data) => setProjects(data))
             .catch((err) => console.error("Error fetching projects:", err));
@@ -2244,12 +2243,10 @@ const Billing = ({ onBack }) => {
             poType,
             subWorkDescription,
             invoiceTitle,
-            tax1Option: tax1.option,
-            tax1Percent: parseFloat(tax1.percent) || 0,
-            tax2Option: tax2.option,
-            tax2Percent: parseFloat(tax2.percent) || 0,
-            tax3Option: tax3.option,
-            tax3Percent: parseFloat(tax3.percent) || 0,
+            IGST: parseFloat(((netTotal * (parseFloat(tax1.percent) || 0)) / 100).toFixed(2)),
+            CGST: parseFloat(((netTotal * (parseFloat(tax2.percent) || 0)) / 100).toFixed(2)),
+            SGST: parseFloat(((netTotal * (parseFloat(tax3.percent) || 0)) / 100).toFixed(2)),
+
             netTotal: parseFloat(netTotal.toFixed(2)),
             totalTax: parseFloat(totalTax.toFixed(2)),
             roundOff: parseFloat(totals.roundOff || 0),
