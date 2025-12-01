@@ -19,8 +19,6 @@ const Sidebar = ({
   const sidebarRef = useRef(null);
   const { user: authUser } = useAuth();
 
-  console.log("User features:", authUser?.role?.features);
-
   // Close sidebar when clicking outside (mobile only)
   useEffect(() => {
     if (!open) return;

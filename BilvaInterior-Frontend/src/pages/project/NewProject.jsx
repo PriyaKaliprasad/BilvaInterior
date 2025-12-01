@@ -10,11 +10,12 @@ import FloatingLabelWrapper from "../../components/Form/FloatingLabelWrapper/Flo
 
 const MEMBERS_API = `${import.meta.env.VITE_API_BASE_URL}/api/Projects/members`;
 
-const NewProject = () => {
+const NewProject = ({ onCancel }) => {
   const [notification, setNotification] = useState(null);
   const [members, setMembers] = useState([]);
   const [tieUpCompanies, setTieUpCompanies] = useState([]);
   const [formKey, setFormKey] = useState(0); // for resetting form
+  
 
 
   // Fetch tie-up companies for dropdown
@@ -148,6 +149,8 @@ const NewProject = () => {
         type: "success",
         message: "Project created successfully.",
       });
+      // notify parent (if provided) so it can close the New view and refresh
+      if (onCancel) onCancel({ success: true, message: "Project created successfully." });
     } catch (err) {
       console.error("Error saving project:", err);
       setNotification({
