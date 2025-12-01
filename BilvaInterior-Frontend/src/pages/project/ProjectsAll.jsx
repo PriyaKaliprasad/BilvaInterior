@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Loader } from "@progress/kendo-react-indicators";
+import { Button } from "@progress/kendo-react-buttons";
+import NewProject from "./NewProject";
+import EditProject from "./EditProject";
 
 /*
   ProjectsAll (inline-styles only) - updated per your request
@@ -19,8 +22,10 @@ const ProjectsAll = () => {
   const [loading, setLoading] = useState(true);
 
   const [columns, setColumns] = useState(3);
-  const navigate = useNavigate();
   const location = useLocation();
+  const [editId, setEditId] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
   // Layout constants
@@ -87,6 +92,32 @@ const ProjectsAll = () => {
     await fetchAllData();
   };
 
+  useEffect(() => {
+    if (successMessage) {
+      const t = setTimeout(() => setSuccessMessage(""), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [successMessage]);
+
+  // Action bar styles (consistent with SiteVisitAll)
+  const actionBarStyle = {
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
+    background: '#fff',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0.5rem 0.5rem 0.5rem 0.5rem',
+    borderBottom: '1px solid #eee',
+    minHeight: 48,
+    marginBottom: 10,
+  };
+  const actionBarBtnGroup = {
+    display: 'flex',
+    gap: '0.5rem',
+  };
+
   const getCompanyName = (project) =>
     project.tieUpCompany?.companyName ||
     (project.tieUpCompanyId
@@ -102,9 +133,140 @@ const ProjectsAll = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: 40, textAlign: "center" }}>
-        <Loader size="large" type="infinite-spinner" />
-        <p>Loading projects...</p>
+      <div style={{ padding: 16 }}>
+        <div style={actionBarStyle} className="projects-action-bar">
+          <div style={actionBarBtnGroup}>
+            <Button
+              icon="refresh"
+              size="small"
+              onClick={handleRefreshClick}
+              className="action-btn refresh-btn"
+            >
+              <span className="tieup-action-btn-text">Refresh</span>
+            </Button>
+          </div>
+          <div style={actionBarBtnGroup}>
+            <Button
+              icon="plus"
+              size="small"
+              onClick={() => setShowAdd(true)}
+              themeColor="primary"
+              className="action-btn add-btn"
+            >
+              <span className="tieup-action-btn-text">Add</span>
+            </Button>
+          </div>
+        </div>
+
+        <div style={{ padding: 40, textAlign: "center" }}>
+          <Loader size="large" type="infinite-spinner" />
+          <p>Loading projects...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (showAdd) {
+    return (
+      <div style={{ padding: 16 }}>
+        <div style={actionBarStyle} className="projects-action-bar">
+          <div style={actionBarBtnGroup}>
+            <Button
+              icon="refresh"
+              size="small"
+              onClick={handleRefreshClick}
+              className="action-btn refresh-btn"
+            >
+              <span className="tieup-action-btn-text">Refresh</span>
+            </Button>
+          </div>
+          <div style={actionBarBtnGroup}>
+            <Button
+              icon="plus"
+              size="small"
+              onClick={() => setShowAdd(true)}
+              themeColor="primary"
+              className="action-btn add-btn"
+            >
+              <span className="tieup-action-btn-text">Add</span>
+            </Button>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+          <Button
+            icon="arrow-left"
+            size="small"
+            onClick={() => setShowAdd(false)}
+            className="action-btn back-btn"
+            style={{ marginRight: 8 }}
+          >
+            <span className="tieup-action-btn-text">Back</span>
+          </Button>
+        </div>
+
+        <NewProject
+          onCancel={(response) => {
+            setShowAdd(false);
+            if (response?.success) {
+              setSuccessMessage(response.message);
+              fetchAllData();
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (editId) {
+    return (
+      <div style={{ padding: 16 }}>
+        <div style={actionBarStyle} className="projects-action-bar">
+          <div style={actionBarBtnGroup}>
+            <Button
+              icon="refresh"
+              size="small"
+              onClick={handleRefreshClick}
+              className="action-btn refresh-btn"
+            >
+              <span className="tieup-action-btn-text">Refresh</span>
+            </Button>
+          </div>
+          <div style={actionBarBtnGroup}>
+            <Button
+              icon="plus"
+              size="small"
+              onClick={() => setShowAdd(true)}
+              themeColor="primary"
+              className="action-btn add-btn"
+            >
+              <span className="tieup-action-btn-text">Add</span>
+            </Button>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+          <Button
+            icon="arrow-left"
+            size="small"
+            onClick={() => setEditId(null)}
+            className="action-btn back-btn"
+            style={{ marginRight: 8 }}
+          >
+            <span className="tieup-action-btn-text">Back</span>
+          </Button>
+        </div>
+
+        <EditProject
+          projectId={editId}
+          onBack={(response) => {
+            setEditId(null);
+            if (response?.success) {
+              setSuccessMessage(response.message || "Project updated successfully.");
+              fetchAllData();
+            }
+          }}
+        />
       </div>
     );
   }
@@ -112,22 +274,32 @@ const ProjectsAll = () => {
   if (!loading && (!Array.isArray(projects) || projects.length === 0)) {
     return (
       <div style={{ padding: 24 }}>
+        <div style={actionBarStyle} className="projects-action-bar">
+          <div style={actionBarBtnGroup}>
+            <Button
+              icon="refresh"
+              size="small"
+              onClick={handleRefreshClick}
+              className="action-btn refresh-btn"
+            >
+              <span className="tieup-action-btn-text">Refresh</span>
+            </Button>
+          </div>
+          <div style={actionBarBtnGroup}>
+            <Button
+              icon="plus"
+              size="small"
+              onClick={() => setShowAdd(true)}
+              themeColor="primary"
+              className="action-btn add-btn"
+            >
+              <span className="tieup-action-btn-text">Add</span>
+            </Button>
+          </div>
+        </div>
+
         <h3>All Projects</h3>
         <p>No projects found.</p>
-        <div style={{ marginTop: 16, textAlign: "right" }}>
-          <button
-            onClick={handleRefreshClick}
-            style={{
-              padding: "8px 16px",
-              borderRadius: 6,
-              border: "1px solid #ccc",
-              backgroundColor: "#f5f5f5",
-              cursor: "pointer",
-            }}
-          >
-            Refresh
-          </button>
-        </div>
       </div>
     );
   }
@@ -165,6 +337,9 @@ const ProjectsAll = () => {
     boxSizing: "border-box",
   };
 
+  // Action bar styles (consistent with SiteVisitAll)
+  
+
   // tile shared inline style
   const tileBaseStyle = {
     borderRadius: 6,
@@ -178,8 +353,38 @@ const ProjectsAll = () => {
 
   return (
     <div style={{ padding: 16 }}>
-      <h3 style={{ marginTop: 0 }}>All Projects</h3>
+      <div style={actionBarStyle} className="projects-action-bar">
+        <div style={actionBarBtnGroup}>
+          <Button
+            icon="refresh"
+            size="small"
+            onClick={handleRefreshClick}
+            className="action-btn refresh-btn"
+          >
+            <span className="tieup-action-btn-text">Refresh</span>
+          </Button>
+        </div>
+        <div style={actionBarBtnGroup}>
+          <Button
+            icon="plus"
+            size="small"
+            onClick={() => setShowAdd(true)}
+            themeColor="primary"
+            className="action-btn add-btn"
+          >
+            <span className="tieup-action-btn-text">Add</span>
+          </Button>
+        </div>
+      </div>
 
+      {/* GLOBAL SUCCESS TOAST MESSAGE */}
+      {successMessage && (
+        <div className="success-box" style={{ marginBottom: 12 }}>
+          {successMessage}
+        </div>
+      )}
+
+      <h3 style={{ marginTop: 0 }}>All Projects</h3>
       <div style={gridStyle}>
         {projects.map((project) => {
           const key = project.id ?? project._id ?? Math.random().toString(36).slice(2);
@@ -231,7 +436,7 @@ const ProjectsAll = () => {
 
                   <div style={{ paddingRight: 8, flex: "0 0 auto" }}>
                     <button
-                      onClick={() => navigate(`/projects/edit/${project.id}`)}
+                      onClick={() => setEditId(project.id)}
                       style={{
                         padding: "6px 10px",
                         fontSize: 13,

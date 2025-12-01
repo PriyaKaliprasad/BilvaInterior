@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import "@progress/kendo-theme-default/dist/all.css";
 import { Checkbox } from "@progress/kendo-react-inputs";
 import { Button } from "@progress/kendo-react-buttons";
@@ -28,9 +27,8 @@ import "./NewProject.css";
 
 const MEMBERS_API = `${import.meta.env.VITE_API_BASE_URL}/api/Projects/members`;
 
-const EditProject = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+const EditProject = ({ projectId, onBack }) => {
+  const id = projectId;
 
   const [members, setMembers] = useState([]);
   const [tieUpCompanies, setTieUpCompanies] = useState([]);
@@ -194,10 +192,8 @@ const EditProject = () => {
       const text = await res.text();
       if (!res.ok) throw new Error(text || `Server returned ${res.status}`);
 
-      // Immediately navigate back to All Projects and trigger a refresh there.
-      // ProjectsAll reads location.state?.refresh and will re-fetch.
-      // If your All Projects route is "/projects/all" change "/projects" below accordingly.
-      navigate("/projects", { state: { refresh: Date.now() } });
+      // Notify parent to go back to All Projects and trigger a refresh there.
+      if (onBack) onBack({ success: true, message: "Project updated successfully." });
     } catch (err) {
       console.error("Error updating project:", err);
       setNotification({ type: "error", message: `Failed to update project: ${err.message}` });
@@ -331,9 +327,7 @@ const EditProject = () => {
                     type="button"
                     look="outline"
                     onClick={() => {
-                      // Explicitly navigate back to All Projects and request a refresh.
-                      // Change path if your All Projects route is different.
-                      navigate("/projects", { state: { refresh: Date.now() } });
+                      if (onBack) onBack({ success: false });
                     }}
                   >
                     Cancel
