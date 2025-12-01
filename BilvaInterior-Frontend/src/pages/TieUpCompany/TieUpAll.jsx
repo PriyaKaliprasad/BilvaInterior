@@ -61,6 +61,7 @@ class ErrorBoundary extends React.Component {
 
 // ------------------ Main Component ------------------
 const TieUpAll = () => {
+
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCompany, setSelectedCompany] = useState(null);
@@ -85,17 +86,41 @@ const TieUpAll = () => {
   };
 
   // Add new company handler
-  const handleAdd = () => setShowAddNew(true);
+const handleAdd = () => {
+setShowAddNew(true);
+
+};
   // Cancel add new company
-  const handleCancelAdd = () => setShowAddNew(false);
+const handleCancelAdd = () => {
+  setShowAddNew(false);
+};
 
   useEffect(() => {
     refreshCompanies();
     // eslint-disable-next-line
   }, []);
 
-  const handleEdit = (company) => setSelectedCompany(company);
-  const handleCloseEdit = () => setSelectedCompany(null);
+  useEffect(() => {
+  const handleBack = () => {
+    if (showAddNew) {
+      setShowAddNew(false);
+    } else if (selectedCompany) {
+      setSelectedCompany(null);
+    }
+  };
+
+  window.addEventListener("popstate", handleBack);
+  return () => window.removeEventListener("popstate", handleBack);
+}, [showAddNew, selectedCompany]);
+
+const handleEdit = (company) => {
+  setSelectedCompany(company);
+};
+
+const handleCloseEdit = () => {
+  setSelectedCompany(null);
+};
+
   // Refetch companies from backend after edit success
   const handleEditSuccess = () => {
     refreshCompanies();
@@ -246,7 +271,7 @@ const TieUpAll = () => {
               {/* ✅ Actions Column */}
               <GridColumn
                 title="Actions"
-                width="130px"
+                width="110px"
                 cell={(props) => (
                   <td style={{ textAlign: "center" }}>
                     <Button

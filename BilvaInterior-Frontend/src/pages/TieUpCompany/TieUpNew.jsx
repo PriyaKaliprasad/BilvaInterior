@@ -10,6 +10,7 @@ import FormUpload from '../../components/Form/FormUpload';
 import CustomFormFieldSet from '../../components/Form/CustomFormFieldSet';
 import { indiaStatesCities } from '../../utils/indiaStatesCities';
 import Avatar from '../../components/Avatar/CustomAvatar';
+import { Switch } from "@progress/kendo-react-inputs";
 
 // ✅ SAFE BASE URL (fixes undefined/api/... when .env isn't loaded)
 const API_BASE_URL =
@@ -90,6 +91,14 @@ const TieUpNew = ({ onCancel, onSuccess }) => {
   const formRef = useRef(null);
   const [showGlobalError, setShowGlobalError] = useState(false);
   const [uniqueError, setUniqueError] = useState('');
+
+  // Inline field-level error messages (duplicate checks)
+const [inlineErrors, setInlineErrors] = useState({
+  companyName: "",
+  email: "",
+  phone: "",
+  gstin: ""
+});
 
   // Toast state
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
@@ -193,15 +202,39 @@ const TieUpNew = ({ onCancel, onSuccess }) => {
       }
 
       if (!checkResult.isUnique) {
-        setToast({
-          visible: true,
-          message: checkResult.message || 'Duplicate entry: Company Name, Email, Phone, or GSTIN already exists.',
-          type: 'error'
-        });
-        setTimeout(() => setToast({ visible: false, message: '', type: 'success' }), 2500);
-        setIsSubmitting(false);
-        return;
-      }
+
+  // Reset previous inline errors
+  setInlineErrors({
+    companyName: "",
+    email: "",
+    phone: "",
+    gstin: ""
+  });
+
+  // Set specific field error
+  const validFields = ["companyName", "email", "phone", "gstin"];
+  const field = validFields.includes(checkResult.field)
+    ? checkResult.field
+    : null;
+
+  if (field) {
+    setInlineErrors(prev => ({
+      ...prev,
+      [field]: checkResult.message || `${field} already exists`
+    }));
+  }
+
+  // Global toast also show
+  setToast({
+    visible: true,
+    message: "Duplicate entry found.",
+    type: "error"
+  });
+
+  setUniqueError("");
+  setIsSubmitting(false);
+  return;
+}
 
       const formData = new FormData();
       formData.append('companyName', dataItem.companyName);
@@ -216,6 +249,7 @@ const TieUpNew = ({ onCancel, onSuccess }) => {
       formData.append('city', selectedCity);
       formData.append('pincode', dataItem.pincode);
       formData.append('gstin', dataItem.gstin);
+      formData.append('isActive', dataItem.isActive);
 
       if (dataItem.billingTemplate?.length > 0) {
         const file = dataItem.billingTemplate[0].getRawFile?.() || dataItem.billingTemplate[0];
@@ -304,19 +338,20 @@ const TieUpNew = ({ onCancel, onSuccess }) => {
       ref={formRef}
       onSubmit={handleSubmit}
       initialValues={{
-        companyName: '',
-        contactPerson: '',
-        phone: '',
-        email: '',
-        storeCode: '',
-        sapCode: '',
-        addressLine1: '',
-        addressLine2: '',
-        pincode: '',
-        gstin: '',
-        billingTemplate: null,
-        profilePic: null
-      }}
+      companyName: '',
+      contactPerson: '',
+      phone: '',
+      email: '',
+      storeCode: '',
+      sapCode: '',
+      addressLine1: '',
+      addressLine2: '',
+      pincode: '',
+      gstin: '',
+      billingTemplate: null,
+      profilePic: null,
+      isActive: true         
+  }}
       render={(formRenderProps) => (
         <FormElement style={{ maxWidth: 900, padding: '0 1rem' }}>
           <CustomFormFieldSet cols={responsiveBreakpoints}>
@@ -391,47 +426,64 @@ const TieUpNew = ({ onCancel, onSuccess }) => {
 
           {/* Contact Info */}
           <CustomFormFieldSet legend="Contact Info" className="custom-fieldset">
+           <div className="form-row">
+
+  <div className="form-col">
+    <Field
+      name="companyName"
+      component={FormInput}
+      label="Company Name *"
+      validator={nameValidator}
+    />
+    {inlineErrors.companyName && (
+      <div style={{ color: "red", fontSize: 12 }}>
+        {inlineErrors.companyName}
+      </div>
+    )}
+  </div>
+
+  <div className="form-col">
+    <Field
+      name="contactPerson"
+      component={FormInput}
+      label="Contact Person *"
+      validator={nameValidator}
+    />
+  </div>
+
+</div>
             <div className="form-row">
-              <Field
-                name="companyName"
-                component={FormInput}
-                label="Company Name *"
-                validator={nameValidator}
-                inputProps={(fieldProps) =>
-                  getFieldStyle(fieldProps.validationMessage, fieldProps.touched)
-                }
-              />
-              <Field
-                name="contactPerson"
-                component={FormInput}
-                label="Contact Person *"
-                validator={nameValidator}
-                inputProps={(fieldProps) =>
-                  getFieldStyle(fieldProps.validationMessage, fieldProps.touched)
-                }
-              />
-            </div>
-            <div className="form-row">
-              <Field
-                name="phone"
-                component={FormMaskedInput}
-                label="Phone *"
-                mask="0000000000"
-                validator={phoneValidator}
-                inputProps={(fieldProps) =>
-                  getFieldStyle(fieldProps.validationMessage, fieldProps.touched)
-                }
-              />
-              <Field
-                name="email"
-                component={FormInput}
-                label="Email *"
-                validator={emailValidator}
-                inputProps={(fieldProps) =>
-                  getFieldStyle(fieldProps.validationMessage, fieldProps.touched)
-                }
-              />
-            </div>
+
+  <div className="form-col">
+    <Field
+      name="phone"
+      component={FormMaskedInput}
+      label="Phone *"
+      mask="0000000000"
+      validator={phoneValidator}
+    />
+    {inlineErrors.phone && (
+      <div style={{ color: "red", fontSize: 12 }}>
+        {inlineErrors.phone}
+      </div>
+    )}
+  </div>
+
+  <div className="form-col">
+    <Field
+      name="email"
+      component={FormInput}
+      label="Email *"
+      validator={emailValidator}
+    />
+    {inlineErrors.email && (
+      <div style={{ color: "red", fontSize: 12 }}>
+        {inlineErrors.email}
+      </div>
+    )}
+  </div>
+
+</div>
             <div className="form-row">
               <Field name="storeCode" component={FormInput} label="Store Code" />
               <Field name="sapCode" component={FormInput} label="SAP Code" />
@@ -529,6 +581,11 @@ const TieUpNew = ({ onCancel, onSuccess }) => {
                 getFieldStyle(fieldProps.validationMessage, fieldProps.touched)
               }
             />
+            {inlineErrors.gstin && (
+  <div style={{ color: "red", fontSize: 12, marginTop: 4 }}>
+    {inlineErrors.gstin}
+  </div>
+)}
           </CustomFormFieldSet>
 
           {/* Billing Template */}
@@ -555,6 +612,26 @@ const TieUpNew = ({ onCancel, onSuccess }) => {
               </Button>
             </CustomFormFieldSet>
           )}
+
+<CustomFormFieldSet>
+  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+    <label style={{ fontWeight: 600 }}>Status:</label>
+
+    <Switch
+      checked={!!formRenderProps.valueGetter("isActive")}
+      onChange={(e) =>
+        formRenderProps.onChange({
+          name: "isActive",
+          value: e.value,
+        })
+      }
+    />
+
+    <span>{formRenderProps.valueGetter("isActive") ? "Active" : "Inactive"}</span>
+  </div>
+
+  <Field name="isActive" component={() => null} />
+</CustomFormFieldSet>
 
           {/* Toast below submit button */}
           {toast.visible && (

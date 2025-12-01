@@ -9,6 +9,7 @@ import FormUpload from '../../components/Form/FormUpload';
 import CustomFormFieldSet from '../../components/Form/CustomFormFieldSet';
 import { indiaStatesCities } from '../../utils/indiaStatesCities';
 import Avatar from '../../components/Avatar/CustomAvatar';
+import { Switch } from "@progress/kendo-react-inputs";
 
 // responsive breakpoints (keep same as before)
 const responsiveBreakpoints = [
@@ -157,17 +158,18 @@ const TieUpEdit = ({ companyId, closeEdit, onEditSuccess }) => {
         }
 
         // set initial values for form
-        const iv = {
-          companyName: data.companyName || '',
-          contactPerson: data.contactPerson || '',
-          phone: data.phone || '',
-          email: data.email || '',
-          addressLine1: data.addressLine1 || '',
-          addressLine2: data.addressLine2 || '',
-          pincode: data.pincode || '',
-          gstin: data.gstin || '',
-          billingTemplate: billingTemplateArr
-        };
+       const iv = {
+  companyName: data.companyName || '',
+  contactPerson: data.contactPerson || '',
+  phone: data.phone || '',
+  email: data.email || '',
+  addressLine1: data.addressLine1 || '',
+  addressLine2: data.addressLine2 || '',
+  pincode: data.pincode || '',
+  gstin: data.gstin || '',
+  billingTemplate: billingTemplateArr,
+  isActive: data.isActive ?? true   
+};
 
         if (mounted) {
           setExcelFile(billingTemplateArr);
@@ -317,6 +319,7 @@ if (checkData && checkData.isUnique === false) {
         if (k !== 'profilePic' && k !== 'billingTemplate') formData.append(k, dataItem[k] || '');
       });
 
+      formData.append("isActive", dataItem.isActive);
       formData.append('id', companyId);
       formData.append('state', selectedState);
       formData.append('city', selectedCity);
@@ -396,18 +399,66 @@ if (checkData && checkData.isUnique === false) {
           </CustomFormFieldSet>
 
           <CustomFormFieldSet legend="Contact Info" className="custom-fieldset">
-            <div className="form-row">
-              <Field name="companyName" component={FormInput} label="Company Name *" validator={nameValidator} />
-              <Field name="contactPerson" component={FormInput} label="Contact Person *" validator={nameValidator} />
-              <Field name="phone" component={FormMaskedInput} label="Phone *" mask="0000000000" validator={phoneValidator} />
-              <Field name="email" component={FormInput} label="Email *" validator={emailValidator} />
-            </div>
-          </CustomFormFieldSet>
+
+  {/* Row 1 — Company Name + Contact Person */}
+  <div className="form-row">
+    <div className="form-col">
+      <Field
+        name="companyName"
+        component={FormInput}
+        label="Company Name *"
+        validator={nameValidator}
+      />
+      {uniqueError === "companyName" && (
+        <div style={{ color: "red", fontSize: 12 }}>Company Name already exists</div>
+      )}
+    </div>
+
+    <div className="form-col">
+      <Field
+        name="contactPerson"
+        component={FormInput}
+        label="Contact Person *"
+        validator={nameValidator}
+      />
+    </div>
+  </div>
+
+
+  {/* Row 2 — Phone + Email */}
+  <div className="form-row">
+    <div className="form-col">
+      <Field
+        name="phone"
+        component={FormMaskedInput}
+        label="Phone *"
+        mask="0000000000"
+        validator={phoneValidator}
+      />
+      {uniqueError === "phone" && (
+        <div style={{ color: "red", fontSize: 12 }}>Phone already exists</div>
+      )}
+    </div>
+
+    <div className="form-col">
+      <Field
+        name="email"
+        component={FormInput}
+        label="Email *"
+        validator={emailValidator}
+      />
+      {uniqueError === "email" && (
+        <div style={{ color: "red", fontSize: 12 }}>Email already exists</div>
+      )}
+    </div>
+  </div>
+
+</CustomFormFieldSet>
 
           <CustomFormFieldSet legend="Address" className="custom-fieldset">
             <div className="form-row">
               <Field name="addressLine1" component={FormInput} label="Address Line 1 *" validator={requiredValidator} />
-              <Field name="addressLine2" component={FormInput} label="Address Line 2 *" />
+              <Field name="addressLine2" component={FormInput} label="Address Line 2 *" validator={requiredValidator} />
             </div>
 
             <div className="form-row">
@@ -500,6 +551,31 @@ if (checkData && checkData.isUnique === false) {
               {toast.message}
             </div>
           )}
+
+{/* ⭐ NEW — Active/Inactive toggle */}
+<CustomFormFieldSet>
+  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <label style={{ fontWeight: 600 }}>Status:</label>
+
+    <Switch
+      checked={!!formRenderProps.valueGetter("isActive")}
+      onChange={(e) =>
+        formRenderProps.onChange({
+          value: e.value,
+          name: "isActive",
+        })
+      }
+    />
+
+    <span style={{ fontWeight: 500 }}>
+      {formRenderProps.valueGetter("isActive") ? "Active" : "Inactive"}
+    </span>
+  </div>
+
+  {/* Hidden field because Switch is not Field component */}
+  <Field name="isActive" component={() => null} />
+</CustomFormFieldSet>
+
 
           <div style={{ textAlign: 'left', marginTop: '1rem' }}>
             <Button themeColor="primary" type="submit" disabled={isSubmitting}>
