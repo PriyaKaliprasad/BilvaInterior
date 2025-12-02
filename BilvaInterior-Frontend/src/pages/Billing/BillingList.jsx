@@ -1064,6 +1064,7 @@ import { Button } from "@progress/kendo-react-buttons";
 import { DropDownList } from "@progress/kendo-react-dropdowns";
 import "bootstrap/dist/css/bootstrap.min.css";
 import BillingNew from "./Billing";
+import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
 
 
 const AllBillings_Simple = () => {
@@ -1075,6 +1076,7 @@ const AllBillings_Simple = () => {
     const [message, setMessage] = useState({ text: "", type: "" });
     const [page, setPage] = useState({ skip: 0, take: 7 });
     const [showAdd, setShowAdd] = useState(false);
+    
 
 
     // <-- MODIFIED: This now only auto-clears error messages.
@@ -1162,6 +1164,53 @@ const AllBillings_Simple = () => {
         } catch { }
     };
 
+    // ✅ DELETE handler
+   // ... inside AllBillings_Simple component ...
+
+    // 1. STATE for the delete dialog
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [billingToDelete, setBillingToDelete] = useState(null);
+
+    // 2. TRIGGER - The function attached to the Trash Icon
+    const handleDelete = (billing) => {
+        setBillingToDelete(billing);
+        setShowDeleteConfirm(true);
+    };
+
+    // 3. CONFIRM - The function attached to "Yes" in the dialog
+    const confirmDelete = async () => {
+        if (!billingToDelete) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/api/Billing/${billingToDelete.billingId}`, {
+                method: "DELETE"
+            });
+
+            if (!res.ok) throw new Error("Delete failed");
+
+            // Update UI
+            setBillings(prev =>
+                prev.filter(b => b.billingId !== billingToDelete.billingId)
+            );
+
+            setMessage({ text: "✅ Deleted successfully!", type: "success" });
+            setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+
+        } catch (err) {
+            console.error(err);
+            setMessage({ text: "❌ Failed to delete", type: "error" });
+        }
+
+        // Close Dialog
+        setShowDeleteConfirm(false);
+        setBillingToDelete(null);
+    };
+
+    // 4. CANCEL - The function attached to "No"
+    const cancelDelete = () => {
+        setShowDeleteConfirm(false);
+        setBillingToDelete(null);
+    };
 
     // ✅ EDIT handler
     const handleEdit = (billing) => {
@@ -1421,7 +1470,7 @@ const AllBillings_Simple = () => {
                                     )}
                                 />
 
-                                <GridColumn
+                                {/* <GridColumn
                                     title="Actions"
                                     width="120px"
                                     cell={(props) => (
@@ -1436,10 +1485,67 @@ const AllBillings_Simple = () => {
                                             </Button>
                                         </td>
                                     )}
+                                /> */}
+                                {/* --- EDIT COLUMN --- */}
+                                <GridColumn
+                                    title="Edit"
+                                    width="100px"
+                                    cell={(props) => (
+                                        <td style={{ textAlign: "center" }}>
+                                            <Button
+                                                size="small"
+                                                themeColor="primary"
+                                                onClick={() => handleEdit(props.dataItem)}
+                                            >
+                                                Edit
+                                            </Button>
+                                        </td>
+                                    )}
+                                />
+
+                                {/* --- DELETE COLUMN --- */}
+                                <GridColumn
+                                    title="Actions"
+                                    width="80px"
+                                    cell={(props) => (
+                                        <td style={{ textAlign: "center" }}>
+                                            <Button
+                                                icon="delete"      // Kendo Trash Icon
+                                                size="small"
+                                                themeColor="error"
+                                                onClick={() => handleDelete(props.dataItem)}
+                                                title="Delete"
+                                            />
+                                        </td>
+                                    )}
                                 />
                             </Grid>
                         </div>
                     </div>
+                )}
+                {/* ... existing Grid code ... */}
+
+                {/* PASTE THIS DIALOG CODE HERE, AT THE BOTTOM OF THE LIST VIEW */}
+                {showDeleteConfirm && (
+                    <Dialog title={"Delete Confirmation"} onClose={cancelDelete} minWidth={300}>
+                        <p style={{ margin: "25px", textAlign: "center" }}>
+                            Are you sure you want to delete the billing for project <strong>{billingToDelete?.projectName}</strong>?
+                        </p>
+                        <DialogActionsBar>
+                            <button
+                                className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base"
+                                onClick={cancelDelete}
+                            >
+                                No
+                            </button>
+                            <button
+                                className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-error"
+                                onClick={confirmDelete}
+                            >
+                                Yes
+                            </button>
+                        </DialogActionsBar>
+                    </Dialog>
                 )}
             </div>
         );

@@ -1111,7 +1111,7 @@ const ReplyWorkItem = ({ taskId, currentUserRole, onBack, onUpdate }) => {
         formData.append("TaskId", taskId);
         formData.append("Status", status);
         formData.append("Comment", newReply);
-        
+
         // ✅ KEPT THIS: This ensures the correct user role is saved
         formData.append("RepliedBy", roleToSend);
 
@@ -1163,7 +1163,7 @@ const ReplyWorkItem = ({ taskId, currentUserRole, onBack, onUpdate }) => {
 
             <div className="mb-3">
                 <label className="form-label fw-bold" style={{ fontSize: "1.1rem" }}>Update Status</label>
-                <div style={{ width: "250px" }}>
+                <div style={{ width: "100%", maxWidth: "250px" }}>
                     <DropDownList
                         data={statusOptions}
                         value={status}
@@ -1244,4 +1244,3 @@ const ReplyWorkItem = ({ taskId, currentUserRole, onBack, onUpdate }) => {
 };
 
 export default ReplyWorkItem;
-//fully working code

@@ -2844,29 +2844,36 @@ const AllQuotations_Simple = () => {
                     </td>
                   )}
                 />
+                {/* --- EDIT COLUMN --- */}
                 <GridColumn
-                  title="Actions"
-                  width="150px"
+                  title="Edit"
+                  width="100px"
                   cell={(props) => (
-                    <td style={{ textAlign: "center", whiteSpace: "nowrap" }}>
-                      {/* EDIT BUTTON */}
+                    <td style={{ textAlign: "center" }}>
                       <Button
                         size="small"
                         themeColor="primary"
                         onClick={() => handleEdit(props.dataItem)}
-                        style={{ marginRight: "6px" }}
                       >
                         Edit
                       </Button>
+                    </td>
+                  )}
+                />
 
-                      {/* DELETE BUTTON */}
+                {/* --- DELETE COLUMN --- */}
+                <GridColumn
+                  title="Actions"
+                  width="80px"
+                  cell={(props) => (
+                    <td style={{ textAlign: "center" }}>
                       <Button
+                        icon="delete"      // Kendo Trash Icon
                         size="small"
-                        themeColor="secondary"
+                        themeColor="error"
                         onClick={() => handleDelete(props.dataItem)}
-                      >
-                        Delete
-                      </Button>
+                        title="Delete"
+                      />
                     </td>
                   )}
                 />
@@ -2876,15 +2883,15 @@ const AllQuotations_Simple = () => {
           </div>
         )}
         {showDeleteConfirm && (
-        <Dialog title="Confirm Delete" onClose={() => setShowDeleteConfirm(false)}>
+          <Dialog title="Confirm Delete" onClose={() => setShowDeleteConfirm(false)}>
             <p>Are you sure you want to delete this quotation?</p>
 
             <DialogActionsBar>
-                <Button onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
-                <Button themeColor="error" onClick={confirmDelete}>Delete</Button>
+              <Button onClick={() => setShowDeleteConfirm(false)}>No</Button>
+              <Button themeColor="error" onClick={confirmDelete}>Yes</Button>
             </DialogActionsBar>
-        </Dialog>
-     )}
+          </Dialog>
+        )}
       </div>
     );
   }
