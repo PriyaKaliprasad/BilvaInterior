@@ -28,7 +28,7 @@ const actionBarBtnGroup = {
 };
 
 // ------------------ Set API Base URL ------------------
-const API_BASE_URL = "https://localhost:7142";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // ------------------ Avatar URL ------------------
 const getAvatarUrl = (dataItem) => {
@@ -128,7 +128,6 @@ const handleCloseEdit = () => {
   };
 
   if (loading) return <div>Loading companies...</div>;
-  if (!showAddNew && companies.length === 0) return <div>No companies found.</div>;
 
   return (
     <>
@@ -198,12 +197,15 @@ const handleCloseEdit = () => {
       ) : (
         <div className="tieup-grid-wrapper">
           <ErrorBoundary>
-            <Grid
-              data={companies}
-              style={{ minWidth: "1500px" }}
-              resizable={true}
-              scrollable="scrollable"
-            >
+            {companies.length === 0 ? (
+              <div style={{ padding: 16 }}>No companies found.</div>
+            ) : (
+              <Grid
+                data={companies}
+                style={{ minWidth: "1300px" }}
+                resizable={true}
+                scrollable="scrollable"
+              >
               {/* ------------------ Avatar Column ------------------ */}
               <GridColumn
                 title=""
@@ -282,7 +284,8 @@ const handleCloseEdit = () => {
                   </td>
                 )}
               />
-            </Grid>
+              </Grid>
+            )}
           </ErrorBoundary>
         </div>
       )}

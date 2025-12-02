@@ -26,11 +26,10 @@ import AddNewRole from '../../pages/ManageEmployees/AddNewRole.jsx';
 import AuditTrail from '../../pages/AuditTrail.jsx';
 import MyAccount from '../../pages/MyAccount.jsx';
 import ManageVendorsAll from "../../pages/Manage Vendor/ManageVendorsAll.jsx";
+import MeasurementSheet from "../../pages/Measurement/MeasurementSheet.jsx";
 import WorkList from "../../pages/WorkNotes/WorkList.jsx";
 import AddWorkItem from "../../pages/WorkNotes/AddWorkItem.jsx"; 
 import ReplyWorkItem from "../../pages/WorkNotes/ReplyWorkItem.jsx"; 
-
-
 
 // Sidebar groups with navMeta, icons, tab IDs, and page components
 export const sidebarLinks = [
@@ -73,6 +72,14 @@ export const sidebarLinks = [
         content: ProjectsTypes,
       }
     ]
+  },
+  {
+    id: "measurementsheet",
+    label: "Measurement Sheet",
+    icon: chartPieIcon,
+    navMeta: { title: "Measurement Sheet", breadcrumb: ["Measurement Sheet"] },
+    content: MeasurementSheet,
+    isGroup: false
   },
   {
     id: "site-visit",
