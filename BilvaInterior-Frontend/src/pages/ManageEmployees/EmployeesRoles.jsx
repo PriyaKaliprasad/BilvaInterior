@@ -1019,23 +1019,6 @@ export default function ManageRoles() {
     // TC_003: set page title
     document.title = "Employee Roles";
 
-    // HTTPS redirect (TC_069) — only redirect when not running on localhost
-    try {
-      if (
-        window &&
-        window.location &&
-        window.location.protocol !== "https:" &&
-        window.location.hostname &&
-        window.location.hostname !== "localhost"
-      ) {
-        // redirect to https — remove if you don't want automatic redirect
-        const httpsUrl = window.location.href.replace("http:", "https:");
-        window.location.replace(httpsUrl);
-      }
-    } catch (err) {
-      console.warn("HTTPS redirect check failed:", err);
-    }
-
     // history popstate handler to support browser back navigation (TC_070)
     const onPop = () => {
       // if user navigated back, close add/edit

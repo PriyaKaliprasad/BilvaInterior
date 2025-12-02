@@ -24,16 +24,17 @@ const LoginNavbar = () => {
           {/* <span className="badge badge-beta ms-2">Beta</span> */}
         </a>
         <button 
-          className="navbar-toggler" 
+          className="navbar-toggler d-none" 
           type="button" 
           data-bs-toggle="collapse" 
           data-bs-target="#nav"
           aria-controls="nav"
           aria-expanded="false"
           aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
+     >
+    <span className="navbar-toggler-icon"></span>
+      </button>
+
         <div id="nav" className="collapse navbar-collapse">
           <ul className="navbar-nav ms-auto align-items-lg-center">
             <li className="nav-item">
