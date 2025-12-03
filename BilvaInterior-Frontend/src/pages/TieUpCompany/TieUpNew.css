@@ -182,3 +182,14 @@ label.k-label:has(*),
 .k-form-field {
   margin-bottom: 12px;
 }
+.k-input {
+  height: 40px !important;
+}
+.custom-fieldset {
+  margin-bottom: 20px;
+}
+.k-label {
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: inline-block;
+}

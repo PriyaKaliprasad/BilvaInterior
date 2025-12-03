@@ -4,7 +4,7 @@ import axios from 'axios';
 import ManageVendors from './ManageVendors';
 import './ManageVendorAll.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, '') || 'http://localhost:7142';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, '') || 'https://localhost:7142';
 
 // Hardcoded Categories (kept for display mapping)
 const categories = [
@@ -42,7 +42,7 @@ const VendorsListHeader = () => (
 );
 
 // Row Component — pencil-only edit button using Kendo icon span
-const VendorsListRow = ({ v, onEdit }) => (
+const VendorsListRow = ({ v, onEdit, onDelete }) => (
   <div className="vendors-list-row">
     <div className="vendors-col id">{v.id}</div>
     <div className="vendors-col name">{v.firstName} {v.lastName}</div>
@@ -59,19 +59,36 @@ const VendorsListRow = ({ v, onEdit }) => (
         title="Edit"
         aria-label={`Edit vendor ${v.id}`}
         onClick={() => onEdit(v)}
-      >
+      > 
         {/* Kendo icon markup you requested */}
         <span className="k-icon k-font-icon k-i-edit k-button-icon" role="presentation" aria-hidden="true"></span>
       </button>
+
+      <button
+  type="button"
+  className="vendors-action-btn delete k-button"
+  title="Delete"
+  aria-label={`Delete vendor ${v.id}`}
+  onClick={() => onDelete(v)}
+>
+  <span className="k-icon k-font-icon k-i-delete k-button-icon"></span>
+</button>
+
     </div>
   </div>
 );
 
 export default function ManageVendorsAll() {
+    useEffect(() => {
+    document.title = "Manage Vendors";
+  }, []);
+
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddNew, setShowAddNew] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState(null);
+  // Delete confirmation popup
+  const [deleteVendor, setDeleteVendor] = useState(null);
 
   const refreshVendors = async () => {
     setLoading(true);
@@ -101,6 +118,22 @@ export default function ManageVendorsAll() {
     setSelectedVendor(vendor);
     setShowAddNew(true);
   };
+  const handleDelete = (vendor) => {
+  setDeleteVendor(vendor);  // open popup
+};
+const confirmDeleteVendor = async () => {
+  if (!deleteVendor) return;
+
+  try {
+    await axios.delete(`${API_BASE_URL}/api/ManageVendors/${deleteVendor.id}`);
+    refreshVendors();
+  } catch (err) {
+    console.error("Delete failed", err);
+  }
+
+  setDeleteVendor(null); // close popup
+};
+
 
   if (loading) return <div>Loading vendors...</div>;
 
@@ -138,19 +171,95 @@ export default function ManageVendorsAll() {
         </div>
       ) : (
         /* Vendors List */
-        <div className="vendors-list-container">
-          <div className="vendors-list-inner">
-            <VendorsListHeader />
-            {vendors.length === 0 ? (
-              <div style={{ padding: 16 }}>No vendors found.</div>
-            ) : (
-              vendors.map(v => (
-                <VendorsListRow key={v.id} v={v} onEdit={handleEdit} />
-              ))
-            )}
+     /* Vendors List */
+<div className="vendors-table-wrapper">
+  <div className="vendors-list-container">
+    <div className="vendors-list-inner">
+      <VendorsListHeader />
+
+      {vendors.length === 0 ? (
+        <div className="vendors-list-row">
+          <div className="vendors-col" style={{ gridColumn: "1 / 8", textAlign: "center" }}>
+            No vendors found
           </div>
         </div>
+      ) : (
+        vendors.map(v => (
+          <VendorsListRow
+            key={v.id}
+            v={v}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        ))
       )}
+    </div>
+  </div>
+</div>
+      )}
+      {deleteVendor && (
+  <div 
+    style={{
+      position: "fixed",
+      top: 0, left: 0,
+      width: "100vw",
+      height: "100vh",
+      background: "rgba(0,0,0,0.45)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 9999
+    }}
+  >
+    <div 
+      style={{
+        background: "#fff",
+        padding: "22px 28px",
+        borderRadius: "10px",
+        width: "350px",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+        textAlign: "center"
+      }}
+    >
+      <p style={{ fontSize: "15px", marginBottom: "20px" }}>
+        Are you sure you want to delete this vendor?
+      </p>
+
+      <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+        
+        {/* YES DELETE */}
+        <button 
+          onClick={confirmDeleteVendor}
+          style={{
+            padding: "8px 14px",
+            background: "#2563eb",
+            border: "none",
+            borderRadius: "6px",
+            color: "white",
+            cursor: "pointer"
+          }}
+        >
+          Yes, Delete
+        </button>
+
+        {/* CANCEL */}
+        <button 
+          onClick={() => setDeleteVendor(null)}
+          style={{
+            padding: "8px 14px",
+            background: "#e5e7eb",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer"
+          }}
+        >
+          Cancel
+        </button>
+
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

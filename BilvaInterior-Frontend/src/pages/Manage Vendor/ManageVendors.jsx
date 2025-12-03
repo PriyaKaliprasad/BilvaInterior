@@ -27,6 +27,7 @@ const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/i;
 const upiRegex = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
 const mobileRegex = /^[6-9]\d{9}$/;
 const micrRegex = /^\d{9}$/;
+const accountNumberRegex = /^[0-9]{9,18}$/;
 
 // Example data for dropdowns — replace with API data as needed
 const categories = [
@@ -139,12 +140,18 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
     if (form.micr && !micrRegex.test(form.micr)) {
       return 'Invalid MICR Code — must be exactly 9 digits.';
     }
+    if (form.accountNumber && !accountNumberRegex.test(form.accountNumber)) {
+      return 'Invalid Account Number';
+    }
+
 
     // ✅ Uniqueness validations (skip check when value unchanged during edit)
     if (!(selectedVendor && selectedVendor.email === form.email) && await checkUnique('email', form.email)) return 'Email already exists.';
     if (!(selectedVendor && selectedVendor.mobile === form.mobile) && await checkUnique('mobile', form.mobile)) return 'Mobile number already exists.';
     if (form.aadhaar && !(selectedVendor && selectedVendor.aadhaar === form.aadhaar) && await checkUnique('aadhaar', form.aadhaar)) return 'Aadhaar already exists.';
     if (form.pan && !(selectedVendor && selectedVendor.pan === form.pan) && await checkUnique('pan', form.pan)) return 'PAN already exists.';
+    if (form.accountNumber &&!(selectedVendor && selectedVendor.accountNumber === form.accountNumber) && await checkUnique('accountNumber', form.accountNumber)) {return 'Account Number already exists.';
+    }
 
     return null;
   }
@@ -201,7 +208,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
         }
 
         // Treat 200, 201 and 204 as success
-        if (res.ok && (res.status === 200 || res.status === 201 || res.status === 204)) {
+          if (res.ok) {
           // Only attempt to parse JSON if there is content
           let saved = null;
           if (res.status !== 204) {
@@ -209,7 +216,11 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
           }
           setToast({ visible: true, message: selectedVendor ? 'Updated successfully' : 'Saved successfully', type: 'success' });
           setForm(initialState);
-          onSaved?.(saved);
+
+setTimeout(() => {
+  onSaved?.(saved);   // add page will close AFTER toast is seen
+}, 1200);
+
         } else {
           const text = await res.text().catch(() => '');
           setToast({ visible: true, message: `Save failed: ${res.status} - ${text}`, type: 'error' });
@@ -218,9 +229,13 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
         console.error('Request failed', err);
         setToast({ visible: true, message: 'Request failed — check console and backend logs.', type: 'error' });
       } finally {
-        setIsSubmitting(false);
-        setTimeout(() => setToast({ visible: false, message: '', type: 'success' }), 2500);
-      }
+  setIsSubmitting(false);
+
+  setTimeout(() => {
+    setToast(t => t.visible ? { visible: false, message: '', type: t.type } : t);
+  }, 2500);
+}
+
     })();
   }
 
@@ -253,7 +268,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
           <h3 className="section-title">Personal Details</h3>
           <div className="form-grid">
             <div className="form-group">
-              <FloatingLabelWrapper label="First Name">
+              <FloatingLabelWrapper label={<>First Name <span className="required-asterisk">*</span></>}>
                 <input
                   className="form-input"
                   name="firstName"
@@ -265,7 +280,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
             </div>
 
             <div className="form-group">
-              <FloatingLabelWrapper label="Last Name">
+               <FloatingLabelWrapper label={<>Last Name <span className="required-asterisk">*</span></>}>
                 <input
                   className="form-input"
                   name="lastName"
@@ -277,7 +292,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
             </div>
 
             <div className="form-group">
-              <FloatingLabelWrapper label="Email-ID">
+               <FloatingLabelWrapper label={<>Email-ID <span className="required-asterisk">*</span></>}>
                 <input
                   className="form-input"
                   name="email"
@@ -290,7 +305,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
             </div>
 
             <div className="form-group">
-              <FloatingLabelWrapper label="Mobile Number">
+               <FloatingLabelWrapper label={<>Mobile Number <span className="required-asterisk">*</span></>}>
                 <input
                   className={`form-input ${form.mobile && !mobileRegex.test(form.mobile) ? 'input-error' : ''}`}
                   name="mobile"
@@ -303,7 +318,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
             </div>
 
             <div className="form-group">
-              <FloatingLabelWrapper label="Address">
+               <FloatingLabelWrapper label={<>Address <span className="required-asterisk">*</span></>}>
                 <textarea
                   className="form-textarea"
                   name="address"
@@ -316,7 +331,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
             </div>
 
             <div className="form-group">
-              <FloatingLabelWrapper label="Categories">
+               <FloatingLabelWrapper label={<>Categories <span className="required-asterisk">*</span></>}>
                 <DropDownList
                   data={categories}
                   textField="name"
@@ -333,7 +348,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
           <h3 className="section-title">KYC</h3>
           <div className="form-grid">
             <div className="form-group">
-              <FloatingLabelWrapper label="Aadhaar Number">
+               <FloatingLabelWrapper label={<>Aadhaar Number <span className="required-asterisk">*</span></>}>
                 <input
                   className={`form-input ${form.aadhaar && !aadhaarRegex.test(form.aadhaar) ? 'input-error' : ''}`}
                   name="aadhaar"
@@ -346,7 +361,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
             </div>
 
             <div className="form-group">
-              <FloatingLabelWrapper label="PAN Card Number">
+               <FloatingLabelWrapper label={<>PAN Card Number <span className="required-asterisk">*</span></>}>
                 <input
                   className={`form-input ${form.pan && !panRegex.test(form.pan) ? 'input-error' : ''}`}
                   name="pan"
@@ -365,7 +380,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
           <h3 className="section-title">Bank Details</h3>
           <div className="form-grid">
             <div className="form-group">
-              <FloatingLabelWrapper label="Bank">
+               <FloatingLabelWrapper label={<>Bank <span className="required-asterisk">*</span></>}>
                 <DropDownList
                   data={banks}
                   textField="name"
@@ -376,7 +391,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
             </div>
 
             <div className="form-group">
-              <FloatingLabelWrapper label="Branch">
+               <FloatingLabelWrapper label={<>Branch <span className="required-asterisk">*</span></>}>
                 <input
                   className="form-input"
                   name="branch"
@@ -388,9 +403,9 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
             </div>
 
             <div className="form-group">
-              <FloatingLabelWrapper label="Bank Account Number">
+               <FloatingLabelWrapper label={<>Bank Account Number <span className="required-asterisk">*</span></>}>
                 <input
-                  className="form-input"
+                  className={`form-input ${form.accountNumber && !accountNumberRegex.test(form.accountNumber) ? 'input-error' : ''}`}
                   name="accountNumber"
                   value={form.accountNumber}
                   onChange={handleInputChange}
@@ -400,7 +415,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
             </div>
 
             <div className="form-group">
-              <FloatingLabelWrapper label="IFSC Code">
+               <FloatingLabelWrapper label={<>IFSC Code <span className="required-asterisk">*</span></>}>
                 <input
                   className={`form-input ${form.ifsc && !ifscRegex.test(form.ifsc) ? 'input-error' : ''}`}
                   name="ifsc"
@@ -412,7 +427,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
             </div>
 
             <div className="form-group">
-              <FloatingLabelWrapper label="MICR Code">
+               <FloatingLabelWrapper label={<>MICR Code <span className="required-asterisk">*</span></>}>
                 <input
                   className={`form-input ${form.micr && !micrRegex.test(form.micr) ? 'input-error' : ''}`}
                   name="micr"
@@ -424,7 +439,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
             </div>
 
             <div className="form-group">
-              <FloatingLabelWrapper label="UPI-ID">
+               <FloatingLabelWrapper label={<>UPI-ID <span className="required-asterisk">*</span></>}>
                 <input
                   className={`form-input ${form.upi && !upiRegex.test(form.upi) ? 'input-error' : ''}`}
                   name="upi"
