@@ -66,6 +66,21 @@ const LoginPage = () => {
 
     const result = await login({ email: trimmedEmail, password: trimmedPassword, ip, iana });
 
+    // ✅ FIX: Extract, Clean, and Save the Role
+    if (result.success && result.data?.user?.role?.name) {
+      let rawRole = result.data.user.role.name;
+      
+      // 1. Remove quotes (") if they exist
+      // 2. Remove extra spaces (trim)
+      let cleanRole = rawRole.replace(/['"]+/g, '').trim(); 
+
+      // 3. Save to LocalStorage
+      localStorage.setItem("userRole", cleanRole);
+      
+      // Optional: Check in console to be sure
+      console.log("✅ SAVED ROLE:", cleanRole);
+    }
+
     if (!result.success) {
       setError(result.error);
     }
