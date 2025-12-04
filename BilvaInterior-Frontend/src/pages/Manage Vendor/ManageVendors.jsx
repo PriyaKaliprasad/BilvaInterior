@@ -122,39 +122,72 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
   }
 
   async function validateForm() {
-    if (form.mobile && !mobileRegex.test(form.mobile)) {
-      return 'Invalid Mobile Number — must be 10 digits starting with 6–9.';
-    }
-    if (form.aadhaar && !aadhaarRegex.test(form.aadhaar)) {
-      return 'Invalid Aadhaar Number — must be 12 digits.';
-    }
-    if (form.pan && !panRegex.test(form.pan)) {
-      return 'Invalid PAN Number — format: ABCDE1234F.';
-    }
-    if (form.ifsc && !ifscRegex.test(form.ifsc)) {
-      return 'Invalid IFSC Code — format: ABCD0XXXXXX.';
-    }
-    if (form.upi && !upiRegex.test(form.upi)) {
-      return 'Invalid UPI ID — format: name@bank.';
-    }
-    if (form.micr && !micrRegex.test(form.micr)) {
-      return 'Invalid MICR Code — must be exactly 9 digits.';
-    }
-    if (form.accountNumber && !accountNumberRegex.test(form.accountNumber)) {
-      return 'Invalid Account Number';
-    }
 
+  // 🔥 REQUIRED FIELD VALIDATIONS
+  if (!form.firstName?.trim()) return "First Name is required.";
+  if (!form.lastName?.trim()) return "Last Name is required.";
+  if (!form.email?.trim()) return "Email is required.";
+  if (!form.mobile?.trim()) return "Mobile Number is required.";
+  if (!form.address?.trim()) return "Address is required.";
+  if (!form.categoryId) return "Category is required.";
+  if (!form.aadhaar?.trim()) return "Aadhaar Number is required.";
+  if (!form.pan?.trim()) return "PAN Number is required.";
+  if (!form.bankId) return "Bank is required.";
+  if (!form.branch?.trim()) return "Branch is required.";
+  if (!form.accountNumber?.trim()) return "Account Number is required.";
+  if (!form.ifsc?.trim()) return "IFSC Code is required.";
+  if (!form.micr?.trim()) return "MICR Code is required.";
+  if (!form.upi?.trim()) return "UPI ID is required.";
 
-    // ✅ Uniqueness validations (skip check when value unchanged during edit)
-    if (!(selectedVendor && selectedVendor.email === form.email) && await checkUnique('email', form.email)) return 'Email already exists.';
-    if (!(selectedVendor && selectedVendor.mobile === form.mobile) && await checkUnique('mobile', form.mobile)) return 'Mobile number already exists.';
-    if (form.aadhaar && !(selectedVendor && selectedVendor.aadhaar === form.aadhaar) && await checkUnique('aadhaar', form.aadhaar)) return 'Aadhaar already exists.';
-    if (form.pan && !(selectedVendor && selectedVendor.pan === form.pan) && await checkUnique('pan', form.pan)) return 'PAN already exists.';
-    if (form.accountNumber &&!(selectedVendor && selectedVendor.accountNumber === form.accountNumber) && await checkUnique('accountNumber', form.accountNumber)) {return 'Account Number already exists.';
-    }
-
-    return null;
+  // 🔥 REGEX VALIDATIONS
+  if (form.mobile && !mobileRegex.test(form.mobile)) {
+    return 'Invalid Mobile Number — must be 10 digits starting with 6–9.';
   }
+  if (form.aadhaar && !aadhaarRegex.test(form.aadhaar)) {
+    return 'Invalid Aadhaar Number — must be 12 digits.';
+  }
+  if (form.pan && !panRegex.test(form.pan)) {
+    return 'Invalid PAN Number — format: ABCDE1234F.';
+  }
+  if (form.ifsc && !ifscRegex.test(form.ifsc)) {
+    return 'Invalid IFSC Code — format: ABCD0XXXXXX.';
+  }
+  if (form.upi && !upiRegex.test(form.upi)) {
+    return 'Invalid UPI ID — format: name@bank.';
+  }
+  if (form.micr && !micrRegex.test(form.micr)) {
+    return 'Invalid MICR Code — must be exactly 9 digits.';
+  }
+  if (form.accountNumber && !accountNumberRegex.test(form.accountNumber)) {
+    return 'Invalid Account Number';
+  }
+
+  // 🔥 UNIQUENESS VALIDATIONS
+  if (!(selectedVendor && selectedVendor.email === form.email) &&
+      await checkUnique('email', form.email))
+    return 'Email already exists.';
+
+  if (!(selectedVendor && selectedVendor.mobile === form.mobile) &&
+      await checkUnique('mobile', form.mobile))
+    return 'Mobile number already exists.';
+
+  if (form.aadhaar &&
+      !(selectedVendor && selectedVendor.aadhaar === form.aadhaar) &&
+      await checkUnique('aadhaar', form.aadhaar))
+    return 'Aadhaar already exists.';
+
+  if (form.pan &&
+      !(selectedVendor && selectedVendor.pan === form.pan) &&
+      await checkUnique('pan', form.pan))
+    return 'PAN already exists.';
+
+  if (form.accountNumber &&
+      !(selectedVendor && selectedVendor.accountNumber === form.accountNumber) &&
+      await checkUnique('accountNumber', form.accountNumber))
+    return 'Account Number already exists.';
+
+  return null;
+}
 
   async function handleSubmit(e) {
     e.preventDefault();
