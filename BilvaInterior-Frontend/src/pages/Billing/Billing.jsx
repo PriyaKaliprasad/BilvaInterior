@@ -2039,18 +2039,35 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL;
         setAddresses({ ...addresses, [e.target.name]: e.target.value });
     };
 
-    const DropDownField = ({ value, onChange, data, textField }) => (
-        <div style={{ width: "200px" }}>
-            <DropDownList
-                data={data}
-                textField={textField}
-                value={value}
-                onChange={(e) => onChange(e.value)}
-                defaultItem={{ [textField]: "Select Project" }}
-                style={{ width: "100%" }}
-            />
-        </div>
-    );
+    // const DropDownField = ({ value, onChange, data, textField }) => (
+    //     <div style={{ width: "200px" }}>
+    //         <DropDownList
+    //             data={data}
+    //             textField={textField}
+    //             value={value}
+    //             onChange={(e) => onChange(e.value)}
+    //             defaultItem={{ [textField]: "Select Project" }}
+    //             style={{ width: "100%" }}
+    //         />
+    //     </div>
+    // );
+    const DropDownField = ({ value, data, textField, onProjectChange }) => (
+    <div style={{ width: "200px" }}>
+        <DropDownList
+            data={data}
+            dataItemKey="id"
+            textField={textField}
+            value={value}
+            defaultItem={{ id: null, projectName: "Select Project" }}
+            onChange={(e) => {
+                if (e.value && e.value.id) {
+                    onProjectChange(e.value);
+                }
+            }}
+            style={{ width: "100%" }}
+        />
+    </div>
+);
 
     // ---- Totals & tax calculation ----
     useEffect(() => {
@@ -2210,8 +2227,8 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL;
         const grandTotal = netTotal + totalTax + (totals.roundOff || 0);
 
         const billingData = {
-            projectName: selectedProject?.projectName || "Untitled Project",
-            projectId: projectId,
+            // projectName: selectedProject?.projectName || "Untitled Project",
+    projectId: Number(projectId),   // ✅ MUST be number, not string
             billingFromAddress: addresses.billingFromAddress,
             billingFromState,
             billingFromStateCode,
@@ -2459,12 +2476,24 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL;
                                     value={selectedProject}          // Pass current selectedProject object
                                     onChange={setSelectedProject}    // Update selectedProject on change
                                 /> */}
-                                <DropDownField
+                                {/* <DropDownField
                                     data={projects}
                                     textField="projectName"
                                     value={selectedProject}
                                     onChange={setSelectedProject}
-                                />
+                                /> */}
+                                <DropDownField
+    data={projects}
+    textField="projectName"
+    value={selectedProject}
+    onProjectChange={(project) => {
+        setSelectedProject(project);
+        setProjectId(project.id);   // ⭐ THIS IS THE FIX
+        console.log("Selected Project:", project);
+        console.log("Project ID set to:", project.id);
+    }}
+/>
+
 
                             </div>
                         </div>
