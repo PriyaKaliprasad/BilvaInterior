@@ -3138,20 +3138,20 @@ const WorkList = () => {
     });
 
     // 3. PAGINATION
-const pagedData = page
-    ? processedItems.slice(page.skip, page.skip + page.take)
-    : [];
+    const pagedData = page
+        ? processedItems.slice(page.skip, page.skip + page.take)
+        : [];
 
     useEffect(() => {
-const take = page?.take || 10;
-const totalPages = Math.ceil(processedItems.length / take);
+        const take = page?.take || 10;
+        const totalPages = Math.ceil(processedItems.length / take);
 
-    const currentPageNumber = Math.floor(page.skip / page.take) + 1;
+        const currentPageNumber = Math.floor(page.skip / page.take) + 1;
 
-    if (currentPageNumber > totalPages && totalPages > 0) {
-        setPage({ skip: 0, take: page.take });
-    }
-}, [processedItems.length]);
+        if (currentPageNumber > totalPages && totalPages > 0) {
+            setPage({ skip: 0, take: page.take });
+        }
+    }, [processedItems.length]);
 
 
 
@@ -3178,6 +3178,17 @@ const totalPages = Math.ceil(processedItems.length / take);
 
     const handleSave = async (e) => {
         e.preventDefault();
+        // VALIDATION FOR WORK DETAILS (DESCRIPTION)
+        if (!formData.description || formData.description.trim().length < 3) {
+            setMessage({ text: "Work Details must be at least 3 characters.", type: "danger" });
+            return;
+        }
+
+        if (formData.description.trim().length > 500) {
+            setMessage({ text: "Work Details cannot exceed 500 characters.", type: "danger" });
+            return;
+        }
+
         const payload = {
             refNo: formData.refNo,
             description: formData.description,
@@ -3284,7 +3295,15 @@ const totalPages = Math.ceil(processedItems.length / take);
                                 </div>
                                 <div className="col-12 col-md-5">
                                     <label htmlFor="description" className="form-label fw-bold mb-1">Work Description</label>
-                                    <input type="text" className="form-control form-control-lg" id="description" value={formData.description} onChange={handleInputChange} />
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-lg"
+                                        id="description"
+                                        value={formData.description}
+                                        onChange={handleInputChange}
+                                        maxLength={500}
+                                        placeholder="Enter work details (3 to 500 characters)"
+                                    />
                                 </div>
                                 {userRole === "Admin" && (
                                     <div className="col-12 col-md-3">
@@ -3476,7 +3495,18 @@ const totalPages = Math.ceil(processedItems.length / take);
                                     <td className="ps-3 text-muted">{page.skip + index + 1}</td>
                                     <td className="fw-medium">{item.refNo}</td>
                                     <td className="text-secondary">{item.description}</td>
-                                    <td><span className="badge bg-primary text-white rounded-2 px-3 py-1">{item.assignedTo}</span></td>
+                                    <td>
+                                        <span
+                                            className="badge text-white bg-primary rounded-2 px-3 py-1"
+                                            style={{
+                                                minWidth: "120px",
+                                                display: "inline-block",
+                                                textAlign: "center"
+                                            }}
+                                        >
+                                            {item.assignedTo}
+                                        </span>
+                                    </td>
 
                                     <td className="text-secondary">
                                         {item.targetDay}
