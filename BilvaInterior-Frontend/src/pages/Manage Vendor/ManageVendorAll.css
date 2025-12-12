@@ -8,17 +8,17 @@
     }
 }
 
-/* List Container */
-.vendors-list-container {
+/* List Container  */
+/* .vendors-list-container {
     overflow-x: auto;
 }
 
 .vendors-list-inner {
-    min-width: 800px; /* Adjust based on total columns width */
-}
+    min-width: 800px; 
+} */
 
-/* Row & Header */
-.vendors-list-header,
+/* Row & Header  */
+/* .vendors-list-header,
 .vendors-list-row {
     display: flex;
     align-items: center;
@@ -37,63 +37,40 @@
 .vendors-list-row {
     padding: 8px 0;
     border-bottom: 1px solid #eee;
-}
+} */
 
-/* Columns */
-.vendors-col,
+/* Columns  */
+/* .vendors-col,
 .vendors-list-header .vendors-col {
     padding: 0 8px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
+} */
 
-/* Column widths */
-.vendors-col.id,
-.vendors-list-header .vendors-col.id {
-    width: 50px;
-}
+/* Column widths  */
+/* .vendors-col.id { width: 50px; }
+.vendors-col.name { flex: 1; }
+.vendors-col.email { flex: 1; }
+.vendors-col.mobile { width: 150px; }
+.vendors-col.category { width: 150px; }
+.vendors-col.bank { width: 150px; } */
 
-.vendors-col.name,
-.vendors-list-header .vendors-col.name {
-    flex: 1;
-}
-
-.vendors-col.email,
-.vendors-list-header .vendors-col.email {
-    flex: 1;
-}
-
-.vendors-col.mobile,
-.vendors-list-header .vendors-col.mobile {
-    width: 150px;
-}
-
-.vendors-col.category,
-.vendors-list-header .vendors-col.category {
-    width: 150px;
-}
-
-.vendors-col.bank,
-.vendors-list-header .vendors-col.bank {
-    width: 150px;
-}
-
-/* Updated: make actions column a bit wider for the outlined square edit button */
-.vendors-col.actions,
-.vendors-list-header .vendors-col.actions {
+/* Updated: make actions column wider  */
+/* .vendors-col.actions {
     width: 120px;
     display: flex;
     gap: 8px;
     justify-content: flex-end;
-}
+} */
 
-/* Even row background */
+/* Even row background  */
 .vendors-list-row:nth-child(even) {
     background-color: #fafafa;
 }
 
-/* Tablet: hide some columns */
+/* Tablet hidden columns  */
+/*
 @media (max-width: 768px) {
     .vendors-col.category,
     .vendors-list-header .vendors-col.category,
@@ -106,8 +83,10 @@
         min-width: 768px;
     }
 }
+*/
 
-/* Small screens: hide more columns */
+/* Small screens hidden columns  */
+/*
 @media (max-width: 576px) {
     .vendors-col.category,
     .vendors-list-header .vendors-col.category,
@@ -118,8 +97,10 @@
         display: none !important;
     }
 }
+*/
 
-/* Very small screens (<=425px): only essentials */
+/* Very small screens hidden columns */
+/*
 @media (max-width: 425px) {
     .vendors-col.mobile,
     .vendors-list-header .vendors-col.mobile,
@@ -136,22 +117,22 @@
         min-width: 425px;
     }
 }
+*/
 
 /* ============================
-   Action button styles (outlined square edit button)
-   ============================ */
+   Action button styles
+============================ */
 
-/* Base action button (small outlined square to match screenshot #1) */
 .vendors-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 34px;
   height: 34px;
-  border-radius: 6px;            /* slightly rounded square like your screenshot */
-  border: 1px solid #cbd5e1;     /* subtle outline */
-  background: #ffffff;           /* white fill for outlined look */
-  color: #1f2937;                /* dark pencil color */
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #1f2937;
   cursor: pointer;
   padding: 0;
   box-shadow: none;
@@ -159,7 +140,6 @@
   line-height: 1;
 }
 
-/* If you use Kendo button classes, keep baseline but ensure outlined look */
 .vendors-action-btn.k-button {
   background: #fff;
   border-radius: 6px;
@@ -168,7 +148,7 @@
   height: 34px;
 }
 
-/* Hover / focus / active states */
+/* Hover / focus / active */
 .vendors-action-btn:hover {
   background: #f1f5f9;
   transform: translateY(-1px);
@@ -178,27 +158,120 @@
   transform: translateY(0);
 }
 .vendors-action-btn:focus {
-  outline: 3px solid rgba(59,130,246,0.12); /* faint focus ring */
+  outline: 3px solid rgba(59,130,246,0.12);
   outline-offset: 2px;
 }
 
-/* Kendo icon specific tweaks — make icon small and inherit color */
+/* Icons */
 .vendors-action-btn .k-icon {
   font-size: 14px;
   width: 14px;
   height: 14px;
   display: inline-block;
   color: inherit;
-  vertical-align: middle;
 }
 
-/* If the icon appears too large on some themes, force smaller line-height */
 .vendors-action-btn .k-button-icon {
   line-height: 14px;
 }
 
-/* Small-screen spacing fix */
+/* Mobile spacing */
 @media (max-width: 480px) {
   .vendors-col.actions { width: 100px; }
-  .vendors-action-btn { width: 30px; height: 30px; border-radius: 6px; }
+  .vendors-action-btn { width: 30px; height: 30px; }
+}
+
+.vendors-list-container {
+    overflow-x: auto;
+}
+
+/* Delete button styling */
+.vendors-action-btn.delete {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+.vendors-action-btn.delete:hover {
+  background: #fecaca;
+}
+
+/* ============================
+   GRID-Based Table Styling (NEW)
+============================ */
+
+/* GRID layout */
+.vendors-list-header,
+.vendors-list-row {
+  display: grid;
+  grid-template-columns:
+    80px      /* ID */
+    180px     /* Name */
+    220px     /* Email */
+    140px     /* Mobile */
+    150px     /* Category */
+    150px     /* Bank */
+    120px;    /* Actions */
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+}
+
+/* Header */
+.vendors-list-header {
+  background: #f3f4f6;
+  font-weight: 700;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+  height: 48px;
+  align-items: center;
+}
+
+/* Cells */
+.vendors-col {
+  padding: 10px 8px;
+  font-size: 14px;
+  color: #4b5563;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vendors-col.id { grid-column: 1; }
+.vendors-col.name { grid-column: 2; }
+.vendors-col.email { grid-column: 3; }
+.vendors-col.mobile { grid-column: 4; }
+.vendors-col.category { grid-column: 5; }
+.vendors-col.bank { grid-column: 6; }
+
+.vendors-col.actions {
+  grid-column: 7;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Row Hover */
+.vendors-list-row:hover {
+  background: #f9fafb;
+}
+
+/* MOBILE — Only scroll, nothing hidden */
+@media (max-width: 768px) {
+  .vendors-list-inner {
+    min-width: 1100px;
+    overflow-x: auto;
+  }
+}
+
+/* Table Wrapper */
+.vendors-table-wrapper {
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-top: 1rem;
+  border: 1px solid #e5e7eb;
+}
+.vendors-list-row {
+  border-bottom: 1px solid #e5e7eb;
 }
