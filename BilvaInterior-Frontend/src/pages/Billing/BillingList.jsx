@@ -1076,7 +1076,7 @@ const AllBillings_Simple = () => {
     const [message, setMessage] = useState({ text: "", type: "" });
     const [page, setPage] = useState({ skip: 0, take: 7 });
     const [showAdd, setShowAdd] = useState(false);
-    
+
 
 
     // <-- MODIFIED: This now only auto-clears error messages.
@@ -1088,17 +1088,38 @@ const AllBillings_Simple = () => {
     }, [message]);
 
     // ✅ Load billings + projects
+    // useEffect(() => {
+    //     fetch(`${API_BASE}/api/Billing`)
+    //         .then((res) => res.json())
+    //         .then((data) => setBillings(data))
+    //         .catch(() => setMessage({ text: "❌ Failed to load billings", type: "error" }));
+
+    //     fetch(`${API_BASE}/projects`)
+    //         .then((res) => res.json())
+    //         .then((data) => setProjects(data))
+    //         .catch(console.error);
+    // }, []);
     useEffect(() => {
+        // load billings
         fetch(`${API_BASE}/api/Billing`)
             .then((res) => res.json())
-            .then((data) => setBillings(data))
+            .then((data) => {
+                // normalize each billing: expose projectName at top-level for grid
+                const normalized = data.map(b => ({
+                    ...b,
+                    projectName: b.project?.projectName ?? (b.projectName ?? ""), // handle both shapes
+                }));
+                setBillings(normalized);
+            })
             .catch(() => setMessage({ text: "❌ Failed to load billings", type: "error" }));
 
-        fetch(`${API_BASE}/projects`)
+        // load projects (use the correct endpoint)
+        fetch(`${API_BASE}/api/projects`)
             .then((res) => res.json())
             .then((data) => setProjects(data))
             .catch(console.error);
     }, []);
+
 
     // --- ADDED ---
     // This useEffect automatically calculates all totals whenever
@@ -1165,7 +1186,7 @@ const AllBillings_Simple = () => {
     };
 
     // ✅ DELETE handler
-   // ... inside AllBillings_Simple component ...
+    // ... inside AllBillings_Simple component ...
 
     // 1. STATE for the delete dialog
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -1575,12 +1596,28 @@ const AllBillings_Simple = () => {
                         Projects <span className="text-danger">*</span>
                     </label>
                     <div style={{ maxWidth: "320px" }}>
-                        <DropDownList
+                        {/* <DropDownList
                             data={projects.map((p) => p.projectName)}
                             value={formData.projectName}
                             onChange={handleProjectChange}
                             defaultItem="Select Option"
+                        /> */}
+                        <DropDownList
+                            data={projects}                      // pass full objects
+                            dataItemKey="id"                     // the unique id field
+                            textField="projectName"              // what to show
+                            value={projects.find(p => p.id === formData.projectId) ?? null}
+                            defaultItem={{ id: null, projectName: "Select Project" }}
+                            onChange={(e) => {
+                                const project = e.value;
+                                setFormData(prev => ({
+                                    ...prev,
+                                    projectId: project?.id ?? null,
+                                    projectName: project?.projectName ?? ""
+                                }));
+                            }}
                         />
+
                     </div>
                 </div>
 

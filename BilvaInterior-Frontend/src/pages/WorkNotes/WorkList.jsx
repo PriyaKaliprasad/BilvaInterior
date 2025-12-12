@@ -3029,6 +3029,9 @@ const WorkList = () => {
     const [currentPage, setCurrentPage] = useState('list');
     const [selectedItem, setSelectedItem] = useState(null);
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
+    const getRealId = (item) =>
+        item.taskId || item.TaskId || item.id || item.Id;
+
 
     // Dialog State
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -3058,7 +3061,9 @@ const WorkList = () => {
 
     // Pagination
     const [page, setPage] = useState({ skip: 0, take: 10 });
-    const handlePageChange = (event) => setPage(event.page);
+    const handlePageChange = (event) => {
+        setPage({ skip: event.skip, take: event.take });
+    };
 
     // ---------------- User Role & Name Configuration ----------------
     const userRole = localStorage.getItem("userRole") || "Admin";
@@ -3088,9 +3093,16 @@ const WorkList = () => {
         fetch(`${import.meta.env.VITE_API_BASE_URL}/api/Employee`)
             .then(res => res.json())
             .then(data => {
-                const sorted = data
-                    .map(emp => ({ id: emp.id, name: emp.firstName }))
-                    .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+                // const sorted = data
+                //     .map(emp => ({ id: emp.id, name: emp.firstName }))
+                //     .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+                // setEmployees(sorted);
+                const sorted = [
+                    { id: 0, name: "Show All" },   // ADD THIS
+                    ...data
+                        .map(emp => ({ id: emp.id, name: emp.firstName }))
+                        .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+                ];
                 setEmployees(sorted);
             })
             .catch(() => setEmployees([]));
@@ -3108,11 +3120,13 @@ const WorkList = () => {
             );
         }
     } else {
-        if (selectedEmployee && selectedEmployee.name) {
+        // Admin filtering with "Show All"
+        if (userRole === "Admin" && selectedEmployee && selectedEmployee.id !== 0) {
             processedItems = processedItems.filter(
                 item => (item.assignedTo || "").toLowerCase() === selectedEmployee.name.toLowerCase()
             );
         }
+
 
     }
 
@@ -3124,7 +3138,22 @@ const WorkList = () => {
     });
 
     // 3. PAGINATION
-    const pagedData = processedItems.slice(page.skip, page.skip + page.take);
+    const pagedData = page
+        ? processedItems.slice(page.skip, page.skip + page.take)
+        : [];
+
+    useEffect(() => {
+        const take = page?.take || 10;
+        const totalPages = Math.ceil(processedItems.length / take);
+
+        const currentPageNumber = Math.floor(page.skip / page.take) + 1;
+
+        if (currentPageNumber > totalPages && totalPages > 0) {
+            setPage({ skip: 0, take: page.take });
+        }
+    }, [processedItems.length]);
+
+
 
 
     // ---------------- Navigation Handlers ----------------
@@ -3149,6 +3178,17 @@ const WorkList = () => {
 
     const handleSave = async (e) => {
         e.preventDefault();
+        // VALIDATION FOR WORK DETAILS (DESCRIPTION)
+        if (!formData.description || formData.description.trim().length < 3) {
+            setMessage({ text: "Work Details must be at least 3 characters.", type: "danger" });
+            return;
+        }
+
+        if (formData.description.trim().length > 500) {
+            setMessage({ text: "Work Details cannot exceed 500 characters.", type: "danger" });
+            return;
+        }
+
         const payload = {
             refNo: formData.refNo,
             description: formData.description,
@@ -3255,7 +3295,15 @@ const WorkList = () => {
                                 </div>
                                 <div className="col-12 col-md-5">
                                     <label htmlFor="description" className="form-label fw-bold mb-1">Work Description</label>
-                                    <input type="text" className="form-control form-control-lg" id="description" value={formData.description} onChange={handleInputChange} />
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-lg"
+                                        id="description"
+                                        value={formData.description}
+                                        onChange={handleInputChange}
+                                        maxLength={500}
+                                        placeholder="Enter work details (3 to 500 characters)"
+                                    />
                                 </div>
                                 {userRole === "Admin" && (
                                     <div className="col-12 col-md-3">
@@ -3441,20 +3489,57 @@ const WorkList = () => {
 
                             return (
                                 <tr
-                                    key={item.taskId}
+                                    key={getRealId(item)}
                                     className={isOverdue ? "table-danger" : ""}
                                 >
                                     <td className="ps-3 text-muted">{page.skip + index + 1}</td>
                                     <td className="fw-medium">{item.refNo}</td>
                                     <td className="text-secondary">{item.description}</td>
-                                    <td><span className="badge bg-primary text-white rounded-2 px-3 py-1">{item.assignedTo}</span></td>
+                                    <td>
+                                        <span
+                                            className="badge text-white bg-primary rounded-2 px-3 py-1"
+                                            style={{
+                                                minWidth: "120px",
+                                                display: "inline-block",
+                                                textAlign: "center"
+                                            }}
+                                        >
+                                            {item.assignedTo}
+                                        </span>
+                                    </td>
 
                                     <td className="text-secondary">
                                         {item.targetDay}
                                     </td>
 
-                                    <td><span className="badge text-dark rounded-2 px-3 py-1" style={{ backgroundColor: '#ffc107' }}>{item.status}</span></td>
-                                    <td><span className={`badge text-white rounded-2 px-3 py-1 ${item.priority === "High" ? "bg-danger" : "bg-secondary"}`}>{item.priority}</span></td>
+                                    <td>
+                                        <span
+                                            className="badge text-dark rounded-2 px-3 py-1"
+                                            style={{
+                                                backgroundColor: '#ffc107',
+                                                minWidth: '120px',
+                                                display: 'inline-block',
+                                                textAlign: 'center'
+                                            }}
+                                        >
+                                            {item.status}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span
+                                            className={`badge text-white rounded-2 px-3 py-1 ${item.priority === "High" ? "bg-danger" : "bg-secondary"
+                                                }`}
+                                            style={{
+                                                minWidth: '100px',
+                                                display: 'inline-block',
+                                                textAlign: 'center'
+                                            }}
+                                        >
+                                            {item.priority}
+                                        </span>
+                                    </td>
+
+
                                     <td className="text-center">
                                         <button className="btn btn-sm btn-primary" onClick={() => handleReply(item)}>Reply</button>
                                     </td>
@@ -3466,7 +3551,7 @@ const WorkList = () => {
                                                 fillMode="outline"
                                                 size="small"
                                                 style={{ width: "34px", height: "34px" }}
-                                                onClick={() => confirmDelete(item.taskId || item.id)}
+                                                onClick={() => confirmDelete(getRealId(item))}
                                                 title="Delete"
                                             />
                                         </td>
