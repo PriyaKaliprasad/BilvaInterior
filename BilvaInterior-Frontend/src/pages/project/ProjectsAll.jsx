@@ -15,6 +15,27 @@ import EditProject from "./EditProject";
   - Body labels are kept bold with compact spacing like your example.
 */
 
+// Helper: proper Google Maps link 
+const getMapUrl = (loc) => {
+  if (!loc) return null;
+
+  // Case 1: If already Google Maps's Link
+  if (loc.includes("google") || loc.includes("maps")) {
+    return loc;
+  }
+
+  // Case 2: If latitude,longitude format
+  // Example: "19.0760,72.8777"
+  if (loc.includes(",")) {
+    const [lat, lng] = loc.split(",");
+    return `https://www.google.com/maps?q=${lat.trim()},${lng.trim()}`;
+  }
+
+  // Case 3: If plain text address
+  return `https://www.google.com/maps?q=${encodeURIComponent(loc)}`;
+};
+
+
 const ProjectsAll = () => {
   const [projects, setProjects] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -490,39 +511,40 @@ const ProjectsAll = () => {
                 }}
               >
                 <p style={{ margin: "6px 0" }}>
-                  <strong style={{ display: "inline-block", minWidth: 98 }}>Description:</strong>{" "}
+                  <strong style={{ display: "inline-block", minWidth: 130 }}>Description:</strong>{" "}
                   <span style={{ fontWeight: 400 }}>{project.description || "No description available."}</span>
                 </p>
 
                 <p style={{ margin: "6px 0" }}>
-                  <strong style={{ display: "inline-block", minWidth: 98 }}>Tie-up Company:</strong>{" "}
+                  <strong style={{ display: "inline-block", minWidth: 130 }}>Tie-up Company:</strong>{" "}
                   <span style={{ fontWeight: 400 }}>{companyName}</span>
                 </p>
 
                 <p style={{ margin: "6px 0" }}>
-                  <strong style={{ display: "inline-block", minWidth: 98 }}>Project Members:</strong>{" "}
+                  <strong style={{ display: "inline-block", minWidth: 130 }}>Project Members:</strong>{" "}
                   <span style={{ fontWeight: 400 }}>{projectMemberNames}</span>
                 </p>
 
                 <p style={{ margin: "6px 0" }}>
-                  <strong style={{ display: "inline-block", minWidth: 98 }}>Address:</strong>{" "}
+                  <strong style={{ display: "inline-block", minWidth: 130 }}>Address:</strong>{" "}
                   <span style={{ fontWeight: 400 }}>{project.address || "No address provided"}</span>
                 </p>
 
                 <p style={{ margin: "6px 0" }}>
-                  <strong style={{ display: "inline-block", minWidth: 98 }}>Location:</strong>{" "}
-                  {project.location ? (
-                    <a
-                      href={project.location}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{ color: "#007bff", wordBreak: "break-word", fontWeight: 400 }}
-                    >
-                      View on Map
-                    </a>
-                  ) : (
-                    <span style={{ fontWeight: 400 }}>No location link available</span>
-                  )}
+                  <strong style={{ display: "inline-block", minWidth: 130 }}>Location:</strong>{" "}
+                 {project.location ? (
+                  <a
+                    href={getMapUrl(project.location)}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ color: "#007bff", wordBreak: "break-word", fontWeight: 400 }}
+                  >
+                    View on Map
+                  </a>
+                ) : (
+                  <span style={{ fontWeight: 400 }}>No location link available</span>
+                )}
+
                 </p>
               </div>
             </div>
