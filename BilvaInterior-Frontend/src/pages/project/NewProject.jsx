@@ -104,14 +104,22 @@ const NewProject = ({ onCancel }) => {
     return "";
   };
   const budgetValidator = (value) => {
-    if (value === undefined || value === null || value === "") {
-      return "Budget is required.";
-    }
-    if (Number(value) < 1000) {
-      return "Budget must be at least 1000.";
-    }
-    return "";
-  };
+  if (!value || value.toString().trim() === "") {
+    return "Budget is required.";
+  }
+
+  // Check if number is valid
+  if (isNaN(Number(value))) {
+    return "Please enter a numeric value.";
+  }
+
+  if (Number(value) < 1000) {
+    return "Budget must be at least 1000.";
+  }
+
+  return "";
+};
+
 
   // Kendo Form submit handler
   const handleSubmit = async (dataItem) => {
