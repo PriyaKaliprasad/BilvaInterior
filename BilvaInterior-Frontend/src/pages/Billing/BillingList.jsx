@@ -1076,6 +1076,18 @@ const AllBillings_Simple = () => {
     const [message, setMessage] = useState({ text: "", type: "" });
     const [page, setPage] = useState({ skip: 0, take: 7 });
     const [showAdd, setShowAdd] = useState(false);
+    const [isUserEditing, setIsUserEditing] = useState(false);
+
+    // ✅ Normalize billing data so projectName is always available
+    const normalizeBillings = (data) =>
+        data.map(b => ({
+            ...b,
+            projectName: b.project?.projectName ?? (b.projectName ?? "")
+        }));
+
+
+
+
 
 
 
@@ -1103,17 +1115,12 @@ const AllBillings_Simple = () => {
         // load billings
         fetch(`${API_BASE}/api/Billing`)
             .then((res) => res.json())
-            .then((data) => {
-                // normalize each billing: expose projectName at top-level for grid
-                const normalized = data.map(b => ({
-                    ...b,
-                    projectName: b.project?.projectName ?? (b.projectName ?? ""), // handle both shapes
-                }));
-                setBillings(normalized);
-            })
-            .catch(() => setMessage({ text: "❌ Failed to load billings", type: "error" }));
+            .then((data) => setBillings(normalizeBillings(data)))
+            .catch(() =>
+                setMessage({ text: "❌ Failed to load billings", type: "error" })
+            );
 
-        // load projects (use the correct endpoint)
+        // load projects
         fetch(`${API_BASE}/api/projects`)
             .then((res) => res.json())
             .then((data) => setProjects(data))
@@ -1160,9 +1167,13 @@ const AllBillings_Simple = () => {
         setFormData(prev => ({
             ...prev,
             netTotal: subtotal,
-            igst: totalTax, // 'igst' field is for Total Tax
+            igst: igstAmount,
+            cgst: cgstAmount,
+            sgst: sgstAmount,
+            totalTax: totalTax,
             grandTotal: grandTotal,
         }));
+
 
     }, [formData.lineItems, formData.igstPercent, formData.cgstPercent, formData.sgstPercent, formData.roundOff]);
     // This effect re-runs when any of these dependencies change
@@ -1234,25 +1245,28 @@ const AllBillings_Simple = () => {
     };
 
     // ✅ EDIT handler
-    const handleEdit = (billing) => {
-        setEditingBilling(billing);
-        setFormData({
-            ...billing,
-            billDate: billing.billDate ? toDateInputValue(billing.billDate) : "",
-            dateOfEstimate: billing.dateOfEstimate ? toDateInputValue(billing.dateOfEstimate) : "",
-            poDate: billing.poDate ? toDateInputValue(billing.poDate) : "",
-            createdDate: billing.createdDate || "",
-            updatedDate: billing.updatedDate || "",
-            lineItems: billing.lineItems || [],
-            igstPercent: billing.igst ?? 0,
-            cgstPercent: billing.cgst ?? 0,
-            sgstPercent: billing.sgst ?? 0,
-            igst: billing.igst ?? 0, // Total Tax
-            cgst: billing.cgst ?? 0,
-            sgst: billing.sgst ?? 0,
+   const handleEdit = async (billing) => {
+    try {
+        setIsUserEditing(false); // 🚫 prevent auto recalculation
 
+        const res = await fetch(`${API_BASE}/api/Billing/${billing.billingId}`);
+        const fullBilling = await res.json();
+
+        setEditingBilling(fullBilling);
+        setFormData({
+            ...fullBilling,
+            billDate: toDateInputValue(fullBilling.billDate),
+            dateOfEstimate: toDateInputValue(fullBilling.dateOfEstimate),
+            poDate: toDateInputValue(fullBilling.poDate),
+            lineItems: fullBilling.lineItems || [],
         });
-    };
+    } catch (err) {
+        console.error(err);
+        setMessage({ text: "❌ Failed to load billing details", type: "error" });
+    }
+
+
+};
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -1326,8 +1340,12 @@ const AllBillings_Simple = () => {
                 sgstPercent: formData.sgstPercent ?? 0,
 
                 // Save Calculated Totals
+                // Save Calculated Totals
                 netTotal: formData.netTotal ?? 0,
-                igst: formData.igst ?? 0, // This is the Total Tax Amount
+                igst: formData.igst ?? 0,
+                cgst: formData.cgst ?? 0,
+                sgst: formData.sgst ?? 0,
+                totalTax: formData.totalTax ?? 0,
                 roundOff: formData.roundOff ?? 0,
                 grandTotal: formData.grandTotal ?? 0,
 
@@ -1420,7 +1438,7 @@ const AllBillings_Simple = () => {
                             onClick={() => {
                                 fetch(`${API_BASE}/api/Billing`)
                                     .then((res) => res.json())
-                                    .then((data) => setBillings(data))
+                                    .then((data) => setBillings(normalizeBillings(data)))
                                     .catch(() =>
                                         setMessage({
                                             text: "❌ Failed to refresh billings",
@@ -2229,12 +2247,13 @@ const AllBillings_Simple = () => {
                             <span>Tax Total:</span>
                             <input
                                 type="number"
-                                name="igst"
+                                name="totalTax"
                                 className="form-control w-25"
-                                value={formData.igst ?? ""}
-                                readOnly // Make read-only
-                                style={{ backgroundColor: "#f8f9fa" }} // Optional: grey out
+                                value={formData.totalTax ?? 0}
+                                readOnly
+                                style={{ backgroundColor: "#f8f9fa" }}
                             />
+
                         </div>
                         <div className="d-flex justify-content-between mb-2">
                             <span>Round Off:</span>

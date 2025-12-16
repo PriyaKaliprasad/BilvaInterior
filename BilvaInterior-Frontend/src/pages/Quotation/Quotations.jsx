@@ -719,9 +719,11 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
                   ))}
                 </div>
               </div> */}
-              <div className="mt-4">
+              {/* Document Details */}
+            <div className="mt-4">
                 <h6 className="fw-bold mb-3">Document Details</h6>
-                <div className="row g-3 align-items-end">
+                {/* Use align-items-center to fix vertical alignment issues */}
+                <div className="row g-3 align-items-center">
                   {[
                     "Bill Number",
                     "Bill Date",
@@ -733,35 +735,44 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
                     "PO Number",
                     "PO Date",
                     "PO Type",
-                  ].map((label, i) => (
-                    <div key={i} className="col-md-3 col-sm-6">
-                      {["Bill Date", "Date of Estimate", "PO Date"].includes(label) ? (
-                        <FloatingLabelWrapper label={label}>
-                          <Field
-                            name={label.replace(/\s+/g, "").toLowerCase()}
-                            component={(fieldRenderProps) => (
-                              <DatePicker
-                                {...fieldRenderProps}
-                                format="yyyy-MM-dd"
-                                size="large"
-                                className="form-control"
-                                max={new Date()}
-                              />
-                            )}
-                          />
-                        </FloatingLabelWrapper>
-                      ) : (
-                        <Field
-                          name={label.replace(/\s+/g, "").toLowerCase()}
-                          label={label}
-                          component={FormInput}
-                          type="text"
-                        />
-                      )}
-                    </div>
-                  ))}
+                  ].map((label, i) => {
+                    // Create safe field name
+                    const fieldName = label.replace(/\s+/g, "").toLowerCase();
+                    const isDate = ["Bill Date", "Date of Estimate", "PO Date"].includes(label);
 
-                  {/* ✅ Manually added for clean naming */}
+                    return (
+                      <div key={i} className="col-md-3 col-sm-6">
+                        {isDate ? (
+                          <FloatingLabelWrapper label={label}>
+                            <Field
+                              name={fieldName}
+                              component={(fieldRenderProps) => (
+                                <DatePicker
+                                  {...fieldRenderProps}
+                                  format="yyyy-MM-dd"
+                                  size="large"
+                                  // Ensure class matches standard inputs
+                                  className="form-control" 
+                                  max={new Date()}
+                                />
+                              )}
+                            />
+                          </FloatingLabelWrapper>
+                        ) : (
+                          // Wrap standard inputs in FloatingLabelWrapper too if you want identical styling
+                          // OR keep them as standard inputs but ensure they have the same height class
+                          <Field
+                             name={fieldName}
+                             label={label}
+                             component={FormInput}
+                             type="text"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Manually added fields - ensure they match the loop structure */}
                   <div className="col-md-3 col-sm-6">
                     <Field
                       name="brandNameSubBrand"
