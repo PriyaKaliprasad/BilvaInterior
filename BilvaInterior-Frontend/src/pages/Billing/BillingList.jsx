@@ -1139,8 +1139,13 @@ const AllBillings_Simple = () => {
 
         // 1. Calculate Net Total (Subtotal)
         const subtotal = items.reduce((acc, li) => {
-            return acc + (parseFloat(li.amount || 0));
+            const amount =
+                li.amount !== null && li.amount !== undefined
+                    ? parseFloat(li.amount)
+                    : 0;
+            return acc + amount;
         }, 0);
+
 
         // 2. Parse Tax Percentages
         const igstPercent = parseFloat(formData.igstPercent || 0);
@@ -1245,28 +1250,51 @@ const AllBillings_Simple = () => {
     };
 
     // ✅ EDIT handler
-   const handleEdit = async (billing) => {
-    try {
-        setIsUserEditing(false); // 🚫 prevent auto recalculation
+    const handleEdit = async (billing) => {
+        try {
+            setIsUserEditing(false); // 🚫 prevent auto recalculation
 
-        const res = await fetch(`${API_BASE}/api/Billing/${billing.billingId}`);
-        const fullBilling = await res.json();
+            const res = await fetch(`${API_BASE}/api/Billing/${billing.billingId}`);
+            const fullBilling = await res.json();
 
-        setEditingBilling(fullBilling);
-        setFormData({
-            ...fullBilling,
-            billDate: toDateInputValue(fullBilling.billDate),
-            dateOfEstimate: toDateInputValue(fullBilling.dateOfEstimate),
-            poDate: toDateInputValue(fullBilling.poDate),
-            lineItems: fullBilling.lineItems || [],
-        });
-    } catch (err) {
-        console.error(err);
-        setMessage({ text: "❌ Failed to load billing details", type: "error" });
-    }
+            setEditingBilling(fullBilling);
+            setFormData({
+                ...fullBilling,
+
+                // ✅ hydrate tax %
+                igstPercent: fullBilling.igstPercent ?? 0,
+                cgstPercent: fullBilling.cgstPercent ?? 0,
+                sgstPercent: fullBilling.sgstPercent ?? 0,
+
+                // ✅ hydrate totals
+                netTotal: fullBilling.netTotal ?? 0,
+                igst: fullBilling.igst ?? 0,
+                cgst: fullBilling.cgst ?? 0,
+                sgst: fullBilling.sgst ?? 0,
+                totalTax: fullBilling.totalTax ?? 0,
+                roundOff: fullBilling.roundOff ?? 0,
+                grandTotal: fullBilling.grandTotal ?? 0,
+
+                billDate: toDateInputValue(fullBilling.billDate),
+                dateOfEstimate: toDateInputValue(fullBilling.dateOfEstimate),
+                poDate: toDateInputValue(fullBilling.poDate),
+
+                // ✅ normalize line items
+                lineItems: (fullBilling.lineItems || []).map(li => ({
+                    ...li,
+                    quantity: li.quantity ?? "",
+                    rate: li.rate ?? "",
+                    amount: li.amount ?? ""
+                })),
+            });
+
+        } catch (err) {
+            console.error(err);
+            setMessage({ text: "❌ Failed to load billing details", type: "error" });
+        }
 
 
-};
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -1311,12 +1339,81 @@ const AllBillings_Simple = () => {
         });
     };
 
+    const validateEditForm = () => {
+        const requiredFields = [
+            { key: "projectId", label: "Project" },
+            { key: "billingFromAddress", label: "Billing From Address" },
+            { key: "billingToAddress", label: "Billing To Address" },
+            { key: "shippingAddress", label: "Shipping Address" },
+            { key: "deliveryAddress", label: "Delivery Address" },
+            { key: "billingFromGSTIN", label: "Billing From GSTIN" },
+            { key: "billingToGSTIN", label: "Billing To GSTIN" },
+            { key: "shippingGSTIN", label: "Shipping GSTIN" },
+            { key: "gstNumber", label: "GST Number" },
+            { key: "pan", label: "PAN" },
+            { key: "invoiceTitle", label: "Invoice Title / Subject" },
+            { key: "billDate", label: "Bill Date" },
+        ];
+
+        for (const field of requiredFields) {
+            const value = formData[field.key];
+            if (!value || String(value).trim() === "") {
+                setMessage({
+                    text: `❌ ${field.label} cannot be empty.`,
+                    type: "error",
+                });
+                return false;
+            }
+        }
+
+        // ✅ Tax validation (0 allowed, empty NOT allowed)
+        const taxFields = [
+            { key: "igstPercent", label: "IGST %" },
+            { key: "cgstPercent", label: "CGST %" },
+            { key: "sgstPercent", label: "SGST %" },
+        ];
+
+        for (const tax of taxFields) {
+            const val = formData[tax.key];
+            if (val === "" || val === null || val === undefined) {
+                setMessage({
+                    text: `❌ ${tax.label} cannot be empty.`,
+                    type: "error",
+                });
+                return false;
+            }
+            if (Number(val) < 0) {
+                setMessage({
+                    text: `❌ ${tax.label} cannot be negative.`,
+                    type: "error",
+                });
+                return false;
+            }
+        }
+
+        // ✅ Line items must exist
+        if (!formData.lineItems || formData.lineItems.length === 0) {
+            setMessage({
+                text: "❌ At least one line item is required.",
+                type: "error",
+            });
+            return false;
+        }
+
+        return true;
+    };
+
+
 
     // ✅ SAVE handler (PUT)
     // --- MODIFIED ---
     const handleSave = async () => {
         try {
+            // 🔒 BLOCK SAVE IF VALIDATION FAILS
+            if (!validateEditForm()) return;
+
             if (!formData || !formData.billingId) {
+
                 setMessage({ text: "❌ Missing billing id.", type: "error" });
                 return;
             }

@@ -166,11 +166,6 @@ const Billing = ({ onBack }) => {
             }, 5000);
             return () => clearTimeout(timer); // Cleanup timer on unmount
         }
-        else if (message.type === "error") {
-            // Keep the original 5-second clear for error messages
-            const timer = setTimeout(() => setMessage({ text: "", type: "" }), 5000);
-            return () => clearTimeout(timer);
-        }
     }, [message, onBack]); // Added onBack to dependency array
 
     useEffect(() => {
@@ -194,18 +189,7 @@ const Billing = ({ onBack }) => {
         setAddresses({ ...addresses, [e.target.name]: e.target.value });
     };
 
-    // const DropDownField = ({ value, onChange, data, textField }) => (
-    //     <div style={{ width: "200px" }}>
-    //         <DropDownList
-    //             data={data}
-    //             textField={textField}
-    //             value={value}
-    //             onChange={(e) => onChange(e.value)}
-    //             defaultItem={{ [textField]: "Select Project" }}
-    //             style={{ width: "100%" }}
-    //         />
-    //     </div>
-    // );
+
     const DropDownField = ({ value, data, textField, onProjectChange }) => (
         <div style={{ width: "200px" }}>
             <DropDownList
@@ -258,10 +242,25 @@ const Billing = ({ onBack }) => {
     // ---- Validation helpers ----
     const isValidGSTIN = (value) => /^[A-Z0-9]{15}$/i.test((value || "").trim());
     const isValidPAN = (value) => /^[A-Z0-9]{10}$/i.test((value || "").trim());
+    const isValidEmail = (val) =>
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val || "");
+
+    const isValidPhone = (val) =>
+        /^[6-9]\d{9}$/.test(val || "");
+
+    const hasFutureDate = (...dates) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        return dates.some(d => d && new Date(d) > today);
+    };
+
 
     const validateCommonRequiredFields = () => {
         // Common required fields (used for both Save and PDF)
         const requiredFields = [
+            { name: "Project", value: projectId },
+            { name: "Bill Date", value: billDate },
             { name: "Billing From Address", value: addresses.billingFromAddress },
             { name: "Billing To Address", value: addresses.billingToAddress },
             { name: "Shipping Address", value: addresses.shippingAddress },
@@ -319,6 +318,41 @@ const Billing = ({ onBack }) => {
     // ---- Submit (Save) ----
     const handleSubmit = async (dataItem) => {
         setMessage({ text: "", type: "" });
+        console.log("Submitting billing data...");
+
+        // 🔴 STEP 1: Detect if user entered ANY data at all
+        // 🔴 STRICT EMPTY FORM CHECK
+        const isFormCompletelyEmpty =
+            !projectId &&
+            !billDate &&
+            !dateOfEstimate &&
+            !poDate &&
+            !invoiceTitle &&
+            !gstNumber &&
+            !pan &&
+            !addresses.billingFromAddress?.trim() &&
+            !addresses.billingToAddress?.trim() &&
+            !addresses.shippingAddress?.trim() &&
+            !addresses.deliveryAddress?.trim() &&
+            lineItems.every(item =>
+                !item.materialCode &&
+                !item.hsnCode &&
+                !item.description &&
+                !item.uom &&
+                !item.quantity &&
+                !item.rate
+            );
+
+        if (isFormCompletelyEmpty) {
+            setMessage({
+                text: "❌ Please fill the form before saving.",
+                type: "error",
+            });
+            return;
+        }
+
+
+
 
         // ⛔ BLOCK SUBMIT IF PROJECT NOT SELECTED
         if (projectId === null || projectId === undefined) {
@@ -328,6 +362,14 @@ const Billing = ({ onBack }) => {
             });
             return; // ⛔ HARD STOP
         }
+        if (hasFutureDate(billDate, dateOfEstimate, poDate)) {
+            setMessage({
+                text: "❌ Future dates cannot be selected.",
+                type: "error",
+            });
+            return;
+        }
+
 
         if (!validateCommonRequiredFields()) return;
 
@@ -362,6 +404,26 @@ const Billing = ({ onBack }) => {
             });
             return;
         }
+        if (billingFromContact) {
+            if (!isValidEmail(billingFromContact) && !isValidPhone(billingFromContact)) {
+                setMessage({
+                    text: "❌ Invalid Billing From contact. Enter valid email or mobile number.",
+                    type: "error",
+                });
+                return;
+            }
+        }
+
+        if (shippingContact) {
+            if (!isValidEmail(shippingContact) && !isValidPhone(shippingContact)) {
+                setMessage({
+                    text: "❌ Invalid Shipping contact. Enter valid email or mobile number.",
+                    type: "error",
+                });
+                return;
+            }
+        }
+
 
         // ❌ SAME GSTIN CHECK
         if (
@@ -400,6 +462,8 @@ const Billing = ({ onBack }) => {
             });
             return;
         }
+
+
 
         if (!validateLineItemsNumeric(validItems)) return;
 
@@ -449,6 +513,9 @@ const Billing = ({ onBack }) => {
             poType,
             subWorkDescription,
             invoiceTitle,
+            igstPercent: parseFloat(tax1.percent) || 0,
+            cgstPercent: parseFloat(tax2.percent) || 0,
+            sgstPercent: parseFloat(tax3.percent) || 0,
             IGST: parseFloat(((netTotal * (parseFloat(tax1.percent) || 0)) / 100).toFixed(2)),
             CGST: parseFloat(((netTotal * (parseFloat(tax2.percent) || 0)) / 100).toFixed(2)),
             SGST: parseFloat(((netTotal * (parseFloat(tax3.percent) || 0)) / 100).toFixed(2)),
@@ -460,28 +527,6 @@ const Billing = ({ onBack }) => {
             lineItems: validItems,
         };
 
-        // try {
-        //     // const res = await fetch(`${API_BASE}/billing`, {
-        //     //     method: "POST",
-        //     //     headers: { "Content-Type": "application/json" },
-        //     //     body: JSON.stringify(billingData),
-        //     // });
-        //     const { data } = await api.post("/api/billing", billingData);
-
-        //     if (res.ok) {
-        //         // <-- MODIFIED: Updated success message text
-        //         setMessage({
-        //             text: "✅ Billing information saved! Returning to list...",
-        //             type: "success",
-        //         });
-        //     } else {
-        //         const err = await res.text();
-        //         setMessage({ text: "❌ Failed to save: " + err, type: "error" });
-        //     }
-        // } catch (err) {
-        //     console.error("Error:", err);
-        //     setMessage({ text: "❌ Error saving billing info.", type: "error" });
-        // }
         try {
             const response = await api.post("/api/billing", billingData);
 
@@ -505,10 +550,54 @@ const Billing = ({ onBack }) => {
         }
 
     };
+    const getMissingFieldsForPDF = () => {
+        const missing = [];
+
+        if (!projectId) missing.push("Project");
+        if (!billDate) missing.push("Bill Date");
+        if (!dateOfEstimate) missing.push("Invoice Date");
+        if (!invoiceTitle) missing.push("Invoice Title");
+        if (!gstNumber) missing.push("GST Number");
+        if (!pan) missing.push("PAN");
+        if (!addresses.billingFromAddress) missing.push("Billing From Address");
+        if (!addresses.billingToAddress) missing.push("Billing To Address");
+        if (!addresses.shippingAddress) missing.push("Shipping Address");
+        if (!addresses.deliveryAddress) missing.push("Delivery Address");
+
+        return missing;
+    };
+
 
     // ---- Download PDF (with validations + clean tax data) ----
     const handleDownloadPDF = async () => {
         setMessage({ text: "", type: "" });
+
+        // ✅ NEW: Block PDF if absolutely no data is entered (Fixes PDF Bug)
+        const hasAnyInput =
+            projectId ||
+            billDate ||
+            addresses.billingFromAddress?.trim() ||
+            addresses.billingToAddress?.trim();
+
+        if (!hasAnyInput) {
+            setMessage({
+                text: "❌ Cannot download PDF. No data has been entered.",
+                type: "error",
+            });
+            return;
+        }
+
+        const missingFields = getMissingFieldsForPDF();
+        // ... rest of the code ...
+
+        if (missingFields.length > 0) {
+            setMessage({
+                text: `❌ Cannot download PDF. Please fill: ${missingFields.join(", ")}`,
+                type: "error",
+            });
+            return;
+        }
+
 
         if (!validateCommonRequiredFields()) return;
 
@@ -666,28 +755,16 @@ const Billing = ({ onBack }) => {
     return (
         <div className="container-fluid py-3">
             <Form
-                onSubmit={handleSubmit}
+                //onSubmit={handleSubmit}
+                noValidate={true}
                 render={(formRenderProps) => (
-                    <FormElement>
+                    <FormElement noValidate>
                         <div className="mb-4">
                             <label className="form-label fw-bold">
                                 Projects <span className="text-danger">*</span>
                             </label>
                             <div style={{ maxWidth: "320px" }}>
-                                {/* <Field
-                                    name="project"
-                                    component={DropDownField}
-                                    data={projects}
-                                    textField="projectName"
-                                    value={selectedProject}          // Pass current selectedProject object
-                                    onChange={setSelectedProject}    // Update selectedProject on change
-                                /> */}
-                                {/* <DropDownField
-                                    data={projects}
-                                    textField="projectName"
-                                    value={selectedProject}
-                                    onChange={setSelectedProject}
-                                /> */}
+
                                 <DropDownField
                                     data={projects}
                                     textField="projectName"
@@ -933,16 +1010,14 @@ const Billing = ({ onBack }) => {
                             <div className="row g-3 align-items-center">
                                 {/* Project ID (Auto from Project selection) */}
                                 <div className="col-md-3 col-sm-6">
-                                    <Field
-                                        name="projectId"
-                                        label="Project ID"
-                                        value={projectId ?? ""}
-                                        component={FormInput}
-                                        readOnly
-                                        disabled
-                                    />
+                                    <div className="col-md-12 col-sm-6">
+                                        <FormInput
+                                            label="Project ID"
+                                            value={projectId ?? ""}
+                                            readOnly={true}
+                                        />
+                                    </div>
                                 </div>
-
                                 {[
                                     { label: "Bill Number", state: billNumber, setter: setBillNumber },
                                     { label: "Bill Date", state: billDate, setter: setBillDate, type: "date" },
@@ -963,11 +1038,20 @@ const Billing = ({ onBack }) => {
                                             <FloatingLabelWrapper label={item.label} value={item.state}>
                                                 <DatePicker
                                                     value={item.state}
-                                                    onChange={(e) => item.setter(e.value)}
                                                     format="yyyy-MM-dd"
                                                     max={new Date()}
-                                                    placeholder=""
+                                                    onChange={(e) => {
+                                                        if (e.value === null && e.target.value) {
+                                                            setMessage({
+                                                                text: `❌ Invalid ${item.label}. Please select a valid date from calendar.`,
+                                                                type: "error",
+                                                            });
+                                                            return;
+                                                        }
+                                                        item.setter(e.value);
+                                                    }}
                                                 />
+
                                             </FloatingLabelWrapper>
 
                                         ) : (
@@ -1084,40 +1168,15 @@ const Billing = ({ onBack }) => {
                             </div>
                         )}
 
-                        {/* <div className="d-flex justify-content-start gap-2 mt-3 mb-4 button-row">
-                            <Button themeColor="primary" type="submit" className="responsive-button">
-                                Save
-                            </Button>
-
-                            <Button type="button" onClick={() => window.location.reload()} className="responsive-button">
-                                Cancel
-                            </Button>
-                        </div>
-
-                        <div className="d-flex justify-content-end button-row mb-3">
-                            <Button
-                                themeColor="primary"
-                                type="button"
-                                onClick={handleDownloadPDF}
-                                className="responsive-button"
-                            >
-                                Download PDF
-                            </Button>
-                        </div> */}
-
-                        {/* Mobile (default): Stacks the two inner <div>s vertically (default "block" behavior).
-  Desktop (md+): Becomes a "d-flex" row, spacing items apart.
-*/}
                         <div className="mt-3 mb-4 d-md-flex justify-content-md-between align-items-md-center">
 
-                            {/* --- ROW 1 (Mobile) / LEFT SIDE (Desktop) --- */}
-                            {/* Mobile: "d-flex" (buttons side-by-side). "mb-2" adds space below.
-    Desktop: "mb-md-0" removes the mobile-only margin.
-  */}
+
                             <div className="d-flex gap-2 mb-2 mb-md-0">
                                 <Button
                                     themeColor="primary"
-                                    type="submit"
+                                    type="button"
+                                    onClick={handleSubmit}
+
                                     className="flex-grow-1 flex-md-grow-0" // Mobile: grow wide. Desktop: normal width.
                                 >
                                     Save
@@ -1132,10 +1191,6 @@ const Billing = ({ onBack }) => {
                                 </Button>
                             </div>
 
-                            {/* --- ROW 2 (Mobile) / RIGHT SIDE (Desktop) --- */}
-                            {/* Mobile: "d-grid" makes the button full-width.
-    Desktop: "d-md-block" resets it to a normal div for flex alignment.
-  */}
                             <div className="d-grid d-md-block">
                                 <Button
                                     themeColor="primary"
