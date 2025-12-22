@@ -40,7 +40,7 @@
   background: #f3f3f9;
   padding: 0 4px;
   color: #777;
-  pointer-events: none;
+  pointer-events: none
   transition: all 0.2s ease;
 }
 

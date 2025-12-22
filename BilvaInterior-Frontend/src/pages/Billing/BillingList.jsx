@@ -1076,6 +1076,18 @@ const AllBillings_Simple = () => {
     const [message, setMessage] = useState({ text: "", type: "" });
     const [page, setPage] = useState({ skip: 0, take: 7 });
     const [showAdd, setShowAdd] = useState(false);
+    const [isUserEditing, setIsUserEditing] = useState(false);
+
+    // ✅ Normalize billing data so projectName is always available
+    const normalizeBillings = (data) =>
+        data.map(b => ({
+            ...b,
+            projectName: b.project?.projectName ?? (b.projectName ?? "")
+        }));
+
+
+
+
 
 
 
@@ -1103,17 +1115,12 @@ const AllBillings_Simple = () => {
         // load billings
         fetch(`${API_BASE}/api/Billing`)
             .then((res) => res.json())
-            .then((data) => {
-                // normalize each billing: expose projectName at top-level for grid
-                const normalized = data.map(b => ({
-                    ...b,
-                    projectName: b.project?.projectName ?? (b.projectName ?? ""), // handle both shapes
-                }));
-                setBillings(normalized);
-            })
-            .catch(() => setMessage({ text: "❌ Failed to load billings", type: "error" }));
+            .then((data) => setBillings(normalizeBillings(data)))
+            .catch(() =>
+                setMessage({ text: "❌ Failed to load billings", type: "error" })
+            );
 
-        // load projects (use the correct endpoint)
+        // load projects
         fetch(`${API_BASE}/api/projects`)
             .then((res) => res.json())
             .then((data) => setProjects(data))
@@ -1132,8 +1139,13 @@ const AllBillings_Simple = () => {
 
         // 1. Calculate Net Total (Subtotal)
         const subtotal = items.reduce((acc, li) => {
-            return acc + (parseFloat(li.amount || 0));
+            const amount =
+                li.amount !== null && li.amount !== undefined
+                    ? parseFloat(li.amount)
+                    : 0;
+            return acc + amount;
         }, 0);
+
 
         // 2. Parse Tax Percentages
         const igstPercent = parseFloat(formData.igstPercent || 0);
@@ -1160,9 +1172,13 @@ const AllBillings_Simple = () => {
         setFormData(prev => ({
             ...prev,
             netTotal: subtotal,
-            igst: totalTax, // 'igst' field is for Total Tax
+            igst: igstAmount,
+            cgst: cgstAmount,
+            sgst: sgstAmount,
+            totalTax: totalTax,
             grandTotal: grandTotal,
         }));
+
 
     }, [formData.lineItems, formData.igstPercent, formData.cgstPercent, formData.sgstPercent, formData.roundOff]);
     // This effect re-runs when any of these dependencies change
@@ -1234,24 +1250,50 @@ const AllBillings_Simple = () => {
     };
 
     // ✅ EDIT handler
-    const handleEdit = (billing) => {
-        setEditingBilling(billing);
-        setFormData({
-            ...billing,
-            billDate: billing.billDate ? toDateInputValue(billing.billDate) : "",
-            dateOfEstimate: billing.dateOfEstimate ? toDateInputValue(billing.dateOfEstimate) : "",
-            poDate: billing.poDate ? toDateInputValue(billing.poDate) : "",
-            createdDate: billing.createdDate || "",
-            updatedDate: billing.updatedDate || "",
-            lineItems: billing.lineItems || [],
-            igstPercent: billing.igst ?? 0,
-            cgstPercent: billing.cgst ?? 0,
-            sgstPercent: billing.sgst ?? 0,
-            igst: billing.igst ?? 0, // Total Tax
-            cgst: billing.cgst ?? 0,
-            sgst: billing.sgst ?? 0,
+    const handleEdit = async (billing) => {
+        try {
+            setIsUserEditing(false); // 🚫 prevent auto recalculation
 
-        });
+            const res = await fetch(`${API_BASE}/api/Billing/${billing.billingId}`);
+            const fullBilling = await res.json();
+
+            setEditingBilling(fullBilling);
+            setFormData({
+                ...fullBilling,
+
+                // ✅ hydrate tax %
+                igstPercent: fullBilling.igstPercent ?? 0,
+                cgstPercent: fullBilling.cgstPercent ?? 0,
+                sgstPercent: fullBilling.sgstPercent ?? 0,
+
+                // ✅ hydrate totals
+                netTotal: fullBilling.netTotal ?? 0,
+                igst: fullBilling.igst ?? 0,
+                cgst: fullBilling.cgst ?? 0,
+                sgst: fullBilling.sgst ?? 0,
+                totalTax: fullBilling.totalTax ?? 0,
+                roundOff: fullBilling.roundOff ?? 0,
+                grandTotal: fullBilling.grandTotal ?? 0,
+
+                billDate: toDateInputValue(fullBilling.billDate),
+                dateOfEstimate: toDateInputValue(fullBilling.dateOfEstimate),
+                poDate: toDateInputValue(fullBilling.poDate),
+
+                // ✅ normalize line items
+                lineItems: (fullBilling.lineItems || []).map(li => ({
+                    ...li,
+                    quantity: li.quantity ?? "",
+                    rate: li.rate ?? "",
+                    amount: li.amount ?? ""
+                })),
+            });
+
+        } catch (err) {
+            console.error(err);
+            setMessage({ text: "❌ Failed to load billing details", type: "error" });
+        }
+
+
     };
 
     const handleChange = (e) => {
@@ -1297,12 +1339,81 @@ const AllBillings_Simple = () => {
         });
     };
 
+    const validateEditForm = () => {
+        const requiredFields = [
+            { key: "projectId", label: "Project" },
+            { key: "billingFromAddress", label: "Billing From Address" },
+            { key: "billingToAddress", label: "Billing To Address" },
+            { key: "shippingAddress", label: "Shipping Address" },
+            { key: "deliveryAddress", label: "Delivery Address" },
+            { key: "billingFromGSTIN", label: "Billing From GSTIN" },
+            { key: "billingToGSTIN", label: "Billing To GSTIN" },
+            { key: "shippingGSTIN", label: "Shipping GSTIN" },
+            { key: "gstNumber", label: "GST Number" },
+            { key: "pan", label: "PAN" },
+            { key: "invoiceTitle", label: "Invoice Title / Subject" },
+            { key: "billDate", label: "Bill Date" },
+        ];
+
+        for (const field of requiredFields) {
+            const value = formData[field.key];
+            if (!value || String(value).trim() === "") {
+                setMessage({
+                    text: `❌ ${field.label} cannot be empty.`,
+                    type: "error",
+                });
+                return false;
+            }
+        }
+
+        // ✅ Tax validation (0 allowed, empty NOT allowed)
+        const taxFields = [
+            { key: "igstPercent", label: "IGST %" },
+            { key: "cgstPercent", label: "CGST %" },
+            { key: "sgstPercent", label: "SGST %" },
+        ];
+
+        for (const tax of taxFields) {
+            const val = formData[tax.key];
+            if (val === "" || val === null || val === undefined) {
+                setMessage({
+                    text: `❌ ${tax.label} cannot be empty.`,
+                    type: "error",
+                });
+                return false;
+            }
+            if (Number(val) < 0) {
+                setMessage({
+                    text: `❌ ${tax.label} cannot be negative.`,
+                    type: "error",
+                });
+                return false;
+            }
+        }
+
+        // ✅ Line items must exist
+        if (!formData.lineItems || formData.lineItems.length === 0) {
+            setMessage({
+                text: "❌ At least one line item is required.",
+                type: "error",
+            });
+            return false;
+        }
+
+        return true;
+    };
+
+
 
     // ✅ SAVE handler (PUT)
     // --- MODIFIED ---
     const handleSave = async () => {
         try {
+            // 🔒 BLOCK SAVE IF VALIDATION FAILS
+            if (!validateEditForm()) return;
+
             if (!formData || !formData.billingId) {
+
                 setMessage({ text: "❌ Missing billing id.", type: "error" });
                 return;
             }
@@ -1326,8 +1437,12 @@ const AllBillings_Simple = () => {
                 sgstPercent: formData.sgstPercent ?? 0,
 
                 // Save Calculated Totals
+                // Save Calculated Totals
                 netTotal: formData.netTotal ?? 0,
-                igst: formData.igst ?? 0, // This is the Total Tax Amount
+                igst: formData.igst ?? 0,
+                cgst: formData.cgst ?? 0,
+                sgst: formData.sgst ?? 0,
+                totalTax: formData.totalTax ?? 0,
                 roundOff: formData.roundOff ?? 0,
                 grandTotal: formData.grandTotal ?? 0,
 
@@ -1420,7 +1535,7 @@ const AllBillings_Simple = () => {
                             onClick={() => {
                                 fetch(`${API_BASE}/api/Billing`)
                                     .then((res) => res.json())
-                                    .then((data) => setBillings(data))
+                                    .then((data) => setBillings(normalizeBillings(data)))
                                     .catch(() =>
                                         setMessage({
                                             text: "❌ Failed to refresh billings",
@@ -2229,12 +2344,13 @@ const AllBillings_Simple = () => {
                             <span>Tax Total:</span>
                             <input
                                 type="number"
-                                name="igst"
+                                name="totalTax"
                                 className="form-control w-25"
-                                value={formData.igst ?? ""}
-                                readOnly // Make read-only
-                                style={{ backgroundColor: "#f8f9fa" }} // Optional: grey out
+                                value={formData.totalTax ?? 0}
+                                readOnly
+                                style={{ backgroundColor: "#f8f9fa" }}
                             />
+
                         </div>
                         <div className="d-flex justify-content-between mb-2">
                             <span>Round Off:</span>

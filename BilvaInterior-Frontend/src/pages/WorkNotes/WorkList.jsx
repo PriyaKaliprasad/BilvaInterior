@@ -3365,102 +3365,91 @@ const WorkList = () => {
             <div className="container-fluid px-2">
 
                 {/* DESKTOP VIEW */}
-                <div className="d-none d-md-flex justify-content-between align-items-start mb-3">
+                <div className="container-fluid px-2 mb-3">
 
-                    {/* LEFT - Refresh */}
-                    {/* <button
-                        className="btn btn-light border border-secondary btn-sm shadow-sm"
-                        onClick={loadData}
-                        title="Reload List"
-                    >
-                        Refresh
-                    </button> */}
+                    {/* DESKTOP */}
+                    <div className="d-none d-md-flex align-items-center justify-content-between">
 
-                    <Button
-                        icon="refresh"
-                        className="btn btn-light border border-secondary btn-sm shadow-sm"
-                        onClick={loadData}
-                        title="Reload List"
-                    >
-                        Refresh
-                    </Button>
+                        {/* LEFT */}
+                        <Button
+                            icon="refresh"
+                            className="btn btn-light border btn-sm shadow-sm"
+                            onClick={loadData}
+                        >
+                            Refresh
+                        </Button>
 
-                    {/* RIGHT - Add New + Filter */}
-                    <div className="d-flex flex-column align-items-end">
-                        {userRole === "Admin" && (
-                            <button
-                                className="btn btn-primary btn-sm mb-2"
-                                onClick={handleAddNew}
-                            >
-                                + Add New Work Item
-                            </button>
-                        )}
-
+                        {/* RIGHT */}
                         {userRole === "Admin" && (
                             <div className="d-flex align-items-center gap-2">
-                                <label className="fw-bold mb-0">Filter by Person:</label>
 
-                                {/* Force specific width here since this is ONLY visible on Desktop */}
+                                <button
+                                    className="btn btn-primary btn-sm"
+                                    onClick={handleAddNew}
+                                >
+                                    + Add New Work Item
+                                </button>
+
+                                {/* FIXED WIDTH FILTER */}
                                 <div style={{ width: "200px" }}>
                                     <DropDownList
                                         data={employees}
                                         textField="name"
                                         dataItemKey="id"
                                         value={selectedEmployee}
+                                            defaultItem={{ id: null, name: "Filter by Person" }}
+
                                         onChange={(e) => setSelectedEmployee(e.value)}
-                                        defaultValue={null}
                                         style={{ width: "100%" }}
                                     />
                                 </div>
+
                             </div>
                         )}
                     </div>
-                </div>
 
-                {/* MOBILE VIEW */}
-                {/* Changed to gap-3 to keep distance between buttons and filter text */}
-                <div className="d-flex d-md-none flex-column gap-3 mb-3">
+                    {/* MOBILE */}
+                    <div className="d-flex d-md-none flex-column gap-2">
 
-                    {/* Stack Buttons Vertically (flex-column) so "Add New Work Item" text fits */}
-                    {/* MOBILE VIEW */}
-                    {/* 1. Removed 'flex-column' so they sit side-by-side */}
-                    <div className="d-flex d-md-none gap-2 mb-3">
+                        {/* Row 1 : Refresh */}
+                        <Button
+                            icon="refresh"
+                            className="btn btn-light border btn-sm shadow-sm w-100"
+                            onClick={loadData}
+                        >
+                            Refresh
+                        </Button>
 
+                        {/* Row 2 : Add New */}
                         {userRole === "Admin" && (
                             <button
-                                /* 2. Changed 'w-100' to 'flex-grow-1' so they share the width */
-                                className="btn btn-primary btn-sm flex-grow-1"
+                                className="btn btn-primary btn-sm w-100"
                                 onClick={handleAddNew}
                             >
-                                {/* 3. Optional: Use text-nowrap to prevent ugly wrapping, or shorten text to "+ Add New" if it's too tight */}
                                 + Add New Work Item
                             </button>
                         )}
 
-                        <button
-                            /* 2. Changed 'w-100' to 'flex-grow-1' */
-                            className="btn btn-light border border-secondary btn-sm shadow-sm flex-grow-1"
-                            onClick={loadData}
-                            title="Reload List"
-                        >
-                            Refresh
-                        </button>
+                        {/* Row 3 : Filter */}
+                        {userRole === "Admin" && (
+                            <div className="w-100">
+                                <DropDownList
+                                    data={employees}
+                                    textField="name"
+                                    dataItemKey="id"
+                                    value={selectedEmployee}
+                                    defaultItem={{ id: null, name: "Filter by Person" }}
+                                    onChange={(e) => setSelectedEmployee(e.value)}
+                                    style={{ width: "100%" }}
+                                />
+                            </div>
+                        )}
+
                     </div>
-                    {userRole === "Admin" && (
-                        <div className="d-flex flex-column gap-1">
-                            <label className="fw-bold mb-0">Filter by Person:</label>
-                            <DropDownList
-                                data={employees}
-                                textField="name"
-                                dataItemKey="id"
-                                value={selectedEmployee}
-                                onChange={(e) => setSelectedEmployee(e.value)}
-                                style={{ width: '100%' }}
-                                defaultValue={null}
-                            />
-                        </div>
-                    )}
+
+
                 </div>
+
 
             </div>
 

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import CanvasJSReact from "../../canvasjs/canvasjs.react.jsx";
 import { DropDownList } from "@progress/kendo-react-dropdowns";
 import api from "../../api/axios"; // your axios instance
+import { Button } from "@progress/kendo-react-buttons";
+
 
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
@@ -91,20 +93,21 @@ const Dashboard = () => {
                 </div>
 
                 {/* Refresh Button */}
-                <button
-                    className="btn btn-light border shadow-sm"
+                <Button
+                    icon="refresh"
+                            className="action-btn refresh-btn"
+                    title="Refresh Charts"
                     onClick={() => {
-                        // Re-trigger API calls manually
                         api.get(`/api/dashboard/company-revenue/${selectedYear}`)
                             .then(res => setCompanyRevenue(res.data));
 
                         api.get(`/api/dashboard/monthly-revenue/${selectedYear}`)
                             .then(res => setMonthlyRevenue(res.data));
                     }}
-                    title="Refresh Charts"
                 >
                     Refresh
-                </button>
+                </Button>
+
 
             </div>
 

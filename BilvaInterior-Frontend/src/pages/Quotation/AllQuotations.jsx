@@ -2672,12 +2672,86 @@ const AllQuotations_Simple = () => {
 
   // ✅ In AllQuotations_Simple.jsx
 
+  const validateMainFields = () => {
+    // 1️⃣ Project
+    if (!formData.projectName || formData.projectName === "Select Option") {
+      return "❌ Please select a Project.";
+    }
+
+    // 2️⃣ Billing From
+    if (!formData.billingFromAddress?.trim()) {
+      return "❌ Billing From address is required.";
+    }
+
+    if (!formData.billingFromGSTIN?.trim()) {
+      return "❌ Billing From GSTIN is required.";
+    }
+
+    // 3️⃣ Billing To
+    if (!formData.billingToAddress?.trim()) {
+      return "❌ Billing To address is required.";
+    }
+
+    if (
+      !formData.gstinConsignee?.trim() &&
+      !formData.billingToConsigneeGSTIN?.trim()
+    ) {
+      return "❌ Billing To (Consignee) GSTIN is required.";
+    }
+
+    // 4️⃣ Document details
+    if (!formData.billNumber?.trim()) {
+      return "❌ Bill Number is required.";
+    }
+
+    if (!formData.billDate) {
+      return "❌ Bill Date is required.";
+    }
+
+    if (!formData.gstNumber?.trim() && !formData.GSTNumber?.trim()) {
+      return "❌ GST Number is required.";
+    }
+
+    if (!formData.pan?.trim()) {
+      return "❌ PAN is required.";
+    }
+
+    // 5️⃣ Line Items
+    if (!Array.isArray(formData.lineItems) || formData.lineItems.length === 0) {
+      return "❌ Please add at least one line item.";
+    }
+
+    const hasValidLineItem = formData.lineItems.some(
+      (li) =>
+        li.description?.trim() &&
+        Number(li.quantity) > 0 &&
+        Number(li.rate) > 0
+    );
+
+    if (!hasValidLineItem) {
+      return "❌ Line item must have Description, Quantity and Rate.";
+    }
+
+    // ✅ All validations passed
+    return null;
+  };
+
+
+
   const handleSave = async () => {
     try {
+      // 🔐 MAIN VALIDATION CHECK
+      const validationError = validateMainFields();
+      if (validationError) {
+        setMessage({ text: validationError, type: "error" });
+        return; // ⛔ STOP SAVE
+      }
+
       if (!formData || !formData.quotationId) {
         setMessage({ text: "❌ Missing quotation id.", type: "error" });
         return;
       }
+
 
       const currentTime = new Date().toISOString();
 
