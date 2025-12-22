@@ -12,6 +12,7 @@ import "./Quotation.css";
 import api from "../../api/axios";
 
 const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
+  const [isSaving, setIsSaving] = useState(false); // 🔒 prevent multiple saves
   const [projects, setProjects] = useState([]);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [lineItems, setLineItems] = useState([]);
@@ -138,11 +139,42 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
 
   // Handle Save (existing)
   const handleSubmit = async (dataItem) => {
+
+    // 🔒 BLOCK MULTIPLE CLICKS
+    if (isSaving) return;
+
+    setIsSaving(true); // lock save
     setMessage({ text: "", type: "" });
+    const isFormEmpty =
+  !dataItem.projectId &&
+  !addresses.billingFromAddress.trim() &&
+  !addresses.billingToAddress.trim() &&
+  !addresses.shippingAddress.trim() &&
+  !addresses.deliveryAddress.trim() &&
+  lineItems.every(
+    (i) =>
+      !i.materialCode &&
+      !i.hsnCode &&
+      !i.description &&
+      !i.uom &&
+      !i.quantity &&
+      !i.rate
+  );
+
+if (isFormEmpty) {
+  setMessage({
+    text: "❌ Please fill the form before saving.",
+    type: "error",
+  });
+  setIsSaving(false);
+  return;
+}
+
 
     // Basic validations (same as before)
     if (!dataItem.projectId || dataItem.projectId === "Select Option") {
       setMessage({ text: "❌ Please select a project.", type: "error" });
+      setIsSaving(false); // 🔓 allow retry
       return;
     }
 
@@ -152,6 +184,7 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
           text: `❌ Please fill ${key.replace(/([A-Z])/g, " $1")}`,
           type: "error",
         });
+        setIsSaving(false); // 🔓 allow retry
         return;
       }
     }
@@ -167,6 +200,7 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
     for (const [label, gstValue] of Object.entries(gstFields)) {
       if (!gstValue || gstValue.trim() === "") {
         setMessage({ text: `❌ ${label} is required.`, type: "error" });
+        setIsSaving(false); // 🔓 allow retry
         return;
       }
       if (gstValue.length !== 15 || !gstRegex.test(gstValue.toUpperCase())) {
@@ -174,6 +208,7 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
           text: `❌ ${label} must be a valid 15-character GST number.`,
           type: "error",
         });
+        setIsSaving(false); // 🔓 allow retry
         return;
       }
     }
@@ -189,21 +224,25 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
         text: "❌ Billing From GSTIN and Billing To (Consignee) GSTIN cannot be the same.",
         type: "error",
       });
+      setIsSaving(false); // 🔓 allow retry
       return;
     }
 
     if (!dataItem.pan || !panRegex.test(dataItem.pan.toUpperCase())) {
       setMessage({ text: "❌ Please enter a valid PAN Number.", type: "error" });
+      setIsSaving(false); // 🔓 allow retry
       return;
     }
 
     if (!dataItem.billnumber || !billNumberRegex.test(dataItem.billnumber)) {
       setMessage({ text: "❌ Please enter a valid Bill Number.", type: "error" });
+      setIsSaving(false); // 🔓 allow retry
       return;
     }
 
     if (lineItems.length === 0 || lineItems.every((item) => !item.materialCode && !item.description)) {
       setMessage({ text: "❌ Please add at least one line item.", type: "error" });
+      setIsSaving(false); // 🔓 allow retry
       return;
     }
 
@@ -222,6 +261,7 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
             text: `❌ Quantity and Rate must be at least 1 for line item ${index + 1}.`,
             type: "error",
           });
+          setIsSaving(false); // 🔓 allow retry
           return;
         }
       }
@@ -283,41 +323,39 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
     };
 
     try {
-      // const res = await fetch(`${API_BASE}/quotations`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(quotationData),
-      // });
+      const res = await api.post("/api/quotations", quotationData);
 
-      // if (res.ok) {
-      //   // <-- MODIFIED: Updated the success message text
-      //   setMessage({ text: "✅ Quotation saved! Returning to list...", type: "success" });
-      //   console.log("Saved Quotation:", quotationData);
-      // } else {
-      //   const err = await res.text();
-      //   setMessage({ text: "❌ Failed to save: " + err, type: "error" });
-      // }
-      try {
-        const res = await api.post("/api/quotations", quotationData);
-
-        if (res.status === 200 || res.status === 201) {
-          setMessage({ text: "✅ Quotation saved", type: "success" });
-          console.log("Saved Quotation:", quotationData);
-        } else {
-          setMessage({ text: "❌ Failed to save quotation.", type: "error" });
-        }
-      } catch (err) {
-        console.error("Error:", err);
+      if (res.status === 200 || res.status === 201) {
         setMessage({
-          text: `❌ Error saving quotation: ${err.response?.data || err.message}`,
+          text: "✅ Quotation saved! Redirecting...",
+          type: "success",
+        });
+
+        console.log("Saved Quotation:", quotationData);
+
+        // ❗ DO NOT set isSaving(false) here
+        // Save must remain locked until redirect happens
+
+      } else {
+        setMessage({
+          text: "❌ Failed to save quotation.",
           type: "error",
         });
+
+        setIsSaving(false); // 🔓 allow retry
       }
 
     } catch (err) {
       console.error("Error:", err);
-      setMessage({ text: "❌ Error saving quotation.", type: "error" });
+
+      setMessage({
+        text: `❌ Error saving quotation: ${err.response?.data || err.message}`,
+        type: "error",
+      });
+
+      setIsSaving(false); // 🔓 allow retry
     }
+
   };
 
   // const handleLineItemChange = (newData) => {
@@ -720,7 +758,7 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
                 </div>
               </div> */}
               {/* Document Details */}
-            <div className="mt-4">
+              <div className="mt-4">
                 <h6 className="fw-bold mb-3">Document Details</h6>
                 {/* Use align-items-center to fix vertical alignment issues */}
                 <div className="row g-3 align-items-center">
@@ -752,7 +790,7 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
                                   format="yyyy-MM-dd"
                                   size="large"
                                   // Ensure class matches standard inputs
-                                  className="form-control" 
+                                  className="form-control"
                                   max={new Date()}
                                 />
                               )}
@@ -762,10 +800,10 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
                           // Wrap standard inputs in FloatingLabelWrapper too if you want identical styling
                           // OR keep them as standard inputs but ensure they have the same height class
                           <Field
-                             name={fieldName}
-                             label={label}
-                             component={FormInput}
-                             type="text"
+                            name={fieldName}
+                            label={label}
+                            component={FormInput}
+                            type="text"
                           />
                         )}
                       </div>
@@ -922,17 +960,17 @@ const Quotations = ({ quotationData = null, isEditing = false, onBack }) => {
                   <Button
                     themeColor="primary"
                     type="submit"
+                    disabled={isSaving}   // 🔒 disable button
                     className="flex-grow-1 flex-md-grow-0"
-                    style={{ minWidth: "100px" }}
+                    style={{ minWidth: "120px" }}
                   >
-                    Save
+                    {isSaving ? "Saving..." : "Save"}
                   </Button>
+
                   <Button
                     type="button"
-                    onClick={() => window.location.reload()} // This reloads the page
-                    // onClick={onBack} // You could also just use onBack here
-                    className="flex-grow-1 flex-md-grow-0"
-                    style={{ minWidth: "100px" }}
+                    disabled={isSaving}
+                    onClick={() => window.location.reload()}
                   >
                     Cancel
                   </Button>

@@ -318,7 +318,6 @@ const Billing = ({ onBack }) => {
     // ---- Submit (Save) ----
     const handleSubmit = async (dataItem) => {
         setMessage({ text: "", type: "" });
-        console.log("Submitting billing data...");
 
         // 🔴 STEP 1: Detect if user entered ANY data at all
         // 🔴 STRICT EMPTY FORM CHECK
