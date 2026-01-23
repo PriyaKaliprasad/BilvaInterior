@@ -77,6 +77,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
   const [form, setForm] = useState(initialState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   // When selectedVendor changes, populate or clear the form
   useEffect(() => {
@@ -126,7 +127,7 @@ export default function ManageVendors({ selectedVendor = null, onSaved = () => {
   // 🔥 REQUIRED FIELD VALIDATIONS
   if (!form.firstName?.trim()) return "First Name is required.";
   if (!form.lastName?.trim()) return "Last Name is required.";
-  if (!form.email?.trim()) return "Email is required.";
+  if (!form.email?.trim()) return "Email is required.";   if (!emailRegex.test(form.email)) {return "Invalid Email Format — example: name@example.com";}
   if (!form.mobile?.trim()) return "Mobile Number is required.";
   if (!form.address?.trim()) return "Address is required.";
   if (!form.categoryId) return "Category is required.";
@@ -419,6 +420,7 @@ setTimeout(() => {
                   textField="name"
                   value={banks.find(b => b.id === form.bankId) || null}
                   onChange={e => setForm(s => ({ ...s, bankId: e.value ? e.value.id : null }))}
+                  style={{ width: '100%' }}
                 />
               </FloatingLabelWrapper>
             </div>
