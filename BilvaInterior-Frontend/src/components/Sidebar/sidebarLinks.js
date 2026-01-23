@@ -3,7 +3,7 @@ import { chartPieIcon, folderIcon, calendarIcon, globeIcon, stickyNoteIcon,
          userIcon } from "@progress/kendo-svg-icons";
 
 // ✅ CHANGED IMPORT PATH for ProjectsAll
-import Dashboard from '../../pages/Dashboard.jsx';
+import Dashboard from '../../pages/Dashboard/Dashboard.jsx';
 import ProjectsAll from '../../pages/project/ProjectsAll.jsx'; 
 import ProjectsEnquiries from '../../pages/project/ProjectsEnquiries.jsx';
 import ProjectsTypes from '../../pages/project/ProjectsTypes.jsx';
