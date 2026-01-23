@@ -113,3 +113,39 @@
   .registration-card { padding: 18px; }
   .form-grid { grid-template-columns: 1fr; gap: 20px; }
 }
+@media (max-width: 600px) {
+
+  /* Ensure form grid items never overflow */
+  .form-grid {
+    width: 100%;
+  }
+
+  .form-group {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* Kendo dropdown must stay inside box */
+  .k-dropdownlist,
+  .k-picker,
+  .k-input {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* Prevent long bank names from pushing layout */
+  .k-dropdownlist .k-input-inner,
+  .k-dropdownlist .k-input-value-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Floating label safety */
+  .floating-label-wrapper {
+    width: 100%;
+    max-width: 100%;
+  }
+}
